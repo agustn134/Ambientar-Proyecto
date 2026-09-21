@@ -12,13 +12,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "gestoPagoAuth", url = "${gestopago.auth.url}")
 public interface GestoPagoAuthClient {
 
-    @PostMapping("/sistema/app/jwt-gp/authenticate/")
+    @PostMapping("${gestopago.auth.endpoint:/sistema/app/jwt-gp/authenticate/}")
     GestoPagoAuthResponse authenticate(
             @RequestHeader("Authorization") String authorization,
             @RequestParam("idDistribuidor") Integer idDistribuidor,
             @RequestParam("codigoDispositivo") String codigoDispositivo,
             @RequestParam("password") String password);
 
+    /**
+     * @deprecated Utilizar {@link GestoPagoProductClient#getProductList(String)} configurado con gestopago.service.url
+     */
+    @Deprecated
     @GetMapping(
             value = "/sistema/service/getProductList.do",
             consumes = {org.springframework.http.MediaType.APPLICATION_XML_VALUE, org.springframework.http.MediaType.TEXT_XML_VALUE, org.springframework.http.MediaType.ALL_VALUE}

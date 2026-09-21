@@ -28,6 +28,12 @@ public class GestoPagoProductoController {
         return ResponseEntity.ok(productService.sincronizarCatalogoProductos());
     }
 
+    @GetMapping("/consultar-externo")
+    @Operation(summary = "Consultar catálogo externo", description = "Consume directamente el endpoint GET /sistema/service/getProductList.do de GestoPago con Bearer Token desde configuración.")
+    public ResponseEntity<GestoPagoProductResponse> consultarCatalogoExterno() {
+        return ResponseEntity.ok(productService.consultarCatalogoGestoPago());
+    }
+
     @GetMapping
     @Operation(summary = "Listar productos", description = "Obtiene los productos activos guardados en la base de datos local.")
     public ResponseEntity<List<GestoPagoProducto>> listarProductos() {

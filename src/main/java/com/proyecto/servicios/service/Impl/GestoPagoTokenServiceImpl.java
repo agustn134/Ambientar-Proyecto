@@ -1,6 +1,7 @@
 package com.proyecto.servicios.service.Impl;
 
 import com.proyecto.servicios.client.GestoPagoAuthClient;
+import com.proyecto.servicios.client.GestoPagoProductClient;
 import com.proyecto.servicios.entity.gestopago.GestoPagoToken;
 import com.proyecto.servicios.mapper.GestoPagoTokenMapper;
 import com.proyecto.servicios.model.gestopago.GestoPagoAuthResponse;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class GestoPagoTokenServiceImpl implements GestoPagoTokenService {
 
     private final GestoPagoAuthClient gestoPagoAuthClient;
+    private final GestoPagoProductClient gestoPagoProductClient;
     private final GestoPagoTokenRepository tokenRepository;
     private final GestoPagoTokenMapper tokenMapper;
 
@@ -32,9 +34,11 @@ public class GestoPagoTokenServiceImpl implements GestoPagoTokenService {
     private String password;
 
     public GestoPagoTokenServiceImpl(GestoPagoAuthClient gestoPagoAuthClient,
+            GestoPagoProductClient gestoPagoProductClient,
             GestoPagoTokenRepository tokenRepository,
             GestoPagoTokenMapper tokenMapper) {
         this.gestoPagoAuthClient = gestoPagoAuthClient;
+        this.gestoPagoProductClient = gestoPagoProductClient;
         this.tokenRepository = tokenRepository;
         this.tokenMapper = tokenMapper;
     }
@@ -84,7 +88,7 @@ public class GestoPagoTokenServiceImpl implements GestoPagoTokenService {
         GestoPagoToken tokenEntity = obtenerTokenActivo(idDistribuidor, codigoDispositivo)
                 .orElseThrow(() -> new IllegalStateException("No existe token activo para este distribuidor"));
         String authHeader = "Bearer " + tokenEntity.getToken();
-        return gestoPagoAuthClient.getProductList(authHeader);
+        return gestoPagoProductClient.getProductList(authHeader);
     }
 
 }

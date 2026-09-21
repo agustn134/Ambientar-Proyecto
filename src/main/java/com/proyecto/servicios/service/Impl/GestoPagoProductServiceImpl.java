@@ -1,6 +1,6 @@
 package com.proyecto.servicios.service.Impl;
 
-import com.proyecto.servicios.client.GestoPagoAuthClient;
+import com.proyecto.servicios.client.GestoPagoProductClient;
 import com.proyecto.servicios.entity.gestopago.GestoPagoProducto;
 import com.proyecto.servicios.entity.gestopago.GestoPagoToken;
 import com.proyecto.servicios.model.gestopago.GestoPagoProductResponse;
@@ -25,21 +25,24 @@ import java.util.Optional;
 @Slf4j
 public class GestoPagoProductServiceImpl implements GestoPagoProductService {
 
-    private final GestoPagoAuthClient gestoPagoAuthClient;
+    private final GestoPagoProductClient gestoPagoProductClient;
     private final GestoPagoTokenService gestoPagoTokenService;
     private final GestoPagoProductoRepository productoRepository;
 
-    @Value("${gestopago.auth.id-distribuidor}")
+    @Value("${gestopago.service.id-distribuidor:${gestopago.auth.id-distribuidor}}")
     private Integer idDistribuidor;
 
-    @Value("${gestopago.auth.codigo-dispositivo}")
+    @Value("${gestopago.service.codigo-dispositivo:${gestopago.auth.codigo-dispositivo}}")
     private String codigoDispositivo;
+
+    @Value("${gestopago.service.token:${gestopago.auth.token:}}")
+    private String tokenConfigurado;
 
     /**
      * Tarea programada (Job) para sincronizar productos automáticamente a una hora configurable del día.
      * Por defecto: todos los días a las 03:00 AM (cron: "0 0 3 * * ?").
      */
-    @Scheduled(cron = "${gestopago.productos.cron:0 0 3 * * ?}")
+    @Scheduled(cron = "${gestopago.service.cron:${gestopago.productos.cron:0 0 3 * * ?}}")
     public void ejecutarJobSincronizacionDiaria() {
         log.info("Iniciando Job programado de sincronización de catálogo GestoPago...");
         try {
@@ -51,19 +54,21 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     }
 
     @Override
+    public GestoPagoProductResponse consultarCatalogoGestoPago() {
+        // 1. Obtener Bearer Token desde la configuración de la aplicación (o fallback activo en BD)
+        String authHeader = obtenerBearerToken();
+
+        // 2. Invocar al endpoint GET /sistema/service/getProductList.do
+        log.info("Consultando endpoint GET /sistema/service/getProductList.do con Bearer Token...");
+        return gestoPagoProductClient.getProductList(authHeader);
+    }
+
+    @Override
     @Transactional("sfTransactionManager")
     public GestoPagoProductResponse sincronizarCatalogoProductos() {
         log.info("Iniciando sincronización de catálogo de productos GestoPago para distribuidor={}", idDistribuidor);
 
-        // 1. Obtener token activo de BD o renovar automáticamente si es la primera vez
-        GestoPagoToken tokenEntity = obtenerOAsegurarToken();
-
-        // 2. Armar cabecera 'Authorization: Bearer <TOKEN>'
-        String authHeader = "Bearer " + tokenEntity.getToken();
-
-        // 3. Invocar al endpoint y parsear XML
-        log.info("Consultando endpoint /sistema/service/getProductList.do ...");
-        GestoPagoProductResponse response = gestoPagoAuthClient.getProductList(authHeader);
+        GestoPagoProductResponse response = consultarCatalogoGestoPago();
 
         if (response == null || response.getProductos() == null || response.getProductos().isEmpty()) {
             log.warn("La respuesta de GestoPago no contiene productos. Mensaje: {}",
@@ -117,6 +122,22 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     }
 
     /**
+     * Obtiene el Bearer Token para la petición. Prioriza el token configurado en properties (no hardcodeado).
+     * Si no está presente en la configuración, recurre al token activo o renovado en la base de datos.
+     */
+    private String obtenerBearerToken() {
+        if (tokenConfigurado != null && !tokenConfigurado.trim().isEmpty()) {
+            String tokenLimpio = tokenConfigurado.trim();
+            log.info("Utilizando Bearer Token obtenido desde la configuración de la aplicación");
+            return tokenLimpio.startsWith("Bearer ") ? tokenLimpio : "Bearer " + tokenLimpio;
+        }
+
+        log.info("Token no configurado explícitamente en properties; obteniendo token activo desde BD...");
+        GestoPagoToken tokenEntity = obtenerOAsegurarToken();
+        return "Bearer " + tokenEntity.getToken();
+    }
+
+    /**
      * Asegura la obtención de un token válido. Si es la primera vez o la BD está vacía,
      * ejecuta renovarToken() antes de consultar.
      */
@@ -127,7 +148,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
                     gestoPagoTokenService.renovarToken();
                     return gestoPagoTokenService.obtenerTokenActivo(idDistribuidor, codigoDispositivo)
                             .orElseThrow(() -> new IllegalStateException(
-                                    "No se pudo generar ni obtener un token activo de GestoPago para distribuidor " + idDistribuidor));
+                                     "No se pudo generar ni obtener un token activo de GestoPago para distribuidor " + idDistribuidor));
                 });
     }
 }

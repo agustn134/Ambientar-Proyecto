@@ -15,6 +15,14 @@ public interface GestoPagoProductService {
     GestoPagoProductResponse sincronizarCatalogoProductos();
 
     /**
+     * Consume directamente el endpoint GET /sistema/service/getProductList.do con Bearer Token
+     * obtenido de la configuración de la aplicación y retorna la respuesta XML procesada.
+     *
+     * @return Respuesta procesada de GestoPago
+     */
+    GestoPagoProductResponse consultarCatalogoGestoPago();
+
+    /**
      * Retorna la lista de productos activos almacenados en la base de datos local.
      *
      * @return Lista de entidades GestoPagoProducto
