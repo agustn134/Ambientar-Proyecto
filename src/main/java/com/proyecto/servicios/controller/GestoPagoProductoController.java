@@ -23,8 +23,14 @@ public class GestoPagoProductoController {
     private final GestoPagoProductService productService;
 
     @PostMapping("/sincronizar")
-    @Operation(summary = "Sincronizar catálogo", description = "Descarga el catálogo de GestoPago, parsea el XML y guarda/actualiza los productos en base de datos.")
-    public ResponseEntity<GestoPagoProductResponse> sincronizarCatalogo() {
+    @Operation(summary = "Obtener o sincronizar catálogo", description = "Jerarquía de caché: Redis -> PostgreSQL -> API GestoPago. Si no está en Redis busca en BD, y si no está en BD sincroniza desde la API.")
+    public ResponseEntity<List<GestoPagoProducto>> sincronizarCatalogo() {
+        return ResponseEntity.ok(productService.obtenerOSincronizarProductos());
+    }
+
+    @PostMapping("/forzar-sincronizacion")
+    @Operation(summary = "Forzar sincronización de catálogo", description = "Descarga el catálogo forzadamente desde GestoPago e invalida la caché.")
+    public ResponseEntity<GestoPagoProductResponse> forzarSincronizacion() {
         return ResponseEntity.ok(productService.sincronizarCatalogoProductos());
     }
 
