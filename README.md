@@ -4,7 +4,7 @@
 Este proyecto tiene como objetivo integrar la aplicación existente en Java (Spring Boot) con los servicios externos de **GestoPago**. La funcionalidad principal consiste en consumir de manera segura la lista de productos de GestoPago, parsear su respuesta XML a entidades utilizables y guardarlas de forma eficiente en una base de datos PostgreSQL utilizando una capa intermedia de caché con Redis para optimizar tiempos de respuesta.
 
 **Características principales:**
-- **Sincronización robusta:** Job programado nocturno (`Cron Task`) gestionado en la clase [`GestoPagoProductScheduler.java`](./src/main/java/com/proyecto/servicios/scheduler/GestoPagoProductScheduler.java) para mantener siempre actualizados los catálogos en PostgreSQL y limpiar/actualizar la caché de Redis.
+- **Sincronización:** Job programado (`Cron Task`) gestionado en la clase [`GestoPagoProductScheduler.java`](./src/main/java/com/proyecto/servicios/scheduler/GestoPagoProductScheduler.java) para mantener siempre actualizados los catálogos en PostgreSQL y limpiar/actualizar la caché de Redis.
 - **Eficiencia con Caché:** Implementación de Redis (`@Cacheable`, `@CacheEvict`) para despachar el catálogo rápidamente sin sobrecargar la base de datos o el proveedor externo.
 - **Desacoplamiento HTTP:** Comunicación con la API de GestoPago implementada a través de [`Spring Cloud OpenFeign`](./src/main/java/com/proyecto/servicios/client/GestoPagoProductClient.java) y [`JAXB`](./src/main/java/com/proyecto/servicios/model/gestopago/GestoPagoProductResponse.java) para el parseo de XML.
 - **Manejo Dinámico de Tokens:** Gestión de Bearer Tokens, con posibilidad de leer de las propiedades del sistema o auto-renovar desde la base de datos sin requerir _hardcodeo_.
