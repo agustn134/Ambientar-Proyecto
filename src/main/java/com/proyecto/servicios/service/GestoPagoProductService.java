@@ -28,4 +28,15 @@ public interface GestoPagoProductService {
      * @return Lista de entidades GestoPagoProducto
      */
     List<GestoPagoProducto> obtenerProductosGuardados();
+
+    /**
+     * Flujo completo de obtención de productos con jerarquía de caché:
+     * 1. Verifica Redis. Si está, lo devuelve.
+     * 2. Si no, verifica PostgreSQL. Si hay datos, los guarda en Redis y los devuelve.
+     * 3. Si PostgreSQL está vacío, llama a la API de GestoPago, parsea el XML con JAXB,
+     *    mapea con MapStruct, guarda en Redis y PostgreSQL, y devuelve la lista.
+     *
+     * @return Lista de entidades GestoPagoProducto
+     */
+    List<GestoPagoProducto> obtenerOSincronizarProductos();
 }

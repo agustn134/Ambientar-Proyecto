@@ -3,22 +3,22 @@ package com.proyecto.servicios.service.Impl;
 import com.proyecto.servicios.client.GestoPagoProductClient;
 import com.proyecto.servicios.entity.gestopago.GestoPagoProducto;
 import com.proyecto.servicios.entity.gestopago.GestoPagoToken;
+import com.proyecto.servicios.exception.GestoPagoException;
+import com.proyecto.servicios.mapper.GestoPagoProductoMapper;
 import com.proyecto.servicios.model.gestopago.GestoPagoProductResponse;
-import com.proyecto.servicios.model.gestopago.ProductoDto;
 import com.proyecto.servicios.repositorys.gestopago.GestoPagoProductoRepository;
 import com.proyecto.servicios.service.GestoPagoProductService;
 import com.proyecto.servicios.service.GestoPagoTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +28,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     private final GestoPagoProductClient gestoPagoProductClient;
     private final GestoPagoTokenService gestoPagoTokenService;
     private final GestoPagoProductoRepository productoRepository;
+    private final GestoPagoProductoMapper productoMapper;
 
     @Value("${gestopago.service.id-distribuidor:${gestopago.auth.id-distribuidor}}")
     private Integer idDistribuidor;
@@ -65,60 +66,84 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
 
     @Override
     @Transactional("sfTransactionManager")
+    @CacheEvict(value = "productosCache", allEntries = true)
     public GestoPagoProductResponse sincronizarCatalogoProductos() {
-        log.info("Iniciando sincronización de catálogo de productos GestoPago para distribuidor={}", idDistribuidor);
+        log.info("Iniciando sincronizacion forzada del catalogo GestoPago para distribuidor={}", idDistribuidor);
 
         GestoPagoProductResponse response = consultarCatalogoGestoPago();
 
         if (response == null || response.getProductos() == null || response.getProductos().isEmpty()) {
-            log.warn("La respuesta de GestoPago no contiene productos. Mensaje: {}",
-                    response != null && response.getMensaje() != null ? response.getMensaje().getTexto() : "Sin respuesta");
-            return response;
+            String msg = response != null && response.getMensaje() != null
+                    ? response.getMensaje().getTexto() : "Sin respuesta";
+            log.warn("La respuesta de GestoPago no contiene productos. Mensaje: {}", msg);
+            throw new GestoPagoException(502, "La API de GestoPago no retorno productos: " + msg);
         }
 
-        log.info("Se recibieron {} productos desde GestoPago. Procesando guardado en base de datos...",
+        log.info("Se recibieron {} productos desde GestoPago. Mapeando y guardando en base de datos...",
                 response.getProductos().size());
 
-        // 4. Guardar / Actualizar productos en base de datos (Upsert)
-        List<GestoPagoProducto> entidadesParaGuardar = new ArrayList<>();
-
-        for (ProductoDto dto : response.getProductos()) {
-            if (dto.getIdProducto() == null) {
-                continue;
-            }
-
-            Optional<GestoPagoProducto> existenteOpt = productoRepository.findByIdProducto(dto.getIdProducto());
-
-            GestoPagoProducto producto = existenteOpt.orElseGet(() -> GestoPagoProducto.builder()
-                    .idProducto(dto.getIdProducto())
-                    .build());
-
-            // Actualizar datos del catálogo
-            producto.setIdServicio(dto.getIdServicio());
-            producto.setServicio(dto.getServicio());
-            producto.setProducto(dto.getProducto());
-            producto.setIdCatTipoServicio(dto.getIdCatTipoServicio());
-            producto.setTipoFront(dto.getTipoFront());
-            producto.setHasDigitoVerificador(dto.getHasDigitoVerificador());
-            producto.setPrecio(dto.getPrecio() != null ? BigDecimal.valueOf(dto.getPrecio()) : null);
-            producto.setShowAyuda(dto.getShowAyuda());
-            producto.setTipoReferencia(dto.getTipoReferencia());
-            producto.setLegend(dto.getLegend());
-            producto.setActivo(true);
-
-            entidadesParaGuardar.add(producto);
-        }
+        // MapStruct: List<ProductoDto> -> List<GestoPagoProducto> en tiempo de ejecucion
+        List<GestoPagoProducto> entidadesParaGuardar = productoMapper.toEntityList(response.getProductos());
 
         productoRepository.saveAll(entidadesParaGuardar);
-        log.info("Sincronización finalizada. Se persistieron {} productos en la tabla gestopago_productos.",
+        log.info("Sincronizacion finalizada. Se persistieron {} productos en gestopago_productos.",
                 entidadesParaGuardar.size());
 
         return response;
     }
 
     @Override
+    @Cacheable(value = "productosCache")
     public List<GestoPagoProducto> obtenerProductosGuardados() {
         return productoRepository.findByActivoTrue();
+    }
+
+    /**
+     * Flujo principal con jerarquia de cache: Redis -> PostgreSQL -> API GestoPago.
+     *
+     * 1. @Cacheable intercepta primero: si la lista ya esta en Redis, la devuelve de inmediato.
+     * 2. Cache miss: verifica PostgreSQL. Si hay datos, los retorna y Spring los guarda en Redis.
+     * 3. PostgreSQL vacio: llama a la API, JAXB parsea el XML (via Feign), MapStruct mapea
+     *    List<ProductoDto> -> List<GestoPagoProducto>, guarda en PostgreSQL.
+     *    Spring guarda el resultado en Redis automaticamente al retornar (@Cacheable).
+     * Si la API responde != 200, GestoPagoErrorDecoder convierte el error en GestoPagoException
+     * que GlobalExceptionHandler responde en el body del ResponseEntity.
+     */
+    @Override
+    @Cacheable(value = "productosCache", unless = "#result == null || #result.isEmpty()")
+    public List<GestoPagoProducto> obtenerOSincronizarProductos() {
+        log.info("Cache miss en Redis. Verificando PostgreSQL...");
+
+        List<GestoPagoProducto> productosEnBD = productoRepository.findByActivoTrue();
+        if (!productosEnBD.isEmpty()) {
+            log.info("{} producto(s) encontrados en PostgreSQL. @Cacheable guardara en Redis al retornar.",
+                    productosEnBD.size());
+            return productosEnBD;
+        }
+
+        log.info("PostgreSQL vacio. Llamando a la API de GestoPago para generar el catalogo...");
+        String authHeader = obtenerBearerToken();
+
+        // Feign llama a la API. GestoPagoErrorDecoder maneja status != 200 automaticamente.
+        // JAXB parsea el XML de respuesta (@XmlRootElement en GestoPagoProductResponse).
+        GestoPagoProductResponse response = gestoPagoProductClient.getProductList(authHeader);
+
+        if (response == null || response.getProductos() == null || response.getProductos().isEmpty()) {
+            String msg = response != null && response.getMensaje() != null
+                    ? response.getMensaje().getTexto() : "Sin respuesta";
+            log.warn("La API de GestoPago no retorno productos. Mensaje: {}", msg);
+            throw new GestoPagoException(502, "La API de GestoPago no retorno productos: " + msg);
+        }
+
+        // MapStruct: List<ProductoDto> -> List<GestoPagoProducto> en tiempo de ejecucion (sin new manual)
+        List<GestoPagoProducto> entidades = productoMapper.toEntityList(response.getProductos());
+
+        // Guardamos en PostgreSQL; @Cacheable guardara el resultado en Redis al retornar
+        productoRepository.saveAll(entidades);
+        log.info("Se persistieron {} productos en PostgreSQL. @Cacheable los guardara en Redis al retornar.",
+                entidades.size());
+
+        return entidades;
     }
 
     /**
