@@ -39,20 +39,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     @Value("${gestopago.service.token:${gestopago.auth.token:}}")
     private String tokenConfigurado;
 
-    /**
-     * Tarea programada (Job) para sincronizar productos automáticamente a una hora configurable del día.
-     * Por defecto: todos los días a las 03:00 AM (cron: "0 0 3 * * ?").
-     */
-    @Scheduled(cron = "${gestopago.service.cron:${gestopago.productos.cron:0 0 3 * * ?}}")
-    public void ejecutarJobSincronizacionDiaria() {
-        log.info("Iniciando Job programado de sincronización de catálogo GestoPago...");
-        try {
-            sincronizarCatalogoProductos();
-            log.info("Job de sincronización finalizado exitosamente.");
-        } catch (Exception e) {
-            log.error("Error al ejecutar el Job de sincronización de productos GestoPago: {}", e.getMessage(), e);
-        }
-    }
+
 
     @Override
     public GestoPagoProductResponse consultarCatalogoGestoPago() {
