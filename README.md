@@ -6,7 +6,7 @@ Este proyecto tiene como objetivo integrar la aplicación existente en Java (Spr
 **Características principales:**
 - **Sincronización robusta:** Job programado nocturno (`Cron Task`) gestionado en la clase [`GestoPagoProductScheduler.java`](./src/main/java/com/proyecto/servicios/scheduler/GestoPagoProductScheduler.java) para mantener siempre actualizados los catálogos en PostgreSQL y limpiar/actualizar la caché de Redis.
 - **Eficiencia con Caché:** Implementación de Redis (`@Cacheable`, `@CacheEvict`) para despachar el catálogo rápidamente sin sobrecargar la base de datos o el proveedor externo.
-- **Desacoplamiento HTTP:** Comunicación con la API de GestoPago implementada a través de `Spring Cloud OpenFeign` y `JAXB` para el parseo de XML.
+- **Desacoplamiento HTTP:** Comunicación con la API de GestoPago implementada a través de [`Spring Cloud OpenFeign`](./src/main/java/com/proyecto/servicios/client/GestoPagoProductClient.java) y [`JAXB`](./src/main/java/com/proyecto/servicios/model/gestopago/GestoPagoProductResponse.java) para el parseo de XML.
 - **Manejo Dinámico de Tokens:** Gestión de Bearer Tokens, con posibilidad de leer de las propiedades del sistema o auto-renovar desde la base de datos sin requerir _hardcodeo_.
 
 ---
@@ -51,10 +51,10 @@ Este endpoint realiza una petición directa a GestoPago (`GET /sistema/service/g
 
 
 > **Respuesta Esperada (Status 200 OK):**  
-> Cuando el servidor responde con un status `200`, significa que la autenticación (Bearer Token) fue exitosa y la API externa retornó correctamente el catálogo en formato XML. Nuestra aplicación lo interceptó, lo transformó automáticamente de XML a JSON mediante los DTOs y lo está entregando estructurado en el cuerpo de la respuesta.
+> Cuando el servidor responde con un status `200`, significa que la autenticación (Bearer Token) fue exitosa y la API externa retornó correctamente el catálogo en formato XML. Nuestra aplicación lo interceptó, lo transformó automáticamente de XML a JSON mediante los [`DTOs`](./src/main/java/com/proyecto/servicios/model/gestopago/ProductoDto.java) y lo está entregando estructurado en el cuerpo de la respuesta.
 
 ### 2. Sincronizar Catálogo (PostgreSQL & Redis)
-Este endpoint fuerza la sincronización manual. Llama a la API de GestoPago, limpia el caché actual en Redis, procesa los productos usando `MapStruct`, y los guarda/actualiza permanentemente en PostgreSQL.
+Este endpoint fuerza la sincronización manual. Llama a la API de GestoPago, limpia el caché actual en Redis, procesa los productos usando [`MapStruct`](./src/main/java/com/proyecto/servicios/mapper/GestoPagoProductoMapper.java), y los guarda/actualiza permanentemente en PostgreSQL.
 
 * **URL:** `POST http://localhost:8080/api/gestopago/productos/sincronizar`
 <img width="1790" height="1795" alt="image" src="https://github.com/user-attachments/assets/0a04e145-708a-4587-93ab-ab83ed08fd9b" />
@@ -62,18 +62,19 @@ Este endpoint fuerza la sincronización manual. Llama a la API de GestoPago, lim
 > **Respuesta Esperada (Status 200 OK):**  
 > Al recibir un `200 OK`, el flujo completo se ha ejecutado sin errores: 
 > 1) La API externa entregó los productos. 
-> 2) `MapStruct` mapeó exitosamente los datos a la Entidad Java.
-> 3) Se guardaron en PostgreSQL exitosamente. 
+> 2) [`MapStruct`](./src/main/java/com/proyecto/servicios/mapper/GestoPagoProductoMapper.java) mapeó exitosamente los datos a la [Entidad Java](./src/main/java/com/proyecto/servicios/entity/gestopago/GestoPagoProducto.java).
+> 3) Se guardaron en [PostgreSQL](./src/main/java/com/proyecto/servicios/repositorys/gestopago/GestoPagoProductoRepository.java) exitosamente. 
 > 4) La caché en Redis se invalidó para obligar a que la próxima consulta `GET` lea los datos recién actualizados.
 
-### Posibles Códigos de Error (Status Alternativos)
-Gracias a la implementación del `GlobalExceptionHandler` y el interceptor de Feign (`GestoPagoErrorDecoder`), si algo sale mal con la API externa o la autenticación, la aplicación está protegida y devolverá respuestas estructuradas en formato JSON con los siguientes posibles estados:
+### Posibles Códigos de Error y Excepciones
+Gracias a la implementación del [`GlobalExceptionHandler`](./src/main/java/com/proyecto/servicios/config/GlobalExceptionHandler.java) y el interceptor de Feign ([`GestoPagoErrorDecoder`](./src/main/java/com/proyecto/servicios/config/GestoPagoErrorDecoder.java)), si algo sale mal con la API externa o la autenticación, la aplicación nunca explota; en su lugar devuelve respuestas JSON limpias. Se implementó un manejo granular con **excepciones personalizadas**:
 
-* **`401 Unauthorized` / `403 Forbidden`:** Ocurre si el Bearer Token configurado es inválido, ha expirado, o si las credenciales de GestoPago son incorrectas y no se pudo autorizar la petición.
-* **`404 Not Found`:** Si la URL de GestoPago cambia o el endpoint deja de estar disponible.
-* **`502 Bad Gateway`:** Si la API de GestoPago responde con éxito (HTTP 200) pero el contenido XML viene vacío o con errores internos definidos por el proveedor (ej. un mensaje de error dentro del XML).
-* **`503 Service Unavailable` / `504 Gateway Timeout`:** Si los servidores de GestoPago están caídos, no responden a tiempo, o no hay conexión a internet en el servidor local.
-* **`500 Internal Server Error`:** Errores no controlados, problemas de parseo (JAXB/MapStruct) o fallo en la comunicación con PostgreSQL/Redis.
+* **`401 Unauthorized` / `403 Forbidden`:** Ocurre si el Bearer Token configurado es inválido, ha expirado o no hay permisos. Se lanza [`GestoPagoAuthException`](./src/main/java/com/proyecto/servicios/exception/GestoPagoAuthException.java).
+* **`404 Not Found`:** Si la URL de GestoPago cambia o el endpoint dejó de existir. Se lanza [`GestoPagoNotFoundException`](./src/main/java/com/proyecto/servicios/exception/GestoPagoNotFoundException.java).
+* **`429 Too Many Requests`:** Se lanza si GestoPago bloquea la petición por exceso de llamadas en poco tiempo (Rate Limit).
+* **`502 Bad Gateway`:** Si la API externa responde HTTP 200, pero el XML viene vacío o con errores reportados dentro del propio XML.
+* **`503 Service Unavailable` / `504 Gateway Timeout`:** Si los servidores de GestoPago están caídos o no responden a tiempo. Se lanza [`GestoPagoServiceUnavailableException`](./src/main/java/com/proyecto/servicios/exception/GestoPagoServiceUnavailableException.java).
+* **`500 Internal Server Error`:** Errores no controlados, problemas de parseo en nuestra app o fallo al conectar con PostgreSQL/Redis local.
 ---
 
 ## Flujo de Datos y Caché (Jerarquía)
@@ -111,8 +112,8 @@ A continuación se describe el ciclo de vida de una petición para obtener los p
 ---
 
 ## Arquitectura y Decisiones Técnicas
-* **Manejo de Errores Global:** Resiliencia lograda con `@ControllerAdvice` y `GestoPagoErrorDecoder` (Feign), interceptando errores (Timeouts, HTTP 401) para devolver JSON estandarizados.
-* **Aspectos (AOP):** Interceptores para medir rendimiento (tiempo en milisegundos) e imprimir logs automáticos de forma segura, sanitizando argumentos críticos.
+* **Manejo de Errores Global:** Resiliencia lograda con [`@ControllerAdvice`](./src/main/java/com/proyecto/servicios/config/GlobalExceptionHandler.java) y [`GestoPagoErrorDecoder`](./src/main/java/com/proyecto/servicios/config/GestoPagoErrorDecoder.java) (Feign), interceptando errores (Timeouts, HTTP 401) para devolver JSON estandarizados.
+* **Aspectos (AOP):** Interceptores (como [`LoggingAspect.java`](./src/main/java/com/proyecto/servicios/config/LoggingAspect.java)) para medir rendimiento (tiempo en milisegundos) e imprimir logs automáticos de forma segura, sanitizando argumentos críticos.
 * **Cron Task Automática:** Clase [`GestoPagoProductScheduler.java`](./src/main/java/com/proyecto/servicios/scheduler/GestoPagoProductScheduler.java) ejecutándose diariamente a medianoche para mantener la integridad de los datos sin intervención humana, habilitada desde la configuración principal en [`App.java`](./src/main/java/com/proyecto/servicios/App.java).
 
 ---
