@@ -1,68 +1,126 @@
-# Ambientar-Proyecto
+# Integración GestoPago (Ambientar-Proyecto)
 
-## Objetivo
-Tomando como base la estructura existente del proyecto Java, realizar la configuración necesaria para habilitar la integración con un nuevo servicio externo y mantener los estándares de desarrollo ya implementados en la aplicación.
+## Descripción del proyecto
+Este proyecto tiene como objetivo integrar la aplicación existente en Java (Spring Boot) con los servicios externos de **GestoPago**. La funcionalidad principal consiste en consumir de manera segura la lista de productos de GestoPago, parsear su respuesta XML a entidades utilizables y guardarlas de forma eficiente en una base de datos PostgreSQL utilizando una capa intermedia de caché con Redis para optimizar tiempos de respuesta.
 
-## Requerimientos
-
-### Configuración de propiedades
-* Agregar las propiedades necesarias para consumir el nuevo servicio externo.
-* Mantener la misma estructura y convención utilizada por el proyecto para la definición de endpoints, credenciales y parámetros de configuración.
-
-### Integración de servicio externo
-* Implementar el consumo del siguiente endpoint: `GET /sistema/service/getProductList.do`
-* La petición debe incluir autenticación mediante Bearer Token.
-* El token deberá obtenerse desde la configuración de la aplicación y no deberá quedar hardcodeado dentro del código fuente.
-
-### Arquitectura
-Mantener la misma estructura de capas existente en el proyecto:
-* Controller
-* Service
-* Client/Integration
-* DTOs o modelos de respuesta
-* Configuración
-
-### Manejo de errores
-Implementar manejo de excepciones para:
-* Errores de comunicación.
-* Respuestas no exitosas.
-* Timeouts.
-* Errores de autenticación.
-
-### Registro y monitoreo
-* Registrar en logs el inicio y fin de la invocación.
-* Registrar errores de integración sin exponer información sensible.
-
-### Pruebas
-* Crear pruebas unitarias para la capa de servicio.
-* Simular respuestas exitosas y escenarios de error.
+**Características principales:**
+- **Sincronización robusta:** Job programado nocturno (`Cron Task`) gestionado en la clase [`GestoPagoProductScheduler.java`](./src/main/java/com/proyecto/servicios/scheduler/GestoPagoProductScheduler.java) para mantener siempre actualizados los catálogos en PostgreSQL y limpiar/actualizar la caché de Redis.
+- **Eficiencia con Caché:** Implementación de Redis (`@Cacheable`, `@CacheEvict`) para despachar el catálogo rápidamente sin sobrecargar la base de datos o el proveedor externo.
+- **Desacoplamiento HTTP:** Comunicación con la API de GestoPago implementada a través de `Spring Cloud OpenFeign` y `JAXB` para el parseo de XML.
+- **Manejo Dinámico de Tokens:** Gestión de Bearer Tokens, con posibilidad de leer de las propiedades del sistema o auto-renovar desde la base de datos sin requerir _hardcodeo_.
 
 ---
 
-## Entregables
+## Instalación
 
-A continuación se listan los artefactos desarrollados junto a sus rutas (direccionamientos) en el proyecto:
+Sigue estos pasos para instalar y ejecutar el proyecto en tu máquina local.
 
-1. **Configuración de propiedades.**
-   *Ruta:* `src/main/resources/application.properties`
+**Requisitos previos:**
+- Java 17+ (o la versión que estés utilizando)
+- Base de datos PostgreSQL ejecutándose.
+- Servidor Redis ejecutándose.
+- Git.
 
-2. **Cliente de integración.**
-   *Ruta:* `src/main/java/com/proyecto/servicios/client/GestoPagoProductClient.java`
+1. **Clona el repositorio:**
+```bash
+git clone https://github.com/tu-usuario/ambientar-proyecto.git
+cd ambientar-proyecto
+```
 
-3. **Servicio de negocio.**
-   *Interfaz:* `src/main/java/com/proyecto/servicios/service/GestoPagoProductService.java`
-   *Implementación:* `src/main/java/com/proyecto/servicios/service/Impl/GestoPagoProductServiceImpl.java`
+2. **Configura las variables de entorno:**
+Asegúrate de configurar los parámetros en `src/main/resources/application.properties` con tus credenciales de PostgreSQL, Redis y GestoPago (token y credenciales de acceso).
 
-4. **DTOs necesarios.**
-   *Respuesta Externa:* `src/main/java/com/proyecto/servicios/model/gestopago/GestoPagoProductResponse.java`
-   *Modelo de Producto:* `src/main/java/com/proyecto/servicios/model/gestopago/ProductoDto.java`
-   *Modelo de Errores Genéricos:* `src/main/java/com/proyecto/servicios/model/error/ErrorResponseDto.java`
+3. **Ejecuta el proyecto con Gradle:**
+Dependiendo de tu terminal (Bash, PowerShell), ejecuta:
+```bash
+./gradlew bootRun
+```
+*(Si usas CMD estándar en Windows, usa `gradlew.bat bootRun`)*
 
-5. **Pruebas unitarias.**
-   *Ruta:* `src/test/java/com/proyecto/servicios/service/GestoPagoProductServiceTest.java`
+---
 
-6. **Breve documentación explicando la solución implementada y las decisiones técnicas tomadas.**
-   - **Desacoplamiento Cliente/Servicio:** Se implementó `Spring Cloud OpenFeign` aislando la llamada HTTP del negocio. Se configuró lectura XML directa mediante anotaciones `JAXB`. Si falta el Bearer Token en configuración, el servicio lo solicita autónomamente a la Base de Datos (`GestoPagoTokenService`).
-   - **Manejo de Errores Global:** La aplicación es resiliente gracias a la intercepción de errores de Feign (`GestoPagoErrorDecoder`) y una clase con `@ControllerAdvice` (`GlobalExceptionHandler`), que atrapa errores de seguridad (401/403) y conectividad (Timeouts), protegiendo la API con JSON estandarizados.
-   - **Logging Desacoplado (AOP):** Para no saturar el código con logs redundantes y por seguridad, se introdujo `Spring AOP`. `LoggingAspect.java` intercepta silenciosamente controladores, servicios y clientes, midiendo inicio, fin (ms) y sanitizando automáticamente los argumentos o respuestas de error si detecta un token o texto demasiado largo.
-   - **Testing sin gasto de Cuota:** Todas las pruebas unitarias utilizan `JUnit 5` y `Mockito`. Esto garantiza que los test pasen simulando escenarios de conexión con error, fallbacks y respuestas vacías sin comprometer la estricta cuota de consumo del proveedor GestoPago.
+## Uso
+
+Una vez que el proyecto esté corriendo en `http://localhost:8080`, puedes interactuar con los siguientes endpoints principales utilizando clientes HTTP (como Liteclient, Postman o Swagger).
+
+### 1. Consultar Catálogo Externo
+Este endpoint realiza una petición directa a GestoPago (`GET /sistema/service/getProductList.do`) y devuelve la respuesta parseada al cliente sin pasar por base de datos o caché, ideal para pruebas de conectividad.
+
+* **URL:** `GET http://localhost:8080/api/gestopago/productos/consultar-externo`
+<img width="1593" height="1910" alt="image" src="https://github.com/user-attachments/assets/7c34045c-2579-4d84-8a8e-dde7b69eb95e" />
+
+
+> **Respuesta Esperada (Status 200 OK):**  
+> Cuando el servidor responde con un status `200`, significa que la autenticación (Bearer Token) fue exitosa y la API externa retornó correctamente el catálogo en formato XML. Nuestra aplicación lo interceptó, lo transformó automáticamente de XML a JSON mediante los DTOs y lo está entregando estructurado en el cuerpo de la respuesta.
+
+### 2. Sincronizar Catálogo (PostgreSQL & Redis)
+Este endpoint fuerza la sincronización manual. Llama a la API de GestoPago, limpia el caché actual en Redis, procesa los productos usando `MapStruct`, y los guarda/actualiza permanentemente en PostgreSQL.
+
+* **URL:** `POST http://localhost:8080/api/gestopago/productos/sincronizar`
+<img width="1790" height="1795" alt="image" src="https://github.com/user-attachments/assets/0a04e145-708a-4587-93ab-ab83ed08fd9b" />
+
+> **Respuesta Esperada (Status 200 OK):**  
+> Al recibir un `200 OK`, el flujo completo se ha ejecutado sin errores: 
+> 1) La API externa entregó los productos. 
+> 2) `MapStruct` mapeó exitosamente los datos a la Entidad Java.
+> 3) Se guardaron en PostgreSQL exitosamente. 
+> 4) La caché en Redis se invalidó para obligar a que la próxima consulta `GET` lea los datos recién actualizados.
+
+### Posibles Códigos de Error (Status Alternativos)
+Gracias a la implementación del `GlobalExceptionHandler` y el interceptor de Feign (`GestoPagoErrorDecoder`), si algo sale mal con la API externa o la autenticación, la aplicación está protegida y devolverá respuestas estructuradas en formato JSON con los siguientes posibles estados:
+
+* **`401 Unauthorized` / `403 Forbidden`:** Ocurre si el Bearer Token configurado es inválido, ha expirado, o si las credenciales de GestoPago son incorrectas y no se pudo autorizar la petición.
+* **`404 Not Found`:** Si la URL de GestoPago cambia o el endpoint deja de estar disponible.
+* **`502 Bad Gateway`:** Si la API de GestoPago responde con éxito (HTTP 200) pero el contenido XML viene vacío o con errores internos definidos por el proveedor (ej. un mensaje de error dentro del XML).
+* **`503 Service Unavailable` / `504 Gateway Timeout`:** Si los servidores de GestoPago están caídos, no responden a tiempo, o no hay conexión a internet en el servidor local.
+* **`500 Internal Server Error`:** Errores no controlados, problemas de parseo (JAXB/MapStruct) o fallo en la comunicación con PostgreSQL/Redis.
+---
+
+## Flujo de Datos y Caché (Jerarquía)
+
+A continuación se describe el ciclo de vida de una petición para obtener los productos. El sistema sigue una jerarquía de 3 capas (Redis -> PostgreSQL -> API GestoPago) para garantizar la mayor velocidad posible y evitar sobrecargar al proveedor externo.
+
+
+<img width="1024" height="554" alt="image" src="https://github.com/user-attachments/assets/04990cfb-d6ef-4e87-a013-7bc561232cc2" />
+
+
+### Explicación simple del flujo paso a paso:
+
+1. **Punto de Entrada (Inicio):**
+   El cliente hace una petición para obtener la lista de productos.
+
+2. **Capa 1: Memoria Rápida (Redis)**
+   * **Decisión:** *¿Están los productos ya guardados en nuestra memoria rápida?*
+   * **Si SÍ:** Se devuelven inmediatamente al cliente. Es el escenario más rápido (respuesta casi instantánea).
+   * **Si NO:** El sistema sigue buscando en la siguiente capa.
+
+3. **Capa 2: Base de Datos Local (PostgreSQL)**
+   * **Decisión:** *¿Están los productos guardados en nuestra base de datos?*
+   * **Si SÍ:** Se sacan de la base de datos, se guardan en la memoria rápida (Redis) para que la próxima vez sea más rápido, y se entregan al cliente.
+   * **Si NO:** Significa que no tenemos los datos localmente, así que vamos a buscarlos al proveedor.
+
+4. **Capa 3: Proveedor Externo (API GestoPago)**
+   * **Acción:** El sistema se autentica y pide los datos a GestoPago.
+   * **Decisión:** *¿La petición fue exitosa?*
+   * **Si hay ERROR:** El sistema atrapa el fallo (como falta de internet, permisos denegados o caída del proveedor) y le avisa al cliente de forma segura.
+   * **Si fue EXITOSA:** Recibimos el catálogo de GestoPago, lo traducimos a nuestro formato, lo guardamos permanentemente en nuestra base de datos (PostgreSQL), luego lo subimos a la memoria rápida (Redis) y, finalmente, se lo entregamos al cliente. 
+
+> **Nota sobre las Tareas Programadas:**  
+> Existe un proceso automático nocturno que se salta directamente a la **Capa 3** (Proveedor Externo) para traer los datos más nuevos de GestoPago y actualizar nuestras bases de datos mientras nadie está usando el sistema.
+
+---
+
+## Arquitectura y Decisiones Técnicas
+* **Manejo de Errores Global:** Resiliencia lograda con `@ControllerAdvice` y `GestoPagoErrorDecoder` (Feign), interceptando errores (Timeouts, HTTP 401) para devolver JSON estandarizados.
+* **Aspectos (AOP):** Interceptores para medir rendimiento (tiempo en milisegundos) e imprimir logs automáticos de forma segura, sanitizando argumentos críticos.
+* **Cron Task Automática:** Clase [`GestoPagoProductScheduler.java`](./src/main/java/com/proyecto/servicios/scheduler/GestoPagoProductScheduler.java) ejecutándose diariamente a medianoche para mantener la integridad de los datos sin intervención humana, habilitada desde la configuración principal en [`App.java`](./src/main/java/com/proyecto/servicios/App.java).
+
+---
+
+## Contribuciones
+Si deseas aportar a este repositorio:
+1. Haz un **Fork** del proyecto.
+2. Crea tu rama de característica (`git checkout -b feature/nueva-caracteristica`).
+3. Haz un commit de tus cambios (`git commit -m 'feat: Agrega nueva característica'`).
+4. Haz push a la rama (`git push origin feature/nueva-caracteristica`).
+5. Abre un **Pull Request**.
