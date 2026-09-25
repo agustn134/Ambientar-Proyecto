@@ -2,6 +2,8 @@ package com.proyecto.servicios.config;
 
 import com.proyecto.servicios.exception.GestoPagoAuthException;
 import com.proyecto.servicios.exception.GestoPagoException;
+import com.proyecto.servicios.exception.GestoPagoNotFoundException;
+import com.proyecto.servicios.exception.GestoPagoServiceUnavailableException;
 import com.proyecto.servicios.model.error.ErrorResponseDto;
 import feign.RetryableException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +33,19 @@ public class GlobalExceptionHandler {
         if (status == null) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
+        return buildErrorResponse(status, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(GestoPagoNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleGestoPagoNotFoundException(GestoPagoNotFoundException ex, HttpServletRequest request) {
+        log.error("Recurso no encontrado en GestoPago: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(GestoPagoServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponseDto> handleGestoPagoServiceUnavailableException(GestoPagoServiceUnavailableException ex, HttpServletRequest request) {
+        log.error("Servicio de GestoPago no disponible: {}", ex.getMessage());
+        HttpStatus status = ex.getStatus() == 504 ? HttpStatus.GATEWAY_TIMEOUT : HttpStatus.SERVICE_UNAVAILABLE;
         return buildErrorResponse(status, ex.getMessage(), request.getRequestURI());
     }
 
