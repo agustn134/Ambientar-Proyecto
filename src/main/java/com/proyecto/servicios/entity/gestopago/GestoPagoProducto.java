@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "gestopago_productos")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor 
 @AllArgsConstructor
 @Builder
 public class GestoPagoProducto implements Serializable {
