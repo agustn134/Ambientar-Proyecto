@@ -8,15 +8,13 @@ import com.proyecto.servicios.mapper.GestoPagoProductoMapper;
 import com.proyecto.servicios.model.gestopago.GestoPagoProductResponse;
 import com.proyecto.servicios.repositorys.gestopago.GestoPagoProductoRepository;
 import com.proyecto.servicios.service.GestoPagoProductService;
+import com.proyecto.servicios.service.GestoPagoCatalogoService;
 import com.proyecto.servicios.service.GestoPagoTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +27,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     private final GestoPagoTokenService gestoPagoTokenService;
     private final GestoPagoProductoRepository productoRepository;
     private final GestoPagoProductoMapper productoMapper;
+    private final GestoPagoCatalogoService catalogoService;
 
     @Value("${gestopago.service.id-distribuidor:${gestopago.auth.id-distribuidor}}")
     private Integer idDistribuidor;
@@ -52,8 +51,6 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     }
 
     @Override
-    @Transactional("sfTransactionManager")
-    @CacheEvict(value = "productosCache", allEntries = true)
     public GestoPagoProductResponse sincronizarCatalogoProductos() {
         log.info("Iniciando sincronizacion forzada del catalogo GestoPago para distribuidor={}", idDistribuidor);
 
@@ -70,7 +67,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
         // MapStruct: List<ProductoDto> -> List<GestoPagoProducto> en tiempo de ejecucion
         List<GestoPagoProducto> entidadesParaGuardar = productoMapper.toEntityList(response.getProductos());
 
-        productoRepository.saveAll(entidadesParaGuardar);
+        catalogoService.guardarCatalogo(entidadesParaGuardar);
         log.info("Sincronizacion finalizada. Se persistieron {} productos en gestopago_productos.",
                 entidadesParaGuardar.size());
 
@@ -121,12 +118,13 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
         // MapStruct: List<ProductoDto> -> List<GestoPagoProducto> en tiempo de ejecucion (sin new manual)
         List<GestoPagoProducto> entidades = productoMapper.toEntityList(response.getProductos());
 
-        // Guardamos en PostgreSQL; @Cacheable guardara el resultado en Redis al retornar
-        productoRepository.saveAll(entidades);
+        // El servicio compartido confirma PostgreSQL e invalida la caché antes de volver a consultar.
+        // @Cacheable guardará las entidades persistidas, con sus IDs y fechas, al retornar.
+        catalogoService.guardarCatalogo(entidades);
         log.info("Se persistieron {} productos en PostgreSQL. @Cacheable los guardara en Redis al retornar.",
                 entidades.size());
 
-        return entidades;
+        return productoRepository.findByActivoTrue();
     }
 
     /**

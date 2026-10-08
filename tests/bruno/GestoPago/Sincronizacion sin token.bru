@@ -1,0 +1,26 @@
+meta {
+  name: Sincronizacion sin token
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/gestopago/productos/forzar-sincronizacion
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Rechaza la sincronización sin JWT", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().codigo).to.equal("NO_AUTENTICADO");
+  });
+}
+
+docs {
+  La petición se rechaza antes de invocar al proveedor o guardar productos.
+}
