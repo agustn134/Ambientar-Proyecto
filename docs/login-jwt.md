@@ -120,6 +120,6 @@ Resultado del 8 de octubre de 2026: **25 pruebas aprobadas** (21 de registro/aut
 
 Se usa H2 modo PostgreSQL, un usuario temporal y una clave fija exclusivamente de tests. La comprobación del usuario real fue sólo una consulta de lectura. La colección Bruno fue preparada; la ejecución manual de login con estos cambios y la aplicación de V6 en PostgreSQL siguen pendientes.
 
-La suite completa también pasó: **32 pruebas ejecutadas, 32 aprobadas**, BUILD SUCCESSFUL in 1m 25s. Se actualizaron los tests antiguos de GestoPago para configurar el mapper y esperar 502 ante catálogo vacío. Esto no corrige el 500 por productos duplicados de la sincronización forzada.
+La suite completa de este cambio también pasó: **32 pruebas ejecutadas, 32 aprobadas**, BUILD SUCCESSFUL in 1m 25s. Se actualizaron los tests antiguos de GestoPago para configurar el mapper y esperar 502 ante catálogo vacío. La corrección posterior del 500 por productos duplicados se documenta por separado en [Sincronización del catálogo GestoPago](sincronizacion-gestopago.md), junto con la validación actual de 40 pruebas.
 
 Referencias: [Spring Security JWT](https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html), [bloqueo de repositorios Spring Data JPA](https://docs.spring.io/spring-data/jpa/reference/3.5-SNAPSHOT/jpa/locking.html).

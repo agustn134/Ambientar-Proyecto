@@ -6,6 +6,8 @@ Registro de clientes: [contrato, validaciones y manejo de errores](docs/registro
 
 [Datos de prueba](docs/datos-prueba.md): perfiles del registro, datos sintéticos y alteraciones de los casos de error.
 
+[Sincronización del catálogo GestoPago](docs/sincronizacion-gestopago.md): actualización por `idProducto` sin duplicados, transacción del lote e invalidación de caché después del commit. Peticiones de comprobación en `tests/bruno/GestoPago`.
+
 ## Objetivo
 Tomando como base la estructura existente del proyecto Java, realizar la configuración necesaria para habilitar la integración con un nuevo servicio externo y mantener los estándares de desarrollo ya implementados en la aplicación.
 
