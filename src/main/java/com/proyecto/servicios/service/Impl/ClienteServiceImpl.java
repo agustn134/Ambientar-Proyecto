@@ -48,6 +48,8 @@ public class ClienteServiceImpl implements ClienteService {
         
         cliente.setEstatus("ACTIVO");
 
+        // El domicilio es dueño de la FK cliente_id.
+        if (cliente.getDomicilio() != null) cliente.getDomicilio().setCliente(cliente);
         // 2. Guardar el cliente
         Cliente clienteGuardado = clienteRepository.save(cliente);
         log.info("Cliente registrado con ID: {}", clienteGuardado.getId());
@@ -122,7 +124,9 @@ public class ClienteServiceImpl implements ClienteService {
         if (datosActualizados.getTelefonoAlternativo() != null) clienteExistente.setTelefonoAlternativo(datosActualizados.getTelefonoAlternativo());
 
         // Actualizar domicilio e información laboral
-        if (datosActualizados.getDomicilio() != null) clienteExistente.setDomicilio(datosActualizados.getDomicilio());
+        if (datosActualizados.getDomicilio() != null) {
+            actualizarDomicilio(clienteExistente, datosActualizados);
+        }
         if (datosActualizados.getInformacionLaboral() != null) clienteExistente.setInformacionLaboral(datosActualizados.getInformacionLaboral());
 
         // Revalidar para asegurar la consistencia del objeto actualizado
@@ -146,6 +150,13 @@ public class ClienteServiceImpl implements ClienteService {
             cuenta.setEstatus("INACTIVA");
             cuentaRepository.save(cuenta);
         }
+    }
+
+    private void actualizarDomicilio(Cliente cliente, Cliente datos) {
+        var nuevo = datos.getDomicilio();
+        if (cliente.getDomicilio() != null) nuevo.setId(cliente.getDomicilio().getId());
+        nuevo.setCliente(cliente);
+        cliente.setDomicilio(nuevo);
     }
 
     private void validarCliente(Cliente cliente) {
