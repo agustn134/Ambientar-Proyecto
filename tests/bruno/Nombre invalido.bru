@@ -1,0 +1,56 @@
+meta {
+  name: Nombre invalido
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "@@@",
+    "apellidoPaterno": "Pérez",
+    "apellidoMaterno": "García",
+    "fechaNacimiento": "1990-01-01",
+    "curp": "PEGJ900101HDFRRS09",
+    "rfc": "PEGJ900101AB1",
+    "sexo": "MASCULINO",
+    "nacionalidad": "Mexicana",
+    "estadoCivil": "SOLTERO",
+    "correoElectronico": "registro.prueba@example.com",
+    "telefonoMovil": "5512345678",
+    "domicilio": {
+      "calle": "Reforma",
+      "numeroExterior": "100",
+      "colonia": "Centro",
+      "municipio": "Cuauhtémoc",
+      "estado": "Ciudad de México",
+      "codigoPostal": "06000",
+      "pais": "México"
+    },
+    "informacionLaboral": {
+      "ocupacion": "Desarrollador",
+      "empresa": "Empresa de prueba",
+      "ingresoMensual": 15000.5
+    }
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
+  test("Campo rechazado", function () { expect(res.getBody().errores.map(e => e.campo)).to.include("nombre"); });
+}
+
+docs {
+  Consultar docs/registro-clientes.md. Los casos de duplicados requieren ejecutar primero Registro valido.
+  El registro válido crea datos; al repetirlo sin cambiarlos se espera 409.
+}

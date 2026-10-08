@@ -14,6 +14,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "domicilios")
 public class Domicilio {
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id", nullable = false, unique = true)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Cliente cliente;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

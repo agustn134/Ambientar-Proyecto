@@ -52,7 +52,7 @@ public class Cliente {
     private String estadoCivil;
 
     // Datos de Contacto
-    @Column(name = "correo_electronico", nullable = false)
+    @Column(name = "correo_electronico", nullable = false, unique = true)
     private String correoElectronico;
 
     @Column(name = "telefono_movil", nullable = false)
@@ -62,8 +62,7 @@ public class Cliente {
     private String telefonoAlternativo;
 
     // Domicilio
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "cliente_id")
+    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL)
     private Domicilio domicilio;
 
     // Información Laboral
