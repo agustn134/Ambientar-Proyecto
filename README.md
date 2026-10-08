@@ -1,6 +1,10 @@
 # Ambientar-Proyecto
 
-Registro de clientes (Registro y validaciones | Excepciones y respuestas): [contrato, validaciones y pruebas Bruno](docs/registro-clientes.md). Colección versionable en `tests/bruno`; usuarios y auth siguen pendientes.
+Registro de clientes: [contrato, validaciones y manejo de errores](docs/registro-clientes.md). Usuarios de acceso: [creación automática y BCrypt](docs/usuarios-autenticacion.md). Colección versionable en `tests/bruno`; login y JWT siguen pendientes.
+
+[Calidad de código, registro y monitoreo](docs/calidad-registro-monitoreo.md): logs de invocaciones y errores sin imprimir payloads ni credenciales.
+
+[Datos de prueba](docs/datos-prueba.md): perfiles del registro, datos sintéticos y alteraciones de los casos de error.
 
 ## Objetivo
 Tomando como base la estructura existente del proyecto Java, realizar la configuración necesaria para habilitar la integración con un nuevo servicio externo y mantener los estándares de desarrollo ya implementados en la aplicación.

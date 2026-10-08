@@ -60,10 +60,8 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
         GestoPagoProductResponse response = consultarCatalogoGestoPago();
 
         if (response == null || response.getProductos() == null || response.getProductos().isEmpty()) {
-            String msg = response != null && response.getMensaje() != null
-                    ? response.getMensaje().getTexto() : "Sin respuesta";
-            log.warn("La respuesta de GestoPago no contiene productos. Mensaje: {}", msg);
-            throw new GestoPagoException(502, "La API de GestoPago no retorno productos: " + msg);
+            log.warn("La respuesta de GestoPago no contiene productos.");
+            throw new GestoPagoException(502, "La API de GestoPago no retornó productos.");
         }
 
         log.info("Se recibieron {} productos desde GestoPago. Mapeando y guardando en base de datos...",
@@ -116,10 +114,8 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
         GestoPagoProductResponse response = gestoPagoProductClient.getProductList(authHeader);
 
         if (response == null || response.getProductos() == null || response.getProductos().isEmpty()) {
-            String msg = response != null && response.getMensaje() != null
-                    ? response.getMensaje().getTexto() : "Sin respuesta";
-            log.warn("La API de GestoPago no retorno productos. Mensaje: {}", msg);
-            throw new GestoPagoException(502, "La API de GestoPago no retorno productos: " + msg);
+            log.warn("La API de GestoPago no retornó productos.");
+            throw new GestoPagoException(502, "La API de GestoPago no retornó productos.");
         }
 
         // MapStruct: List<ProductoDto> -> List<GestoPagoProducto> en tiempo de ejecucion (sin new manual)

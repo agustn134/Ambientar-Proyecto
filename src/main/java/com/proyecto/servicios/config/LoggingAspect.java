@@ -7,8 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 @Aspect
 @Component
@@ -30,51 +29,21 @@ public class LoggingAspect {
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
 
-        // Evitar registrar invocaciones si log nivel INFO no está activado
-        if (log.isInfoEnabled()) {
-            log.info("Iniciando ejecución de {}.{}() con argumentos: {}",
-                    className, methodName,
-                    sanitizeArguments(joinPoint.getArgs()));
-        }
-
-        long start = System.currentTimeMillis();
+        // Nunca serializar argumentos, respuestas, headers ni mensajes de excepciones.
+        log.info("Iniciando ejecución de {}.{}()", className, methodName);
+        long start = System.nanoTime();
+        boolean success = false;
         try {
             Object result = joinPoint.proceed();
-            long elapsedTime = System.currentTimeMillis() - start;
-            
-            if (log.isInfoEnabled()) {
-                log.info("Finalizando ejecución de {}.{}() en {} ms.", className, methodName, elapsedTime);
-            }
-            
+            success = true;
             return result;
-        } catch (IllegalArgumentException e) {
-            log.error("Argumento ilegal en {}.{}(): {}", className, methodName, Arrays.toString(joinPoint.getArgs()));
-            throw e;
-        } catch (Exception e) {
-            long elapsedTime = System.currentTimeMillis() - start;
-            log.error("Excepción durante ejecución de {}.{}() luego de {} ms. Causa: {}", 
-                      className, methodName, elapsedTime, e.getMessage());
-            throw e;
+        } catch (Throwable error) {
+            log.error("Error en {}.{}(); tipo={}", className, methodName, error.getClass().getSimpleName());
+            throw error;
+        } finally {
+            long elapsedTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+            log.info("Finalizando ejecución de {}.{}() en {} ms; resultado={}",
+                    className, methodName, elapsedTime, success ? "EXITO" : "ERROR");
         }
-    }
-
-    /**
-     * Filtra los argumentos evitando imprimir información de tokens, contraseñas o datos muy largos.
-     */
-    private String sanitizeArguments(Object[] args) {
-        if (args == null || args.length == 0) {
-            return "[]";
-        }
-        return Arrays.stream(args)
-                .map(arg -> {
-                    if (arg == null) return "null";
-                    String argStr = arg.toString();
-                    if (argStr.toLowerCase().contains("bearer") || argStr.length() > 200) {
-                        return "[PROTEGIDO/EXTENSO]";
-                    }
-                    return argStr;
-                })
-                .collect(Collectors.toList())
-                .toString();
     }
 }

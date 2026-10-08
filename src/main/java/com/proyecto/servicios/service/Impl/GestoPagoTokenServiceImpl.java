@@ -75,7 +75,7 @@ public class GestoPagoTokenServiceImpl implements GestoPagoTokenService {
             log.info("Token GestoPago renovado correctamente");
 
         } catch (Exception e) {
-            log.error("Error al renovar token GestoPago: {}", e.getMessage(), e);
+            log.error("Error al renovar token GestoPago; tipo={}", e.getClass().getSimpleName());
         }
     }
 
