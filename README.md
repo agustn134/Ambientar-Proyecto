@@ -1,5 +1,9 @@
 # Ambientar-Proyecto
 
+[Plan de implementación conforme a la actividad](docs/plan-implementacion.md): alcance confirmado, catálogos de México, roles EJECUTIVO/CLIENTE y trabajo pendiente.
+
+[Catálogos de México](docs/catalogos-mexico.md): IDs de sexo, nacionalidad, país y estado civil; catálogo postal nacional con archivo local ignorado. Configurar SEPOMEX_ARCHIVO para la primera carga.
+
 Registro de clientes: [contrato, validaciones y manejo de errores](docs/registro-clientes.md). Usuarios de acceso: [creación automática y BCrypt](docs/usuarios-autenticacion.md). [Login, JWT y bloqueo por intentos](docs/login-jwt.md), con colección versionable en `tests/bruno/Auth`. Configurar JWT_SECRET antes de arrancar.
 
 [Calidad de código, registro y monitoreo](docs/calidad-registro-monitoreo.md): logs de invocaciones y errores sin imprimir payloads ni credenciales.

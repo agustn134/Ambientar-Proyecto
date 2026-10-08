@@ -33,6 +33,7 @@ class RegistroClienteIntegrationTest {
     @SpringBootConfiguration
     @EnableAutoConfiguration
     @Import({ConfigDB.class, RegistroClienteService.class, ClienteController.class,
+        com.proyecto.servicios.repositorys.cliente.CatalogoRepository.class,com.proyecto.servicios.controller.CatalogoController.class,
         RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, PasswordConfig.class, LoggingAspect.class,
         JwtConfig.class,SecurityConfig.class,com.proyecto.servicios.security.UsuarioJwtValidator.class,
         com.proyecto.servicios.security.SecurityErrorHandler.class,com.proyecto.servicios.service.LoginService.class,
@@ -43,10 +44,13 @@ class RegistroClienteIntegrationTest {
         Object schema(DataSource dataSource) {
             new ResourceDatabasePopulator(new ClassPathResource("db/migration/V3__create_clientes_domicilios_cuentas.sql"),
                     new ClassPathResource("db/migration/V5__create_usuarios.sql"),
-                    new ClassPathResource("db/migration/V6__version_token_usuarios.sql"))
+                    new ClassPathResource("db/migration/V6__version_token_usuarios.sql"),
+                    new ClassPathResource("db/migration/V7__catalogos_mexico.sql"),
+                    new ClassPathResource("catalogo-postal-prueba.sql"))
                 .execute(dataSource);
             return new Object();
         }
+        @Bean(name="catalogoPostal") Object postalPrueba() { return new Object(); }
     }
 
     @Autowired MockMvc mvc;
@@ -55,6 +59,70 @@ class RegistroClienteIntegrationTest {
     @Autowired org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     @Autowired org.springframework.security.oauth2.jwt.JwtEncoder jwtEncoder;
     @Autowired org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder;
+
+    @Test void catalogosPublicosPermitenPrepararElRegistro() throws Exception {
+        mvc.perform(get("/catalogos/sexos")).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1)).andExpect(jsonPath("$[1].id").value(2));
+        mvc.perform(get("/catalogos/nacionalidades")).andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].descripcion").value("Mexicana"));
+        mvc.perform(get("/catalogos/paises")).andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].descripcion").value("México"));
+        mvc.perform(get("/catalogos/codigos-postales/37907")).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(110333891)).andExpect(jsonPath("$[0].colonia").value("San Isidro"));
+        mvc.perform(get("/catalogos/codigos-postales/00000")).andExpect(status().isOk()).andExpect(content().json("[]"));
+        mvc.perform(get("/catalogos/codigos-postales/ABC")).andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
+    }
+
+    @Test void registroRechazaReferenciasInexistentesSinGuardar() throws Exception {
+        for (String campo : new String[]{"sexoId","nacionalidadId","estadoCivilId","paisId","asentamientoId"}) {
+            ObjectNode body=valido();
+            ObjectNode destino=campo.equals("paisId") || campo.equals("asentamientoId") ? (ObjectNode)body.get("domicilio") : body;
+            destino.put(campo,999);
+            enviar(body).andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
+            vacio();
+        }
+    }
+
+    @Test void idsDeCatalogoNoAceptanTextoDecimalesNiBooleanos() throws Exception {
+        for (String valor : new String[]{"\"1\"","1.0","true","2147483648"}) {
+            ObjectNode body=valido();
+            body.set("sexoId",mapper.readTree(valor));
+            enviar(body).andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("JSON_INVALIDO"));
+            vacio();
+        }
+    }
+
+    @Test void domicilioDebeCorresponderAlAsentamientoYSeDerivaDelCatalogo() throws Exception {
+        ObjectNode body=valido();
+        ((ObjectNode)body.get("domicilio")).put("codigoPostal","37900");
+        enviar(body).andExpect(status().isBadRequest());
+        vacio();
+        enviar(valido()).andExpect(status().isCreated());
+        assertEquals("San Isidro",sql.queryForObject("SELECT colonia FROM domicilios",String.class));
+        assertEquals(110333891,sql.queryForObject("SELECT asentamiento_id FROM domicilios",Integer.class));
+        assertEquals(1,sql.queryForObject("SELECT sexo_id FROM clientes",Integer.class));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,
+            () -> sql.update("UPDATE clientes SET sexo_id=999"));
+    }
+
+    @Test void opcionDeshabilitadaNoPuedeRegistrarse() throws Exception {
+        sql.update("UPDATE cat_sexos SET activo=FALSE WHERE id=1");
+        try {
+            enviar(valido()).andExpect(status().isBadRequest());
+            vacio();
+            mvc.perform(get("/catalogos/sexos")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
+        } finally { sql.update("UPDATE cat_sexos SET activo=TRUE WHERE id=1"); }
+    }
+
+    @Test void admiteRfcDeDoceCaracteresYRechazaSuFechaImposible() throws Exception {
+        ObjectNode body=hermana();
+        body.put("rfc","ABC051332AB1");
+        enviar(body).andExpect(status().isBadRequest());
+        vacio();
+        body.put("rfc","ABC051108AB1");
+        enviar(body).andExpect(status().isCreated());
+        assertEquals("ABC051108AB1",sql.queryForObject("SELECT rfc FROM clientes",String.class));
+    }
 
     @BeforeEach void limpiar() {
         sql.update("DELETE FROM usuarios");

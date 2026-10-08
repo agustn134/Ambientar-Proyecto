@@ -1,7 +1,7 @@
 meta {
-  name: CURP duplicada
+  name: Estado civil inexistente
   type: http
-  seq: 5
+  seq: 11
 }
 
 post {
@@ -22,7 +22,7 @@ body:json {
     "apellidoPaterno": "López",
     "apellidoMaterno": "Parra",
     "fechaNacimiento": "2005-11-08",
-    "curp": "LOPA040905HGTPRGA7",
+    "curp": "LOPD051108MGTPRLA8",
     "rfc": "LOPD051108AB1",
     "correoElectronico": "dulce.lopez.parra@example.com",
     "telefonoMovil": "4680000000",
@@ -41,16 +41,19 @@ body:json {
     "segundoNombre": "María",
     "sexoId": 2,
     "nacionalidadId": 1,
-    "estadoCivilId": 7
+    "estadoCivilId": 999
   }
 }
 
 tests {
-  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(409); });
-  test("Campo rechazado", function () { expect(res.getBody().errores.map(e => e.campo)).to.include("curp"); });
+  test("Rechaza catálogo inválido", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().codigo).to.equal("VALIDACION");
+    expect(res.getBody().errores.some(e => e.campo === "estadoCivilId")).to.equal(true);
+  });
 }
 
 docs {
-  Consultar docs/datos-prueba.md y docs/registro-clientes.md. Los casos de duplicados requieren ejecutar primero Registro valido.
-  El registro válido crea datos; al repetirlo sin cambiarlos se espera 409.
+  Error deliberado del perfil de Dulce; no debe persistir cliente, domicilio, cuenta ni usuario.
+  Leer docs/catalogos-mexico.md.
 }

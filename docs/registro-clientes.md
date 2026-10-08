@@ -10,7 +10,7 @@ El servicio `RegistroClienteService` usa explícitamente `sfTransactionManager`.
 
 - Iniciar Docker Desktop y `docker start postgres-dev redis-dev`.
 - Ejecutar la configuración App de IntelliJ con `DB_PASSWORD` y `GESTOPAGO_PASSWORD`, o usar PowerShell con esas variables antes de `./gradlew.bat bootRun`.
-- Reiniciar el backend para cargar el endpoint y aplicar V4. Confirmar el log `Started App`.
+- Reiniciar el backend para aplicar las migraciones pendientes. El contrato actual requiere V7 y el catálogo postal local; consultar [Catálogos de México](catalogos-mexico.md). Confirmar el log `Started App`.
 - En Bruno abrir la colección de la carpeta `tests/bruno` y seleccionar el entorno **Local**. No inicializar otro repositorio Git dentro de ella.
 - Ejecutar **Registro valido**. Esperado: 201, `clienteId` y `cuenta.numeroCuenta`.
 - Ese caso captura ambos valores como variables runtime mediante `bru.setVar`; sirven dentro de esta colección. En otras colecciones se deben copiar al entorno global. El número de cuenta es texto de 20 dígitos.
@@ -48,12 +48,12 @@ Las respuestas no incluyen valores rechazados ni detalles SQL. El manejador espe
 
 - Nombres: 3–38; apellidos: 2–50; letras Unicode y espacios. Se quitan espacios extremos y se agrupan espacios repetidos antes de validar. Sólo espacios no es un nombre.
 - Segundo nombre y teléfono alternativo: omitir o enviar null cuando no existan; texto vacío no equivale a un valor válido. Número interior es opcional.
-- CURP: 18, formato con sexo y entidad; RFC de persona física: 13. Se convierten a mayúsculas y se verifica que el segmento de fecha sea válido. No se verifica expedición oficial ni coincidencia de identidad con nombre/fecha.
+- CURP: 18, formato con sexo y entidad; RFC: 12 o 13 conforme al documento de la actividad. Se convierten a mayúsculas y se verifica que el segmento de fecha sea válido. No se verifica expedición oficial ni coincidencia de identidad con nombre/fecha.
 - Correo: formato válido, máximo 100; normalización a minúsculas; consulta previa e índice único `lower(correo_electronico)` para concurrencia.
 - Nacimiento: texto YYYY-MM-DD, fecha real sin hora, pasada y edad de al menos 18 usando la fecha del servidor.
 - Teléfonos: texto de 10 dígitos. CP: texto de 5 dígitos (conserva ceros iniciales).
 - Ingreso: número JSON positivo; hasta 13 dígitos enteros y 2 decimales. Se rechaza `"15000"`, booleanos y texto; se acepta 15000 o 15000.50.
-- Domicilio y datos laborales: obligatorios con límites compatibles con V3. Sexo/nacionalidad/estado civil son texto obligatorio limitado; no se implementa aún un catálogo de valores permitidos.
+- Domicilio y datos laborales: obligatorios. Sexo/nacionalidad/estado civil y país usan IDs de catálogo; el domicilio exige asentamiento y CP compatibles. El servidor deriva colonia, municipio y estado. Ver [contrato de catálogos](catalogos-mexico.md).
 - V4 falla si hay correos históricos duplicados ignorando mayúsculas. No elimina ni modifica datos para resolverlo.
 
 ## Evidencias y casos

@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Order(-100)
 @Slf4j
-@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class})
+@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class,com.proyecto.servicios.controller.CatalogoController.class})
 public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
@@ -34,6 +34,13 @@ public class RegistroClienteExceptionHandler {
         var errores = ex.getBindingResult().getFieldErrors().stream()
             .map(e -> new ErrorCampo(e.getField(), e.getDefaultMessage())).toList();
         return respuesta(400, "VALIDACION", "Revisa los campos de la petición", errores, request);
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorRegistro> parametros(org.springframework.web.method.annotation.HandlerMethodValidationException ex, HttpServletRequest request) {
+        var errores=ex.getParameterValidationResults().stream().flatMap(r -> r.getResolvableErrors().stream()
+            .map(e -> new ErrorCampo(r.getMethodParameter().getParameterName(),e.getDefaultMessage()))).toList();
+        return respuesta(400,"VALIDACION","Revisa los parámetros de la petición",errores,request);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

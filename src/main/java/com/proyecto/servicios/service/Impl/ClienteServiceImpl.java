@@ -109,9 +109,9 @@ public class ClienteServiceImpl implements ClienteService {
         if (datosActualizados.getApellidoPaterno() != null) clienteExistente.setApellidoPaterno(datosActualizados.getApellidoPaterno());
         if (datosActualizados.getApellidoMaterno() != null) clienteExistente.setApellidoMaterno(datosActualizados.getApellidoMaterno());
         if (datosActualizados.getFechaNacimiento() != null) clienteExistente.setFechaNacimiento(datosActualizados.getFechaNacimiento());
-        if (datosActualizados.getSexo() != null) clienteExistente.setSexo(datosActualizados.getSexo());
-        if (datosActualizados.getNacionalidad() != null) clienteExistente.setNacionalidad(datosActualizados.getNacionalidad());
-        if (datosActualizados.getEstadoCivil() != null) clienteExistente.setEstadoCivil(datosActualizados.getEstadoCivil());
+        if (datosActualizados.getSexoId() != null) clienteExistente.setSexoId(datosActualizados.getSexoId());
+        if (datosActualizados.getNacionalidadId() != null) clienteExistente.setNacionalidadId(datosActualizados.getNacionalidadId());
+        if (datosActualizados.getEstadoCivilId() != null) clienteExistente.setEstadoCivilId(datosActualizados.getEstadoCivilId());
 
         // Actualizar datos de contacto y validación
         if (datosActualizados.getCorreoElectronico() != null && !datosActualizados.getCorreoElectronico().equals(clienteExistente.getCorreoElectronico())) {
