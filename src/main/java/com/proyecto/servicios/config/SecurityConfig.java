@@ -15,6 +15,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST,"/clientes","/auth/login").permitAll()
+                .requestMatchers(HttpMethod.GET,"/catalogos/**").permitAll()
                 .requestMatchers(HttpMethod.GET,"/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()
                 // APIs antiguas de personas no se exponen a clientes sin una política de permisos.
                 .requestMatchers("/personas","/personasActualiza","/personasElimina").denyAll()

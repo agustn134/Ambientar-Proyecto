@@ -10,6 +10,8 @@ Sólo se incluyen campos que existen en el contrato. El estatus fiscal, régimen
 
 Estado civil: NO_ESPECIFICADO. Empresa: Empresa de prueba. Ingreso de Agustín: 15000.50. Son valores auxiliares de prueba, no información confirmada de su situación laboral/familiar. La contraseña `PruebaCliente2026!` sigue siendo sintética, no una contraseña personal.
 
+Con V7, estado civil se envía como `estadoCivilId=7`, nacionalidad y país como ID 1. Sexo es ID 1 para Agustín e ID 2 para Dulce. El domicilio usa `asentamientoId=110333891`, San Isidro, CP 37907. Agustín confirmó la equivalencia con su denominación anterior “Nueva San Isidro”. Consultar [catálogos de México](catalogos-mexico.md).
+
 ## Perfil para errores
 
 Se utiliza Dulce María López Parra, nacimiento 2005-11-08 y el mismo domicilio, con ocupación Gerente de bodega y empresa Bodega Aurrera según lo proporcionado.

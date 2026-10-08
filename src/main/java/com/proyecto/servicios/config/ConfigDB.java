@@ -62,7 +62,7 @@ public class ConfigDB {
     }
 
     @Bean(name="sfEntityManagerFactory")
-    @DependsOn("flyway")
+    @DependsOn({"flyway","catalogoPostal"})
     public LocalContainerEntityManagerFactoryBean sfEntityManagerFactory(){
         LocalContainerEntityManagerFactoryBean em= new LocalContainerEntityManagerFactoryBean();
         try{

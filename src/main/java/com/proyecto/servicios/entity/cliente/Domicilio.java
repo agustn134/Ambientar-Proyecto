@@ -46,6 +46,9 @@ public class Domicilio {
     @Column(name = "codigo_postal", nullable = false)
     private String codigoPostal;
 
-    @Column(name = "pais", nullable = false)
-    private String pais;
+    @Column(name = "pais_id", nullable = false)
+    private Short paisId;
+
+    @Column(name = "asentamiento_id")
+    private Integer asentamientoId;
 }

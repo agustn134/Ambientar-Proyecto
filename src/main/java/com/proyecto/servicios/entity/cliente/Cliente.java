@@ -42,14 +42,14 @@ public class Cliente {
     @Column(name = "rfc", nullable = false, unique = true)
     private String rfc;
 
-    @Column(name = "sexo", nullable = false)
-    private String sexo;
+    @Column(name = "sexo_id", nullable = false)
+    private Short sexoId;
 
-    @Column(name = "nacionalidad", nullable = false)
-    private String nacionalidad;
+    @Column(name = "nacionalidad_id", nullable = false)
+    private Short nacionalidadId;
 
-    @Column(name = "estado_civil", nullable = false)
-    private String estadoCivil;
+    @Column(name = "estado_civil_id", nullable = false)
+    private Short estadoCivilId;
 
     // Datos de Contacto
     @Column(name = "correo_electronico", nullable = false, unique = true)
