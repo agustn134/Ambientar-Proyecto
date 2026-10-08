@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApi {
     @Bean
     public OpenAPI openAPI(){
-        return new OpenAPI().addServersItem(new Server().url("/").description("Servidor Local"));
+        return new OpenAPI().addServersItem(new Server().url("/").description("Servidor Local"))
+            .components(new io.swagger.v3.oas.models.Components().addSecuritySchemes("bearerAuth",
+                new io.swagger.v3.oas.models.security.SecurityScheme()
+                    .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                    .scheme("bearer").bearerFormat("JWT")))
+            .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList("bearerAuth"));
     }
 }

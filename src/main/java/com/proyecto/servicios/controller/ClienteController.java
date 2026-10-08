@@ -14,6 +14,7 @@ public class ClienteController {
     private final RegistroClienteService registro;
 
     @PostMapping(consumes="application/json", produces="application/json")
+    @io.swagger.v3.oas.annotations.security.SecurityRequirements
     public ResponseEntity<RegistroClienteResponse> registrar(@Valid @RequestBody RegistroClienteRequest request) {
         // GET /clientes/{id} se incorporará en la siguiente etapa.
         return ResponseEntity.status(201).body(registro.registrar(request));

@@ -19,24 +19,31 @@ import org.springframework.test.web.servlet.MockMvc;
 import javax.sql.DataSource;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /** HTTP real + JPA + SQL V3, aislado de GestoPago y de las bases del usuario. */
 @SpringBootTest(classes=RegistroClienteIntegrationTest.Config.class, properties={
     "spring.datasource.url=jdbc:h2:mem:registro;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
-    "spring.datasource.username=sa", "spring.datasource.password=", "spring.flyway.enabled=false"
+    "spring.datasource.username=sa", "spring.datasource.password=", "spring.flyway.enabled=false",
+    "security.jwt.secret=MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE="
 })
 @AutoConfigureMockMvc
 class RegistroClienteIntegrationTest {
     @SpringBootConfiguration
     @EnableAutoConfiguration
     @Import({ConfigDB.class, RegistroClienteService.class, ClienteController.class,
-        RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, PasswordConfig.class, LoggingAspect.class})
+        RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, PasswordConfig.class, LoggingAspect.class,
+        JwtConfig.class,SecurityConfig.class,com.proyecto.servicios.security.UsuarioJwtValidator.class,
+        com.proyecto.servicios.security.SecurityErrorHandler.class,com.proyecto.servicios.service.LoginService.class,
+        com.proyecto.servicios.service.JwtService.class,com.proyecto.servicios.service.UsuarioSesionService.class,
+        com.proyecto.servicios.controller.AuthController.class})
     static class Config {
         @Bean(name="flyway")
         Object schema(DataSource dataSource) {
             new ResourceDatabasePopulator(new ClassPathResource("db/migration/V3__create_clientes_domicilios_cuentas.sql"),
-                    new ClassPathResource("db/migration/V5__create_usuarios.sql"))
+                    new ClassPathResource("db/migration/V5__create_usuarios.sql"),
+                    new ClassPathResource("db/migration/V6__version_token_usuarios.sql"))
                 .execute(dataSource);
             return new Object();
         }
@@ -46,6 +53,8 @@ class RegistroClienteIntegrationTest {
     @Autowired ObjectMapper mapper;
     @Autowired JdbcTemplate sql;
     @Autowired org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    @Autowired org.springframework.security.oauth2.jwt.JwtEncoder jwtEncoder;
+    @Autowired org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder;
 
     @BeforeEach void limpiar() {
         sql.update("DELETE FROM usuarios");
@@ -222,5 +231,139 @@ class RegistroClienteIntegrationTest {
         } finally {
             sql.execute("ALTER TABLE usuarios DROP CONSTRAINT fallo_usuario_prueba");
         }
+    }
+
+    String registrarYToken() throws Exception {
+        enviar(valido()).andExpect(status().isCreated());
+        return iniciarSesion(valido().get("password").asText()).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+    }
+
+    org.springframework.test.web.servlet.ResultActions iniciarSesion(String password) throws Exception {
+        ObjectNode request=mapper.createObjectNode();
+        request.put("correo",valido().get("correoElectronico").asText());
+        request.put("password",password);
+        return mvc.perform(post("/auth/login").contentType("application/json").content(request.toString()));
+    }
+
+    String extraerToken(String response) throws Exception { return mapper.readTree(response).get("accessToken").asText(); }
+
+    String tokenFirmado(java.time.Instant expiry, String issuer, String audience, long version) {
+        Long id=sql.queryForObject("SELECT id FROM usuarios",Long.class);
+        var claims=org.springframework.security.oauth2.jwt.JwtClaimsSet.builder().issuer(issuer)
+            .audience(java.util.List.of(audience)).subject(id.toString())
+            .issuedAt(java.time.Instant.now().minusSeconds(400)).notBefore(java.time.Instant.now().minusSeconds(400))
+            .expiresAt(expiry).claim("ver",version).build();
+        return jwtEncoder.encode(org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(
+            org.springframework.security.oauth2.jwt.JwsHeader.with(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256).build(),claims)).getTokenValue();
+    }
+
+    @Test void loginEmiteJwtYPerfilPropioSinDatosSensibles() throws Exception {
+        String response=registrarYToken();
+        var body=mapper.readTree(response);
+        assertEquals("Bearer",body.get("tokenType").asText()); assertEquals(300,body.get("expiresIn").asLong());
+        String token=extraerToken(response);
+        var jwt=jwtDecoder.decode(token);
+        assertEquals("http://localhost:8080",jwt.getIssuer().toString());
+        assertTrue(jwt.getAudience().contains("gestopago-api"));
+        assertFalse(jwt.getClaims().containsKey("correo")); assertFalse(jwt.getClaims().containsKey("password"));
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token))
+            .andExpect(status().isOk()).andExpect(jsonPath("correo").value(valido().get("correoElectronico").asText()))
+            .andExpect(jsonPath("passwordHash").doesNotExist());
+    }
+
+    @Test void rechazoConfirmaContadorYExitoLoReinicia() throws Exception {
+        enviar(valido()).andExpect(status().isCreated());
+        iniciarSesion("Incorrecta123!").andExpect(status().isUnauthorized());
+        assertEquals(1,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+        iniciarSesion("Incorrecta123!").andExpect(status().isUnauthorized());
+        assertEquals(2,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+        iniciarSesion(valido().get("password").asText()).andExpect(status().isOk());
+        assertEquals(0,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+    }
+
+    @Test void tresIntentosBloqueanSinDesactivarCuentaYRevocanJwt() throws Exception {
+        String token=extraerToken(registrarYToken());
+        for (int i=0;i<3;i++) iniciarSesion("Incorrecta123!").andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("codigo").value("CREDENCIALES_INVALIDAS"));
+        assertEquals(3,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+        assertFalse(sql.queryForObject("SELECT activo FROM usuarios",Boolean.class));
+        assertEquals("ACTIVA",sql.queryForObject("SELECT estatus FROM cuentas",String.class));
+        assertEquals(1,sql.queryForObject("SELECT version_token FROM usuarios",Long.class));
+        iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        sql.update("UPDATE usuarios SET activo=TRUE, intentos_fallidos=0");
+        // Reactivar no vuelve a habilitar tokens anteriores al bloqueo.
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+    }
+
+    @Test void tokenAusenteAlteradoVencidoOConClaimsIncorrectosSeRechaza() throws Exception {
+        String token=extraerToken(registrarYToken());
+        mvc.perform(get("/auth/me")).andExpect(status().isUnauthorized());
+        var parts=token.split("\\.");
+        parts[2]=(parts[2].charAt(0)=='A'?"B":"A")+parts[2].substring(1);
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+String.join(".",parts))).andExpect(status().isUnauthorized());
+        String expired=tokenFirmado(java.time.Instant.now().minusSeconds(1),"http://localhost:8080","gestopago-api",0);
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+expired)).andExpect(status().isUnauthorized());
+        for (String invalid : new String[]{
+            tokenFirmado(java.time.Instant.now().plusSeconds(300),"otro-emisor","gestopago-api",0),
+            tokenFirmado(java.time.Instant.now().plusSeconds(300),"http://localhost:8080","otra-audiencia",0),
+            tokenFirmado(java.time.Instant.now().plusSeconds(300),"http://localhost:8080","gestopago-api",9)}) {
+            mvc.perform(get("/auth/me").header("Authorization","Bearer "+invalid)).andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Test void usuarioInexistenteOInactivoTieneMismoErrorGenerico() throws Exception {
+        String nonexistent=iniciarSesion("Incorrecta123!").andExpect(status().isUnauthorized()).andReturn().getResponse().getContentAsString();
+        assertEquals("CREDENCIALES_INVALIDAS",mapper.readTree(nonexistent).get("codigo").asText());
+        enviar(valido()).andExpect(status().isCreated());
+        sql.update("UPDATE usuarios SET activo=FALSE");
+        iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("mensaje").value("Credenciales inválidas o acceso no disponible"));
+        assertEquals(0,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+    }
+
+    @Test void loginNormalizaCorreoPeroNoPasswordYRechazaTiposIncorrectos() throws Exception {
+        enviar(valido()).andExpect(status().isCreated());
+        var request=mapper.createObjectNode().put("correo","  "+valido().get("correoElectronico").asText().toUpperCase()+" ")
+            .put("password",valido().get("password").asText());
+        mvc.perform(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isOk());
+        iniciarSesion(" "+valido().get("password").asText()).andExpect(status().isUnauthorized());
+        assertEquals(1,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+        request.put("password",12345678);
+        mvc.perform(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        request.put("password","A".repeat(73));
+        mvc.perform(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        assertEquals(1,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+    }
+
+    @Test void cuentaInactivaPermiteLoginPeroClienteInactivoNo() throws Exception {
+        enviar(valido()).andExpect(status().isCreated());
+        sql.update("UPDATE cuentas SET estatus='INACTIVA'");
+        String token=extraerToken(iniciarSesion(valido().get("password").asText()).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString());
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
+        sql.update("UPDATE clientes SET estatus='INACTIVO'");
+        iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+    }
+
+    @Test void solicitudesConcurrentesNoPierdenIntentos() throws Exception {
+        enviar(valido()).andExpect(status().isCreated());
+        var executor=java.util.concurrent.Executors.newFixedThreadPool(3);
+        try {
+            var futures=new java.util.ArrayList<java.util.concurrent.Future<Integer>>();
+            for (int i=0;i<3;i++) futures.add(executor.submit(() -> iniciarSesion("Incorrecta123!")
+                .andReturn().getResponse().getStatus()));
+            for (var future : futures) assertEquals(401,future.get(30,java.util.concurrent.TimeUnit.SECONDS));
+        } finally { executor.shutdownNow(); }
+        assertEquals(3,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
+        assertFalse(sql.queryForObject("SELECT activo FROM usuarios",Boolean.class));
+    }
+
+    @Test void autenticadoSinPermisoObtiene403() throws Exception {
+        String token=extraerToken(registrarYToken());
+        mvc.perform(post("/personas").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("codigo").value("ACCESO_DENEGADO"));
     }
 }

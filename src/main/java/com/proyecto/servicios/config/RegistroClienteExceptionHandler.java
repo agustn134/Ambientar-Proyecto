@@ -1,6 +1,8 @@
 package com.proyecto.servicios.config;
 
 import com.proyecto.servicios.controller.ClienteController;
+import com.proyecto.servicios.controller.AuthController;
+import com.proyecto.servicios.exception.CredencialesInvalidasException;
 import com.proyecto.servicios.exception.RegistroClienteException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,11 +18,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @Order(-100)
 @Slf4j
-@RestControllerAdvice(assignableTypes=ClienteController.class)
+@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class})
 public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
                                 String path, List<ErrorCampo> errores) {}
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ErrorRegistro> login(CredencialesInvalidasException ex, HttpServletRequest request) {
+        return respuesta(401,"CREDENCIALES_INVALIDAS",ex.getMessage(),List.of(),request);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorRegistro> validar(MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -70,9 +77,9 @@ public class RegistroClienteExceptionHandler {
     private ResponseEntity<ErrorRegistro> respuesta(int status, String codigo, String mensaje,
             List<ErrorCampo> errores, HttpServletRequest request) {
         if (status >= 500) {
-            log.error("Registro de cliente rechazado; status={}; codigo={}", status, codigo);
+            log.error("Petición rechazada; status={}; codigo={}", status, codigo);
         } else {
-            log.warn("Registro de cliente rechazado; status={}; codigo={}; camposInvalidos={}", status, codigo, errores.size());
+            log.warn("Petición rechazada; status={}; codigo={}; camposInvalidos={}", status, codigo, errores.size());
         }
         return ResponseEntity.status(status).body(new ErrorRegistro(LocalDateTime.now(), status, codigo,
             mensaje, request.getRequestURI(), errores));
