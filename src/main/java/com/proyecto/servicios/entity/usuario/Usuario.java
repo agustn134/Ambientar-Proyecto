@@ -33,6 +33,10 @@ public class Usuario {
     @Column(name="intentos_fallidos", nullable=false)
     private int intentosFallidos=0;
 
+    @Column(name="version_token", nullable=false)
+    @JsonIgnore
+    private long versionToken=0;
+
     @Column(name="fecha_creacion", nullable=false, updatable=false)
     private LocalDateTime fechaCreacion;
 

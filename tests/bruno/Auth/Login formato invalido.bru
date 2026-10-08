@@ -1,0 +1,33 @@
+meta {
+  name: Login formato invalido
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "password": 12345678,
+    "correo": "agustinlopezparra13@gmail.com"
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
+}
+
+docs {
+  Consultar docs/login-jwt.md antes de ejecutar. Login valido captura el token de Agustin.
+  Para bloqueo se usa el perfil sintético de Dulce; repetir Intento incorrecto usuario de bloqueo tres veces.
+  El registro de bloqueo sólo crea un usuario la primera vez; repetirlo retorna 409.
+}

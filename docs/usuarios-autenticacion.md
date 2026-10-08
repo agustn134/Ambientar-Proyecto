@@ -6,7 +6,7 @@ El registro `POST /clientes` requiere ahora `password`. Tras validar los datos s
 
 La migración **V5__create_usuarios.sql** crea `usuarios`. Cada cliente puede tener un único usuario (`cliente_id` único); el correo es único y se almacena normalizado a minúsculas. Se guardan `password_hash`, `activo`, `intentos_fallidos`, `fecha_creacion` y `fecha_actualizacion`.
 
-El nuevo usuario queda activo y con cero intentos fallidos. V5 no genera accesos ni contraseñas para clientes históricos. El bloqueo, login y validación JWT aún no están implementados; el contador se prepara para ese trabajo.
+El nuevo usuario queda activo y con cero intentos fallidos. V5 no genera accesos ni contraseñas para clientes históricos. Login, JWT y bloqueo ya están implementados: consultar [login, JWT y bloqueo](login-jwt.md). V6 agrega la versión usada para revocar tokens.
 
 ## Contraseña
 
@@ -16,7 +16,7 @@ El nuevo usuario queda activo y con cero intentos fallidos. V5 no genera accesos
 - Máximo **72 bytes UTF-8**, límite de BCrypt; caracteres multibyte pueden alcanzar el límite antes de 72 caracteres.
 - BCrypt con costo 10 y salt generado por la biblioteca. Se usa `PasswordEncoder`, no un algoritmo casero ni cifrado reversible.
 - El password no se serializa en respuestas ni aparece en `toString` del DTO. La entidad excluye el hash de JSON. El aspecto de logs no imprime argumentos, respuestas ni mensajes crudos de excepciones. Ver [calidad de código, registro y monitoreo](calidad-registro-monitoreo.md).
-- Se agrega sólo `spring-security-crypto:6.4.5`: incluye las correcciones de longitud de BCrypt indicadas en [CVE-2025-22228](https://spring.io/security/cve-2025-22228/) y [CVE-2025-22234](https://spring.io/security/cve-2025-22234/). No se activa aún la protección HTTP de Spring Security.
+- Spring Security se alinea a 6.4.5 mediante dependencia administrada: incluye las correcciones de longitud de BCrypt indicadas en [CVE-2025-22228](https://spring.io/security/cve-2025-22228/) y [CVE-2025-22234](https://spring.io/security/cve-2025-22234/). La protección HTTP y los starters JWT se documentan en [login-jwt.md](login-jwt.md).
 
 No usar contraseñas personales en las colecciones de Git. `PruebaCliente2026!` es un valor sintético de prueba, no una credencial del servidor ni de un usuario real.
 
@@ -85,6 +85,8 @@ Resultado del 8 de octubre de 2026: **12 pruebas ejecutadas, 12 aprobadas**, `BU
 Pendiente ejecutar la colección actualizada en Bruno contra el backend local y comprobar V5 en PostgreSQL. No se reinició ni modificó la base PostgreSQL del usuario desde estas pruebas. Los dos fallos previamente documentados de tests existentes de GestoPago siguen fuera de este bloque; la suite completa no se volvió a ejecutar aquí.
 
 ## Trabajo siguiente
+
+Los puntos de login, tres intentos, JWT y verificación de estado de la siguiente lista se completaron en `feature/login-jwt`; ver contrato y pruebas en [login-jwt.md](login-jwt.md). Continúan pendientes recuperación/cambio de contraseña, desbloqueo y alta de acceso para clientes históricos.
 
 - `POST /auth/login` con respuesta genérica para credenciales incorrectas.
 - Tres intentos incorrectos consecutivos bloquean el acceso; éxito reinicia el contador. El bloqueo se debe persistir incluso cuando la petición devuelve error.

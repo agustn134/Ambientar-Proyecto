@@ -1,0 +1,34 @@
+meta {
+  name: Login usuario de bloqueo
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "password": "PruebaCliente2026!",
+    "correo": "dulce.lopez.parra@example.com"
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("JWT recibido", function () { expect(res.getBody().tokenType).to.equal("Bearer"); expect(res.getBody().accessToken.split(".")).to.have.lengthOf(3); bru.setVar("tokenBloqueo", res.getBody().accessToken); });
+}
+
+docs {
+  Consultar docs/login-jwt.md antes de ejecutar. Login valido captura el token de Agustin.
+  Para bloqueo se usa el perfil sintético de Dulce; repetir Intento incorrecto usuario de bloqueo tres veces.
+  El registro de bloqueo sólo crea un usuario la primera vez; repetirlo retorna 409.
+}

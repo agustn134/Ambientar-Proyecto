@@ -1,6 +1,6 @@
 # Ambientar-Proyecto
 
-Registro de clientes: [contrato, validaciones y manejo de errores](docs/registro-clientes.md). Usuarios de acceso: [creación automática y BCrypt](docs/usuarios-autenticacion.md). Colección versionable en `tests/bruno`; login y JWT siguen pendientes.
+Registro de clientes: [contrato, validaciones y manejo de errores](docs/registro-clientes.md). Usuarios de acceso: [creación automática y BCrypt](docs/usuarios-autenticacion.md). [Login, JWT y bloqueo por intentos](docs/login-jwt.md), con colección versionable en `tests/bruno/Auth`. Configurar JWT_SECRET antes de arrancar.
 
 [Calidad de código, registro y monitoreo](docs/calidad-registro-monitoreo.md): logs de invocaciones y errores sin imprimir payloads ni credenciales.
 

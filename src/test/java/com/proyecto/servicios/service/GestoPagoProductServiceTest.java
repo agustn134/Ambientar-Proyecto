@@ -7,6 +7,7 @@ import com.proyecto.servicios.exception.GestoPagoException;
 import com.proyecto.servicios.model.gestopago.GestoPagoProductResponse;
 import com.proyecto.servicios.model.gestopago.ProductoDto;
 import com.proyecto.servicios.repositorys.gestopago.GestoPagoProductoRepository;
+import com.proyecto.servicios.mapper.GestoPagoProductoMapper;
 import com.proyecto.servicios.service.Impl.GestoPagoProductServiceImpl;
 import feign.FeignException;
 import jakarta.xml.bind.JAXBContext;
@@ -42,6 +43,9 @@ class GestoPagoProductServiceTest {
 
     @Mock
     private GestoPagoProductoRepository productoRepository;
+
+    @Mock
+    private GestoPagoProductoMapper productoMapper;
 
     @InjectMocks
     private GestoPagoProductServiceImpl productService;
@@ -119,7 +123,9 @@ class GestoPagoProductServiceTest {
         mockResponse.setProductos(List.of(prod1));
 
         when(gestoPagoProductClient.getProductList(anyString())).thenReturn(mockResponse);
-        when(productoRepository.findByIdProducto(101)).thenReturn(Optional.empty());
+        GestoPagoProducto entidad = new GestoPagoProducto();
+        entidad.setIdProducto(101);
+        when(productoMapper.toEntityList(mockResponse.getProductos())).thenReturn(List.of(entidad));
 
         GestoPagoProductResponse response = productService.sincronizarCatalogoProductos();
 
@@ -131,7 +137,7 @@ class GestoPagoProductServiceTest {
     }
 
     @Test
-    @DisplayName("Sincronización debe retornar sin error si la respuesta es vacía o nula")
+    @DisplayName("Sincronización rechaza catálogo vacío sin guardar registros")
     void debeSincronizarCatalogoProductosRespuestaVacia() {
         GestoPagoProductResponse mockResponse = new GestoPagoProductResponse();
         // Productos nulos o lista vacia
@@ -139,10 +145,8 @@ class GestoPagoProductServiceTest {
 
         when(gestoPagoProductClient.getProductList(anyString())).thenReturn(mockResponse);
 
-        GestoPagoProductResponse response = productService.sincronizarCatalogoProductos();
-
-        assertNotNull(response);
-        assertTrue(response.getProductos().isEmpty());
+        GestoPagoException error = assertThrows(GestoPagoException.class, productService::sincronizarCatalogoProductos);
+        assertEquals(502, error.getStatus());
         // No se debe llamar a base de datos
         verify(productoRepository, never()).saveAll(anyList());
     }

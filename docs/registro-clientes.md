@@ -2,7 +2,7 @@
 
 ## Alcance
 
-Se implementa `POST /clientes` con cliente, domicilio, cuenta y usuario de acceso, validaciones y errores por campo. La contraseña es obligatoria y se guarda como hash BCrypt; consultar [usuarios de acceso y BCrypt](usuarios-autenticacion.md). Login, JWT, búsquedas, actualización y baja siguen pendientes.
+Se implementa `POST /clientes` con cliente, domicilio, cuenta y usuario de acceso, validaciones y errores por campo. La contraseña es obligatoria y se guarda como hash BCrypt; consultar [usuarios de acceso y BCrypt](usuarios-autenticacion.md). Login y JWT están documentados en [login y bloqueo](login-jwt.md). Búsquedas, actualización y baja siguen pendientes.
 
 El servicio `RegistroClienteService` usa explícitamente `sfTransactionManager`. La relación JPA fue corregida para usar `domicilios.cliente_id`, que ya existe desde V3. V3 no se modifica: V4 agrega un índice único para correo sin distinguir mayúsculas.
 
@@ -100,6 +100,6 @@ Usan HTTP de prueba, JPA y el SQL V3 en H2 modo PostgreSQL sin conectarse a la b
 ## Trabajo pendiente
 
 - Conservar esta documentación y la colección junto con el código en Git; guardar evidencias de respuesta sin credenciales.
-- Implementar usuarios y autenticación: usuario automático, BCrypt, login JWT y bloqueo por intentos. Extender el registro transaccional para incluir al usuario.
+- Usuarios y autenticación ya incorporan usuario automático, BCrypt, login JWT y bloqueo por intentos; completar su comprobación manual y conservar evidencias según [login-jwt.md](login-jwt.md).
 - Completar consultas de clientes/cuentas, filtros y paginación, actualización y baja lógica; mantener independientes los estados de cuenta y login.
 - Consolidar Excel de pruebas, README y diagrama ER. El Excel es un entregable adicional, no queda reemplazado por este Markdown.
