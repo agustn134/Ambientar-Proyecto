@@ -2,7 +2,7 @@
 
 ## Alcance
 
-Se implementa `POST /clientes` con cliente, domicilio y cuenta, validaciones y errores por campo. Usuarios, contraseña, JWT, búsquedas, actualización y baja se incorporarán después; las peticiones de esas etapas en Bruno siguen pendientes.
+Se implementa `POST /clientes` con cliente, domicilio, cuenta y usuario de acceso, validaciones y errores por campo. La contraseña es obligatoria y se guarda como hash BCrypt; consultar [usuarios de acceso y BCrypt](usuarios-autenticacion.md). Login, JWT, búsquedas, actualización y baja siguen pendientes.
 
 El servicio `RegistroClienteService` usa explícitamente `sfTransactionManager`. La relación JPA fue corregida para usar `domicilios.cliente_id`, que ya existe desde V3. V3 no se modifica: V4 agrega un índice único para correo sin distinguir mayúsculas.
 
@@ -16,7 +16,7 @@ El servicio `RegistroClienteService` usa explícitamente `sfTransactionManager`.
 - Ese caso captura ambos valores como variables runtime mediante `bru.setVar`; sirven dentro de esta colección. En otras colecciones se deben copiar al entorno global. El número de cuenta es texto de 20 dígitos.
 - Ejecutar los casos inválidos y duplicados. Repetir el registro válido sin cambiar sus datos devuelve 409: es una prueba de unicidad, no un fallo.
 
-La colección no contiene contraseñas reales. El JSON válido es `src/test/resources/registro-cliente-valido.json` y usa identificadores sintéticos que cumplen el formato, no una identidad oficial verificada.
+La colección no contiene contraseñas personales. El JSON válido es `src/test/resources/registro-cliente-valido.json` y contiene los datos proporcionados por Agustín; los casos de error usan a Dulce con identificadores inventados. Ver [datos de prueba y alteraciones deliberadas](datos-prueba.md).
 
 ## Contrato
 
@@ -26,7 +26,7 @@ La colección no contiene contraseñas reales. El JSON válido es `src/test/reso
 {"clienteId":1,"estatus":"ACTIVO","cuenta":{"numeroCuenta":"00000000000000000001","saldo":0,"estatus":"ACTIVA"}}
 ```
 
-El ID de secuencia de cliente genera una cuenta única de 20 dígitos. No es una CLABE. Saldo inicial definido por el sistema: 0. No se aceptan saldo, IDs ni estatus como datos de registro: se generan en el servicio (los campos JSON desconocidos actualmente se ignoran).
+La respuesta incluye además `usuario` con `usuarioId`, `correo` y `activo`; no devuelve la contraseña ni su hash. El ID de secuencia de cliente genera una cuenta única de 20 dígitos. No es una CLABE. Saldo inicial definido por el sistema: 0. No se aceptan saldo, IDs ni estatus como datos de registro: se generan en el servicio (los campos JSON desconocidos actualmente se ignoran).
 
 Ejemplo 400:
 
@@ -80,6 +80,8 @@ WHERE c.id = 1;
 ```
 
 ## Pruebas automatizadas
+
+Tras incorporar usuario automático y BCrypt, esta misma clase contiene **12 pruebas**. El resultado actual está documentado en [usuarios de acceso y BCrypt](usuarios-autenticacion.md); las siete pruebas mencionadas debajo corresponden a la ejecución anterior sin usuario.
 
 ```powershell
 .\gradlew.bat test --tests com.proyecto.servicios.RegistroClienteIntegrationTest

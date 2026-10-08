@@ -12,8 +12,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Order(-100)
+@Slf4j
 @RestControllerAdvice(assignableTypes=ClienteController.class)
 public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
@@ -67,6 +69,11 @@ public class RegistroClienteExceptionHandler {
 
     private ResponseEntity<ErrorRegistro> respuesta(int status, String codigo, String mensaje,
             List<ErrorCampo> errores, HttpServletRequest request) {
+        if (status >= 500) {
+            log.error("Registro de cliente rechazado; status={}; codigo={}", status, codigo);
+        } else {
+            log.warn("Registro de cliente rechazado; status={}; codigo={}; camposInvalidos={}", status, codigo, errores.size());
+        }
         return ResponseEntity.status(status).body(new ErrorRegistro(LocalDateTime.now(), status, codigo,
             mensaje, request.getRequestURI(), errores));
     }

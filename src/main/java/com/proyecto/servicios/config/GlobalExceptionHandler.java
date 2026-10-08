@@ -22,13 +22,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GestoPagoAuthException.class)
     public ResponseEntity<ErrorResponseDto> handleGestoPagoAuthException(GestoPagoAuthException ex, HttpServletRequest request) {
-        log.error("Error de autenticación capturado: {}", ex.getMessage());
+        log.warn("Error de autenticación GestoPago; status=401");
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(GestoPagoException.class)
     public ResponseEntity<ErrorResponseDto> handleGestoPagoException(GestoPagoException ex, HttpServletRequest request) {
-        log.error("Error de GestoPago capturado: {}", ex.getMessage());
+        log.error("Error GestoPago; status={}; tipo={}", ex.getStatus(), ex.getClass().getSimpleName());
         HttpStatus status = HttpStatus.resolve(ex.getStatus());
         if (status == null) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -38,26 +38,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GestoPagoNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleGestoPagoNotFoundException(GestoPagoNotFoundException ex, HttpServletRequest request) {
-        log.error("Recurso no encontrado en GestoPago: {}", ex.getMessage());
+        log.warn("Recurso no encontrado en GestoPago; status=404");
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(GestoPagoServiceUnavailableException.class)
     public ResponseEntity<ErrorResponseDto> handleGestoPagoServiceUnavailableException(GestoPagoServiceUnavailableException ex, HttpServletRequest request) {
-        log.error("Servicio de GestoPago no disponible: {}", ex.getMessage());
+        log.error("Servicio GestoPago no disponible; status={}", ex.getStatus());
         HttpStatus status = ex.getStatus() == 504 ? HttpStatus.GATEWAY_TIMEOUT : HttpStatus.SERVICE_UNAVAILABLE;
         return buildErrorResponse(status, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler({RetryableException.class, SocketTimeoutException.class})
     public ResponseEntity<ErrorResponseDto> handleTimeoutException(Exception ex, HttpServletRequest request) {
-        log.error("Timeout de comunicación capturado: {}", ex.getMessage());
+        log.error("Error de comunicación; status=504; tipo={}", ex.getClass().getSimpleName());
         return buildErrorResponse(HttpStatus.GATEWAY_TIMEOUT, "Error de comunicación o timeout al intentar conectar con el servicio externo.", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex, HttpServletRequest request) {
-        log.error("Error interno del servidor capturado: {}", ex.getMessage(), ex);
+        log.error("Error interno; status=500; tipo={}", ex.getClass().getSimpleName());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ha ocurrido un error inesperado en el servidor.", request.getRequestURI());
     }
 

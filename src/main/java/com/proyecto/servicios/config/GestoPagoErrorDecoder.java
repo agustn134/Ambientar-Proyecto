@@ -9,8 +9,6 @@ import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.InputStream;
-
 /**
  * Interceptor de errores para el cliente Feign que consume la API de GestoPago.
  * Convierte los códigos de estado HTTP de error en excepciones personalizadas del dominio
@@ -43,20 +41,8 @@ public class GestoPagoErrorDecoder implements ErrorDecoder {
      */
     @Override
     public Exception decode(String methodKey, Response response) {
-        String requestUrl = response.request().url();
         int status = response.status();
-
-        log.error("Error detectado en cliente Feign al invocar '{}'. Status HTTP: {}", requestUrl, status);
-
-        // Intentar extraer el cuerpo del error para incluirlo en el log
-        String responseBody = "";
-        try (InputStream bodyIs = response.body().asInputStream()) {
-            responseBody = new String(bodyIs.readAllBytes());
-            String logBody = responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody;
-            log.error("Cuerpo de la respuesta de error (truncado a 500 chars): {}", logBody);
-        } catch (Exception e) {
-            log.warn("No se pudo leer el cuerpo de la respuesta de error desde GestoPago.");
-        }
+        log.error("Error de integración GestoPago; operación={}; status={}", methodKey, status);
 
         // 401 Unauthorized / 403 Forbidden: Token inválido o sin permisos
         if (status == 401 || status == 403) {
@@ -67,9 +53,9 @@ public class GestoPagoErrorDecoder implements ErrorDecoder {
 
         // 404 Not Found: El endpoint de GestoPago no existe o cambió de URL
         if (status == 404) {
-            log.error("El endpoint de GestoPago no fue encontrado: {}", requestUrl);
+            log.error("El endpoint de GestoPago no fue encontrado.");
             return new GestoPagoNotFoundException(
-                    "El recurso solicitado no fue encontrado en GestoPago (Status 404). URL: " + requestUrl);
+                    "El recurso solicitado no fue encontrado en GestoPago (Status 404).");
         }
 
         // 429 Too Many Requests: Se superó el límite de peticiones al proveedor

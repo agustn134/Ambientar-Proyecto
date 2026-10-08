@@ -1,16 +1,16 @@
 {
-  "nombre": "Agustín",
+  "nombre": "Dulce",
   "password": "PruebaCliente2026!",
   "apellidoPaterno": "López",
   "apellidoMaterno": "Parra",
-  "fechaNacimiento": "2004-09-05",
-  "curp": "LOPA040905HGTPRGA7",
-  "rfc": "LOPA040905MQ3",
-  "sexo": "MASCULINO",
+  "fechaNacimiento": "2005-11-08",
+  "curp": "LOPD051108MGTPRLA8",
+  "rfc": "LOPD051108AB1",
+  "sexo": "FEMENINO",
   "nacionalidad": "Mexicana",
   "estadoCivil": "NO_ESPECIFICADO",
-  "correoElectronico": "agustinlopezparra13@gmail.com",
-  "telefonoMovil": "4681134553",
+  "correoElectronico": "dulce.lopez.parra@example.com",
+  "telefonoMovil": "4680000000",
   "domicilio": {
     "calle": "Guerrero",
     "numeroExterior": "843",
@@ -21,8 +21,9 @@
     "pais": "México"
   },
   "informacionLaboral": {
-    "ocupacion": "Tester / QA",
-    "empresa": "Empresa de prueba",
-    "ingresoMensual": 15000.5
-  }
+    "ocupacion": "Gerente de bodega",
+    "empresa": "Bodega Aurrera",
+    "ingresoMensual": 18000.5
+  },
+  "segundoNombre": "María"
 }

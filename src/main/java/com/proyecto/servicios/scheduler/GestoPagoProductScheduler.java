@@ -52,7 +52,7 @@ public class GestoPagoProductScheduler {
             log.info("Actualización de getlistproduct completada con éxito.");
             return true;
         } catch (Exception e) {
-            log.error("Error crítico en la actualización automática de productos: {}", e.getMessage(), e);
+            log.error("Error en la actualización automática de productos; tipo={}", e.getClass().getSimpleName());
             return false;
         }
     }

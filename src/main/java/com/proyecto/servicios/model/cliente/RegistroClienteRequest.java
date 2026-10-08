@@ -22,12 +22,20 @@ public record RegistroClienteRequest(
     @JsonDeserialize(using = TextoEstricto.class) @NotBlank @Pattern(regexp="[0-9]{10}") String telefonoMovil,
     @JsonDeserialize(using = TextoEstricto.class) @Pattern(regexp="[0-9]{10}") String telefonoAlternativo,
     @NotNull @Valid DomicilioRequest domicilio,
-    @NotNull @Valid LaboralRequest informacionLaboral
+    @NotNull @Valid LaboralRequest informacionLaboral,
+    @com.fasterxml.jackson.annotation.JsonProperty(access=com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
+    @JsonDeserialize(using=com.proyecto.servicios.model.usuario.PasswordEstricto.class)
+    @com.proyecto.servicios.validation.PasswordValida String password
 ) {
     public RegistroClienteRequest {
         if (curp != null) curp = curp.toUpperCase(Locale.ROOT);
         if (rfc != null) rfc = rfc.toUpperCase(Locale.ROOT);
         if (correoElectronico != null) correoElectronico = correoElectronico.toLowerCase(Locale.ROOT);
+    }
+
+    @Override
+    public String toString() {
+        return "RegistroClienteRequest[datos personales y contraseña protegidos]";
     }
 
     public record DomicilioRequest(

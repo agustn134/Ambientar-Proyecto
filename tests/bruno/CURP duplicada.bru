@@ -17,31 +17,33 @@ headers {
 
 body:json {
   {
-    "nombre": "José",
-    "apellidoPaterno": "Pérez",
-    "apellidoMaterno": "García",
-    "fechaNacimiento": "1990-01-01",
-    "curp": "PEGJ900101HDFRRS09",
-    "rfc": "LOPE900101AB1",
-    "sexo": "MASCULINO",
+    "nombre": "Dulce",
+    "password": "PruebaCliente2026!",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2005-11-08",
+    "curp": "LOPA040905HGTPRGA7",
+    "rfc": "LOPD051108AB1",
+    "sexo": "FEMENINO",
     "nacionalidad": "Mexicana",
-    "estadoCivil": "SOLTERO",
-    "correoElectronico": "otro.curp@example.com",
-    "telefonoMovil": "5512345678",
+    "estadoCivil": "NO_ESPECIFICADO",
+    "correoElectronico": "dulce.lopez.parra@example.com",
+    "telefonoMovil": "4680000000",
     "domicilio": {
-      "calle": "Reforma",
-      "numeroExterior": "100",
-      "colonia": "Centro",
-      "municipio": "Cuauhtémoc",
-      "estado": "Ciudad de México",
-      "codigoPostal": "06000",
+      "calle": "Guerrero",
+      "numeroExterior": "843",
+      "colonia": "Nueva San Isidro",
+      "municipio": "San Luis de la Paz",
+      "estado": "Guanajuato",
+      "codigoPostal": "37907",
       "pais": "México"
     },
     "informacionLaboral": {
-      "ocupacion": "Desarrollador",
-      "empresa": "Empresa de prueba",
-      "ingresoMensual": 15000.5
-    }
+      "ocupacion": "Gerente de bodega",
+      "empresa": "Bodega Aurrera",
+      "ingresoMensual": 18000.5
+    },
+    "segundoNombre": "María"
   }
 }
 
@@ -51,6 +53,6 @@ tests {
 }
 
 docs {
-  Consultar docs/registro-clientes.md. Los casos de duplicados requieren ejecutar primero Registro valido.
+  Consultar docs/datos-prueba.md y docs/registro-clientes.md. Los casos de duplicados requieren ejecutar primero Registro valido.
   El registro válido crea datos; al repetirlo sin cambiarlos se espera 409.
 }
