@@ -1,0 +1,33 @@
+meta {
+  name: Perfil Dulce
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenDulce}}
+}
+
+tests {
+  test("Perfil CLIENTE propio", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().correo).to.equal("dulce.maria.lopez.parra.qa@gmail.com"); expect(res.getBody().rol).to.equal("CLIENTE"); expect(res.getBody()).not.to.have.property("passwordHash"); });
+  if (res.getStatus() === 200) { bru.setVar("dulceClienteId",res.getBody().clienteId); bru.setVar("dulceUsuarioId",res.getBody().usuarioId); }
+}
+
+docs {
+  Requiere Login Dulce. Confirma el rol CLIENTE y recupera los IDs del perfil sin mostrar contraseña.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenDulce. Renovar el login correspondiente si vence.
+  Variables que captura: dulceClienteId, dulceUsuarioId.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

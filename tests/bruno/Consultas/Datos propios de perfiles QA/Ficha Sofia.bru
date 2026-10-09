@@ -1,0 +1,33 @@
+meta {
+  name: Ficha Sofia
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/clientes/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenSofia}}
+}
+
+tests {
+  test("Ficha propia con datos confirmados", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("sofia.jimena.salazar.godinez.qa@gmail.com"); expect(res.getBody().telefonoMovil).to.equal("4181788464"); expect(res.getBody().domicilio.asentamientoId).to.equal(110140023); });
+  if (res.getStatus() === 200) { bru.setVar("sofiaClienteId",res.getBody().cliente.clienteId); if (res.getBody().cuentas.length) bru.setVar("sofiaCuenta",res.getBody().cuentas[0].numeroCuenta); }
+}
+
+docs {
+  Requiere Login Sofia. Consulta solamente su información. Apellidos y CP confirmados. Nacimiento inferido del segmento 050618 de la CURP. Número exterior S/N provisional: no fue proporcionado. RFC, correo, empresa, ingreso y estado civil son datos auxiliares de QA.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenSofia. Renovar el login correspondiente si vence.
+  Variables que captura: sofiaClienteId, sofiaCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

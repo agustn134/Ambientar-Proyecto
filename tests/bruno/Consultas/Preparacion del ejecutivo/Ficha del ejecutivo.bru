@@ -1,0 +1,38 @@
+meta {
+  name: Ficha del ejecutivo
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/clientes/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("Ficha del ejecutivo correcta", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().cliente.correo).to.equal("agustin.ejecutivo@example.com");
+    expect(res.getBody().cuentas.length).to.be.greaterThan(0);
+  });
+  if (res.getStatus() === 200 && res.getBody().cliente.correo === "agustin.ejecutivo@example.com") {
+    bru.setVar("ejecutivoClienteId",res.getBody().cliente.clienteId);
+    bru.setVar("ejecutivoCurp",res.getBody().cliente.curp);
+    bru.setVar("ejecutivoNumeroCuenta",res.getBody().cuentas[0].numeroCuenta);
+  }
+}
+
+docs {
+  HTTP esperado: 200. Después de Login ejecutivo y Perfil ejecutivo, recupera su cuenta e identificadores. No registra otro usuario ni requiere SQL. Sirve para preparar las pruebas de acceso ajeno y filtros incompatibles.
+  Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

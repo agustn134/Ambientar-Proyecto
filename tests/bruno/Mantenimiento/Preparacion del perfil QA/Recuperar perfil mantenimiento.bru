@@ -1,0 +1,33 @@
+meta {
+  name: Recuperar perfil mantenimiento
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenMantenimiento}}
+}
+
+tests {
+  test("Perfil QA correcto", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().correo).to.equal("dulce.mantenimiento@example.com"); expect(res.getBody().rol).to.equal("CLIENTE"); });
+  if (res.getStatus() === 200 && res.getBody().correo === "dulce.mantenimiento@example.com") { bru.setVar("clienteMantId",res.getBody().clienteId); bru.setVar("usuarioMantId",res.getBody().usuarioId); }
+}
+
+docs {
+  Para retomar el perfil existente después de Login con nueva password. Recupera los IDs sin registrar otra vez. No usa el nuevo perfil permanente de Dulce.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenMantenimiento. Renovar el login correspondiente si vence.
+  Variables que captura: clienteMantId, usuarioMantId.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

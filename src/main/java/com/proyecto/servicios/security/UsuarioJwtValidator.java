@@ -16,12 +16,13 @@ public class UsuarioJwtValidator implements OAuth2TokenValidator<Jwt> {
         try {
             long id=Long.parseLong(token.getSubject());
             Object version=token.getClaim("ver");
+            var rol=com.proyecto.servicios.entity.usuario.RolUsuario.valueOf(token.getClaimAsString("rol"));
             if (id > 0 && version instanceof Number number && number.doubleValue() == number.longValue() && token.getExpiresAt() != null
                     && token.getIssuedAt() != null
-                    && usuarios.existsByIdAndActivoTrueAndVersionTokenAndClienteEstatus(id, number.longValue(), "ACTIVO")) {
+                    && usuarios.existsByIdAndActivoTrueAndVersionTokenAndClienteEstatusAndRol(id, number.longValue(), "ACTIVO",rol)) {
                 return OAuth2TokenValidatorResult.success();
             }
-        } catch (NumberFormatException ex) {
+        } catch (IllegalArgumentException | NullPointerException ex) {
             // El subject no identifica un usuario válido.
         }
         return OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Acceso no disponible", null));

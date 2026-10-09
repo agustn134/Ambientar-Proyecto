@@ -1,0 +1,70 @@
+meta {
+  name: Registro Dulce
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Dulce",
+    "password": "PruebaCliente2026!",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2005-11-08",
+    "curp": "LOPD051108MGTXXX08",
+    "rfc": "LOPD051108ZZ8",
+    "correoElectronico": "dulce.maria.lopez.parra.qa@gmail.com",
+    "telefonoMovil": "4681046222",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "843",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Gerente de bodega",
+      "empresa": "Bodega Aurrera",
+      "ingresoMensual": 18000.5
+    },
+    "segundoNombre": "María",
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7
+  }
+}
+
+tests {
+  test("Cliente, usuario y cuenta creados", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().usuario.activo).to.equal(true);
+    expect(res.getBody().cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
+    expect(res.getBody().cuenta.saldo).to.equal(0);
+    expect(res.getBody().usuario).not.to.have.property("passwordHash");
+  });
+  if (res.getStatus() === 201) {
+    bru.setVar("dulceClienteId", res.getBody().clienteId);
+    bru.setVar("dulceUsuarioId", res.getBody().usuario.usuarioId);
+    bru.setVar("dulceCuenta", res.getBody().cuenta.numeroCuenta);
+  }
+}
+
+docs {
+  Teléfono confirmado 4681046222. Perfil permanente independiente del mantenimiento y del bloqueo. CURP, RFC, correo, ingreso y estado civil son sintéticos. Alta pública CLIENTE. Ejecutar una sola vez; repetida devuelve 409. No asigna EJECUTIVO ni sustituye al perfil de mantenimiento.
+
+  HTTP esperado: 201.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: dulceClienteId, dulceUsuarioId, dulceCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

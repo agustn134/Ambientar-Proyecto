@@ -1,0 +1,38 @@
+meta {
+  name: Login ejecutivo
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {"correo":"agustin.ejecutivo@example.com","password":"PruebaCliente2026!"}
+}
+
+tests {
+  test("JWT recibido", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().accessToken).to.be.a("string"); });
+  if (res.getStatus() === 200) {
+    bru.setVar("tokenEjecutivo",res.getBody().accessToken);
+    bru.setVar("tokenEjecutivoExpiresAt",res.getBody().expiresAt);
+  }
+}
+
+docs {
+  Completar antes la asignación controlada del rol en la base; este login no asigna roles.
+  La siguiente petición Perfil ejecutivo verifica el rol efectivamente emitido.
+
+  HTTP esperado: 200.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: tokenEjecutivo, tokenEjecutivoExpiresAt.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

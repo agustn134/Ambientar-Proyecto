@@ -1,0 +1,34 @@
+meta {
+  name: Perfil autenticado
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Perfil propio sin hash", function () { expect(res.getBody().correo).to.equal("agustinlopezparra13@gmail.com"); expect(res.getBody()).not.to.have.property("passwordHash"); });
+}
+
+docs {
+  Consultar docs/login-jwt.md antes de ejecutar. Login valido captura el token de Agustin.
+  Para bloqueo se usa el perfil sintético de Dulce; repetir Intento incorrecto usuario de bloqueo tres veces.
+  El registro de bloqueo sólo crea un usuario la primera vez; repetirlo retorna 409.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer token. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

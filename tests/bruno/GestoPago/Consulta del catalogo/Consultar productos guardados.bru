@@ -1,0 +1,79 @@
+meta {
+  name: Consultar productos guardados
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/gestopago/productos
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("Responde 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Devuelve una lista de productos", function () {
+    expect(res.getBody()).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+}
+
+docs {
+  # GP-001 — Consultar productos guardados
+
+  ## Objetivo
+
+  Verificar que el backend devuelve el catálogo de productos.
+
+  ## Precondiciones
+
+  - Backend ejecutándose en localhost:8080.
+  - PostgreSQL y Redis disponibles.
+  - Catálogo cargado previamente.
+  - Entorno Local o VariablesEntorno con baseUrl seleccionado.
+  - Auth/Acceso/Login valido enviado para capturar token.
+
+  ## Petición
+
+  Método: GET URL: {{baseUrl}}/api/gestopago/productos Header: Accept: application/json Autenticación: Bearer token Body: ninguno
+
+  ## Resultado esperado
+
+  - HTTP 200.
+  - Body JSON de tipo array.
+  - Las dos pruebas automáticas aprobadas.
+
+  ## Evidencia histórica previa a esta reorganización
+
+  - HTTP 200.
+  - Lista de productos recibida.
+  - 2 pruebas aprobadas y 0 fallidas.
+  - Tiempo observado: 1.94 segundos.
+  - Tamaño observado: 535.16 KB.
+
+  ## Alcance
+
+  Comprueba la respuesta HTTP y que el body es una lista. No comprueba por sí sola si los datos proceden de Redis o de PostgreSQL.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer token. Renovar Auth/Acceso/Login valido si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

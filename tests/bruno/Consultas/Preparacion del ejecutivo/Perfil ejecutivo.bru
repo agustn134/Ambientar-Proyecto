@@ -1,0 +1,34 @@
+meta {
+  name: Perfil ejecutivo
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Rol ejecutivo confirmado", function () { expect(res.getBody().rol).to.equal("EJECUTIVO"); bru.setVar("ejecutivoClienteId",res.getBody().clienteId); });
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Variables que captura: ejecutivoClienteId.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

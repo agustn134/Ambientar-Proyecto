@@ -1,5 +1,7 @@
 # Datos utilizados en las pruebas de registro
 
+La colección se organiza ahora por categorías; ver [guía manual de Bruno](bruno-guia-manual.md) para los nuevos perfiles de Sofía, Nancy y Dulce y el orden de mantenimiento pendiente. El teléfono de Dulce se corrigió a `4681046222` en fixtures y peticiones; un registro existente se actualiza al ejecutar el PUT válido, no al modificar el archivo.
+
 ## Registro válido
 
 Se utiliza la información proporcionada por Agustín López Parra para nombre, apellidos, nacimiento (2004-09-05), CURP, RFC, correo, teléfono y domicilio. Ocupación de prueba: Tester / QA.
@@ -16,12 +18,13 @@ Con V7, estado civil se envía como `estadoCivilId=7`, nacionalidad y país como
 
 Se utiliza Dulce María López Parra, nacimiento 2005-11-08 y el mismo domicilio, con ocupación Gerente de bodega y empresa Bodega Aurrera según lo proporcionado.
 
+Teléfono confirmado por Agustín: `4681046222`.
+
 Estos valores son **inventados exclusivamente para las pruebas**:
 
 - CURP: `LOPD051108MGTPRLA8`.
 - RFC: `LOPD051108AB1`.
 - Correo: `dulce.lopez.parra@example.com`.
-- Teléfono: `4680000000`.
 - Ingreso mensual: 18000.50.
 - Estado civil: NO_ESPECIFICADO.
 

@@ -1,0 +1,33 @@
+meta {
+  name: Ficha Nancy
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/clientes/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenNancy}}
+}
+
+tests {
+  test("Ficha propia con datos confirmados", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("nancy.guadalupe.enriquez.parra.qa@hotmail.com"); expect(res.getBody().telefonoMovil).to.equal("4681205803"); expect(res.getBody().domicilio.asentamientoId).to.equal(110333883); });
+  if (res.getStatus() === 200) { bru.setVar("nancyClienteId",res.getBody().cliente.clienteId); if (res.getBody().cuentas.length) bru.setVar("nancyCuenta",res.getBody().cuentas[0].numeroCuenta); }
+}
+
+docs {
+  Requiere Login Nancy. Consulta solamente su información. CURP y nacimiento 27/02/1998 confirmados por Agustín; sustituyen la fecha inicial 27/09/1998. Banda de Arriba, San Luis de la Paz. RFC, correo, empresa, ingreso y estado civil son auxiliares de QA.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenNancy. Renovar el login correspondiente si vence.
+  Variables que captura: nancyClienteId, nancyCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

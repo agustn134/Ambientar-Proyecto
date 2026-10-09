@@ -1,0 +1,33 @@
+meta {
+  name: Fecha invalida
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/clientes?desde=2026-02-30
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
+  test("Fecha rechazada", function () { expect(res.getBody().codigo).to.equal("VALIDACION"); });
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 400.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

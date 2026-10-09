@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /** HTTP real + JPA + SQL V3, aislado de GestoPago y de las bases del usuario. */
@@ -34,6 +36,9 @@ class RegistroClienteIntegrationTest {
     @EnableAutoConfiguration
     @Import({ConfigDB.class, RegistroClienteService.class, ClienteController.class,
         com.proyecto.servicios.repositorys.cliente.CatalogoRepository.class,com.proyecto.servicios.controller.CatalogoController.class,
+        com.proyecto.servicios.service.ConsultaClienteService.class,com.proyecto.servicios.controller.CuentaController.class,
+        com.proyecto.servicios.service.ValidacionDatosCliente.class,com.proyecto.servicios.service.MantenimientoClienteService.class,
+        com.proyecto.servicios.service.MantenimientoUsuarioService.class,com.proyecto.servicios.controller.UsuarioController.class,
         RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, PasswordConfig.class, LoggingAspect.class,
         JwtConfig.class,SecurityConfig.class,com.proyecto.servicios.security.UsuarioJwtValidator.class,
         com.proyecto.servicios.security.SecurityErrorHandler.class,com.proyecto.servicios.service.LoginService.class,
@@ -46,6 +51,7 @@ class RegistroClienteIntegrationTest {
                     new ClassPathResource("db/migration/V5__create_usuarios.sql"),
                     new ClassPathResource("db/migration/V6__version_token_usuarios.sql"),
                     new ClassPathResource("db/migration/V7__catalogos_mexico.sql"),
+                    new ClassPathResource("db/migration/V8__roles_y_fecha_registro.sql"),
                     new ClassPathResource("catalogo-postal-prueba.sql"))
                 .execute(dataSource);
             return new Object();
@@ -59,6 +65,246 @@ class RegistroClienteIntegrationTest {
     @Autowired org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     @Autowired org.springframework.security.oauth2.jwt.JwtEncoder jwtEncoder;
     @Autowired org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder;
+
+    ObjectNode editable(ObjectNode registro) {
+        ObjectNode body=registro.deepCopy();body.remove(java.util.List.of("curp","rfc","password"));return body;
+    }
+    org.springframework.test.web.servlet.ResultActions actualizar(long id,ObjectNode body,String token) throws Exception {
+        return mvc.perform(put("/clientes/"+id).header("Authorization","Bearer "+token).contentType("application/json").content(body.toString()));
+    }
+
+    @Test void actualizaDatosSinCambiarIdentificadoresCuentaSaldoNiFechaAlta() throws Exception {
+        var alta=alta(valido());String token=tokenDe(valido().get("correoElectronico").asText());
+        long id=alta.get("clienteId").asLong();
+        var antes=sql.queryForMap("SELECT curp,rfc,fecha_registro FROM clientes WHERE id=?",id);
+        String numero=alta.get("cuenta").get("numeroCuenta").asText();
+        ObjectNode body=editable(valido());body.put("nombre","Agustín Actualizado");
+        ((ObjectNode)body.get("domicilio")).put("numeroExterior","844");
+        actualizar(id,body,token).andExpect(status().isOk()).andExpect(jsonPath("cliente.nombre").value("Agustín Actualizado"));
+        assertEquals(antes,sql.queryForMap("SELECT curp,rfc,fecha_registro FROM clientes WHERE id=?",id));
+        assertEquals(numero,sql.queryForObject("SELECT numero_cuenta FROM cuentas",String.class));
+        assertEquals(new java.math.BigDecimal("0.00"),sql.queryForObject("SELECT saldo FROM cuentas",java.math.BigDecimal.class));
+        for (String campo:new String[]{"curp","rfc","numeroCuenta","rol","estatus","password"}) {
+            ObjectNode invalido=body.deepCopy();invalido.put(campo,"No permitido");
+            actualizar(id,invalido,token).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errores[0].campo").value(campo));
+        }
+    }
+
+    @Test void cambioCorreoSincronizaUsuarioRevocaJwtYDuplicadoNoSeGuarda() throws Exception {
+        var uno=alta(valido());alta(hermana());long id=uno.get("clienteId").asLong();
+        String token=tokenDe(valido().get("correoElectronico").asText());
+        ObjectNode body=editable(valido());body.put("correoElectronico",hermana().get("correoElectronico").asText());
+        actualizar(id,body,token).andExpect(status().isConflict());
+        assertEquals(valido().get("correoElectronico").asText(),sql.queryForObject("SELECT correo_electronico FROM clientes WHERE id=?",String.class,id));
+        body.put("correoElectronico","AGUSTIN.ACTUALIZADO@EXAMPLE.COM");
+        actualizar(id,body,token).andExpect(status().isOk());
+        assertEquals("agustin.actualizado@example.com",sql.queryForObject("SELECT correo FROM usuarios WHERE cliente_id=?",String.class,id));
+        mvc.perform(get("/clientes/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        tokenDe("agustin.actualizado@example.com");
+    }
+
+    @Test void actualizacionInvalidaOAjenaNoModificaClienteYFalloUsuarioHaceRollback() throws Exception {
+        var uno=alta(valido());var dos=alta(hermana());
+        String token=tokenDe(valido().get("correoElectronico").asText());long id=uno.get("clienteId").asLong();
+        actualizar(dos.get("clienteId").asLong(),editable(hermana()),token).andExpect(status().isNotFound());
+        ObjectNode body=editable(valido());body.put("fechaNacimiento",java.time.LocalDate.now().minusYears(10).toString());
+        actualizar(id,body,token).andExpect(status().isBadRequest());
+        body=editable(valido());((ObjectNode)body.get("domicilio")).put("codigoPostal","37900");
+        actualizar(id,body,token).andExpect(status().isBadRequest());
+        sql.execute("ALTER TABLE usuarios ADD CONSTRAINT fallo_actualizacion CHECK (correo NOT LIKE 'rollback%')");
+        try {
+            body=editable(valido());body.put("nombre","Nombre Revertido");body.put("correoElectronico","rollback@example.com");
+            actualizar(id,body,token).andExpect(status().isInternalServerError());
+            assertEquals("Agustín",sql.queryForObject("SELECT nombre FROM clientes WHERE id=?",String.class,id));
+            assertEquals(valido().get("correoElectronico").asText(),sql.queryForObject("SELECT correo FROM usuarios WHERE cliente_id=?",String.class,id));
+            mvc.perform(get("/clientes/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
+        } finally { sql.execute("ALTER TABLE usuarios DROP CONSTRAINT fallo_actualizacion"); }
+    }
+
+    @Test void bajaLogicaDesactivaTodasLasCuentasYUsuarioConservandoSaldos() throws Exception {
+        var uno=alta(valido());var dos=alta(hermana());
+        long id=dos.get("clienteId").asLong();
+        String afectado=tokenDe(hermana().get("correoElectronico").asText());
+        String token=ejecutivo(uno);
+        sql.update("INSERT INTO cuentas(cliente_id,numero_cuenta,saldo,estatus) VALUES (?,'88888888888888888888',500,'ACTIVA')",id);
+        mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isNoContent());
+        assertEquals("INACTIVO",sql.queryForObject("SELECT estatus FROM clientes WHERE id=?",String.class,id));
+        assertFalse(sql.queryForObject("SELECT activo FROM usuarios WHERE cliente_id=?",Boolean.class,id));
+        assertEquals(0,sql.queryForObject("SELECT COUNT(*) FROM cuentas WHERE cliente_id=? AND estatus='ACTIVA'",Integer.class,id));
+        assertEquals(new java.math.BigDecimal("500.00"),sql.queryForObject("SELECT SUM(saldo) FROM cuentas WHERE cliente_id=?",java.math.BigDecimal.class,id));
+        assertEquals(2,sql.queryForObject("SELECT COUNT(*) FROM clientes",Integer.class));
+        mvc.perform(get("/clientes/me").header("Authorization","Bearer "+afectado)).andExpect(status().isUnauthorized());
+        mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isNoContent());
+        assertEquals(1,sql.queryForObject("SELECT version_token FROM usuarios WHERE cliente_id=?",Integer.class,id));
+    }
+
+    @Test void clienteNoDaBajaAjenaYFalloEnCuentaRevierteLaBajaCompleta() throws Exception {
+        var uno=alta(valido());var dos=alta(hermana());long id=dos.get("clienteId").asLong();
+        String cliente=tokenDe(valido().get("correoElectronico").asText());
+        mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+cliente)).andExpect(status().isNotFound());
+        String token=ejecutivo(uno);
+        sql.execute("ALTER TABLE cuentas ADD CONSTRAINT fallo_baja CHECK (estatus='ACTIVA')");
+        try {
+            mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isInternalServerError());
+            assertEquals("ACTIVO",sql.queryForObject("SELECT estatus FROM clientes WHERE id=?",String.class,id));
+            assertTrue(sql.queryForObject("SELECT activo FROM usuarios WHERE cliente_id=?",Boolean.class,id));
+            assertEquals(0,sql.queryForObject("SELECT version_token FROM usuarios WHERE cliente_id=?",Integer.class,id));
+        } finally { sql.execute("ALTER TABLE cuentas DROP CONSTRAINT fallo_baja"); }
+    }
+
+    @Test void propietarioCambiaPasswordConActualRevocaTokensYNoExponeHashes() throws Exception {
+        var uno=alta(valido());long uid=uno.get("usuario").get("usuarioId").asLong();
+        String token=tokenDe(valido().get("correoElectronico").asText());
+        mvc.perform(get("/usuarios/"+uid).header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("passwordHash").doesNotExist());
+        String anterior=sql.queryForObject("SELECT password_hash FROM usuarios",String.class);
+        ObjectNode request=mapper.createObjectNode().put("passwordActual",valido().get("password").asText()).put("passwordNueva","NuevaPrueba2026!");
+        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isNoContent());
+        String nuevo=sql.queryForObject("SELECT password_hash FROM usuarios",String.class);
+        assertNotEquals(anterior,nuevo);assertTrue(passwordEncoder.matches("NuevaPrueba2026!",nuevo));
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        iniciarSesion("NuevaPrueba2026!").andExpect(status().isOk());
+        iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());
+    }
+
+    @Test void passwordInvalidaActualIncorrectaOUsuarioAjenoNoModificanCredenciales() throws Exception {
+        var uno=alta(valido());var dos=alta(hermana());long uid=uno.get("usuario").get("usuarioId").asLong();
+        String token=tokenDe(valido().get("correoElectronico").asText());
+        ObjectNode request=mapper.createObjectNode().put("passwordActual","Incorrecta2026!").put("passwordNueva","NuevaPrueba2026!");
+        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isUnauthorized());
+        assertEquals(0,sql.queryForObject("SELECT version_token FROM usuarios WHERE id=?",Integer.class,uid));
+        assertEquals(0,sql.queryForObject("SELECT intentos_fallidos FROM usuarios WHERE id=?",Integer.class,uid));
+        request.put("passwordActual",valido().get("password").asText()).put("passwordNueva",12345678);
+        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        request.put("passwordNueva","corta");
+        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        request.put("passwordNueva","NuevaPrueba2026!");
+        long ajeno=dos.get("usuario").get("usuarioId").asLong();
+        mvc.perform(get("/usuarios/"+ajeno).header("Authorization","Bearer "+token)).andExpect(status().isNotFound());
+        String ejecutivo=ejecutivo(uno);
+        mvc.perform(get("/usuarios/"+ajeno).header("Authorization","Bearer "+ejecutivo)).andExpect(status().isOk());
+        mvc.perform(put("/usuarios/"+ajeno+"/password").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content(request.toString())).andExpect(status().isNotFound());
+    }
+
+    com.fasterxml.jackson.databind.JsonNode alta(ObjectNode body) throws Exception {
+        return mapper.readTree(enviar(body).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString());
+    }
+
+    String tokenDe(String correo) throws Exception {
+        ObjectNode request=mapper.createObjectNode().put("correo",correo).put("password",valido().get("password").asText());
+        return extraerToken(mvc.perform(post("/auth/login").contentType("application/json").content(request.toString()))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+    }
+
+    String ejecutivo(com.fasterxml.jackson.databind.JsonNode registro) throws Exception {
+        sql.update("UPDATE usuarios SET rol='EJECUTIVO',version_token=version_token+1 WHERE id=?",registro.get("usuario").get("usuarioId").asLong());
+        return tokenDe(registro.get("usuario").get("correo").asText());
+    }
+
+    @Test void registroNoPermiteEscalarRolYClienteNoListaDatosGenerales() throws Exception {
+        ObjectNode request=valido();
+        request.put("rol","EJECUTIVO");
+        alta(request);
+        assertEquals("CLIENTE",sql.queryForObject("SELECT rol FROM usuarios",String.class));
+        String token=tokenDe(request.get("correoElectronico").asText());
+        assertEquals("CLIENTE",jwtDecoder.decode(token).getClaimAsString("rol"));
+        mvc.perform(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
+        mvc.perform(get("/cuentas").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
+        mvc.perform(get("/clientes")).andExpect(status().isUnauthorized());
+    }
+
+    @Test void clienteConsultaSoloDatosPropiosYCuentasSinFiltrarDatosAjenos() throws Exception {
+        var uno=alta(valido()); var dos=alta(hermana());
+        String token=tokenDe(valido().get("correoElectronico").asText());
+        String cabecera="Bearer "+token;
+        String propio=mvc.perform(get("/clientes/me").header("Authorization",cabecera)).andExpect(status().isOk())
+            .andExpect(jsonPath("cliente.clienteId").value(uno.get("clienteId").asLong())).andReturn().getResponse().getContentAsString();
+        assertFalse(propio.contains("password")); assertFalse(propio.contains("hash"));
+        mvc.perform(get("/clientes/"+uno.get("clienteId").asLong()).header("Authorization",cabecera)).andExpect(status().isOk());
+        mvc.perform(get("/clientes/"+dos.get("clienteId").asLong()).header("Authorization",cabecera))
+            .andExpect(status().isNotFound()).andExpect(jsonPath("codigo").value("RECURSO_NO_ENCONTRADO"));
+        mvc.perform(get("/clientes/999999999").header("Authorization",cabecera)).andExpect(status().isNotFound());
+        String numero=uno.get("cuenta").get("numeroCuenta").asText();
+        mvc.perform(get("/cuentas/"+numero+"/saldo").header("Authorization",cabecera))
+            .andExpect(status().isOk()).andExpect(jsonPath("saldo").value(0));
+        mvc.perform(get("/cuentas/"+dos.get("cuenta").get("numeroCuenta").asText()).header("Authorization",cabecera)).andExpect(status().isNotFound());
+        mvc.perform(get("/clientes/"+dos.get("clienteId").asLong()+"/cuentas").header("Authorization",cabecera)).andExpect(status().isNotFound());
+    }
+
+    @Test void ejecutivoFiltraIdentificadoresCombinadosYClienteBuscaSoloElPropio() throws Exception {
+        var uno=alta(valido()); alta(hermana());
+        String cliente=tokenDe(valido().get("correoElectronico").asText());
+        mvc.perform(get("/clientes/buscar").param("curp",valido().get("curp").asText().toLowerCase(java.util.Locale.ROOT)).header("Authorization","Bearer "+cliente))
+            .andExpect(status().isOk());
+        mvc.perform(get("/clientes/buscar").param("curp",hermana().get("curp").asText()).header("Authorization","Bearer "+cliente))
+            .andExpect(status().isNotFound());
+        String token=ejecutivo(uno);
+        for (String campo : new String[]{"curp","rfc","correo","numeroCuenta"}) {
+            String valor=switch(campo) {
+                case "correo" -> valido().get("correoElectronico").asText().toUpperCase(java.util.Locale.ROOT);
+                case "numeroCuenta" -> uno.get("cuenta").get("numeroCuenta").asText();
+                default -> valido().get(campo).asText();
+            };
+            mvc.perform(get("/clientes").param(campo,valor).header("Authorization","Bearer "+token))
+                .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1))
+                .andExpect(jsonPath("contenido[0].clienteId").value(uno.get("clienteId").asLong()));
+        }
+        mvc.perform(get("/clientes").param("curp",valido().get("curp").asText()).param("rfc",hermana().get("rfc").asText())
+            .header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(0));
+        mvc.perform(get("/clientes/buscar").param("correo","inexistente@example.com").header("Authorization","Bearer "+token)).andExpect(status().isNotFound());
+    }
+
+    @Test void paginasSonEstablesYRangosIncluyenTodoElUltimoDia() throws Exception {
+        var uno=alta(valido()); var dos=alta(hermana());
+        sql.update("UPDATE clientes SET fecha_registro='2026-01-10 00:00:00' WHERE id=?",uno.get("clienteId").asLong());
+        sql.update("UPDATE clientes SET fecha_registro='2026-01-10 23:59:59.999999' WHERE id=?",dos.get("clienteId").asLong());
+        String token=ejecutivo(uno);
+        for (int page=0;page<2;page++) {
+            mvc.perform(get("/clientes").param("page",Integer.toString(page)).param("size","1").header("Authorization","Bearer "+token))
+                .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2)).andExpect(jsonPath("totalPaginas").value(2))
+                .andExpect(jsonPath("contenido[0].clienteId").value((page==0?uno:dos).get("clienteId").asLong()));
+        }
+        mvc.perform(get("/clientes").param("page","2").param("size","1").header("Authorization","Bearer "+token))
+            .andExpect(status().isOk()).andExpect(jsonPath("contenido.length()").value(0));
+        mvc.perform(get("/clientes").param("desde","2026-01-10").param("hasta","2026-01-10").header("Authorization","Bearer "+token))
+            .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2));
+        sql.update("UPDATE clientes SET fecha_registro=NULL WHERE id=?",dos.get("clienteId").asLong());
+        mvc.perform(get("/clientes").param("desde","2026-01-10").header("Authorization","Bearer "+token))
+            .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
+    }
+
+    @Test void filtrosActivosYSaldosNoDuplicanClienteConVariasCuentas() throws Exception {
+        var uno=alta(valido()); var dos=alta(hermana());
+        sql.update("UPDATE clientes SET estatus='INACTIVO' WHERE id=?",dos.get("clienteId").asLong());
+        sql.update("UPDATE cuentas SET estatus='INACTIVA' WHERE cliente_id=?",dos.get("clienteId").asLong());
+        sql.update("INSERT INTO cuentas(cliente_id,numero_cuenta,saldo,estatus) VALUES (?,'77777777777777777777',125.50,'ACTIVA')",uno.get("clienteId").asLong());
+        String token=ejecutivo(uno);
+        mvc.perform(get("/clientes").param("activo","true").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
+        mvc.perform(get("/cuentas").param("activo","true").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2));
+        mvc.perform(get("/clientes").param("numeroCuenta","77777777777777777777").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
+        mvc.perform(get("/cuentas/77777777777777777777/saldo").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("saldo").value(125.50));
+    }
+
+    @Test void parametrosInvalidosProducen400Controlado() throws Exception {
+        String token=ejecutivo(alta(valido()));
+        String[][] invalidos={{"page","-1"},{"size","0"},{"size","101"},{"size",""},{"page","1.5"},{"activo","incorrecto"},{"desde","2026-02-30"},{"ordenarPor","passwordHash"},{"direccion","SQL"},{"curp","123"},{"correo","incorrecto"}};
+        for (var parametro:invalidos) mvc.perform(get("/clientes").param(parametro[0],parametro[1]).header("Authorization","Bearer "+token))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
+        mvc.perform(get("/clientes").param("desde","2026-12-01").param("hasta","2026-01-01").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        mvc.perform(get("/clientes/buscar").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        mvc.perform(get("/clientes/abc").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        mvc.perform(get("/cuentas/123").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+    }
+
+    @Test void cambioDeRolRevocaTokenAnteriorInclusoSinCambiarVersion() throws Exception {
+        var uno=alta(valido());
+        String cliente=tokenDe(valido().get("correoElectronico").asText());
+        String token=ejecutivo(uno);
+        mvc.perform(get("/auth/me").header("Authorization","Bearer "+cliente)).andExpect(status().isUnauthorized());
+        mvc.perform(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isOk());
+        sql.update("UPDATE usuarios SET rol='CLIENTE' WHERE id=?",uno.get("usuario").get("usuarioId").asLong());
+        mvc.perform(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+    }
 
     @Test void catalogosPublicosPermitenPrepararElRegistro() throws Exception {
         mvc.perform(get("/catalogos/sexos")).andExpect(status().isOk())
@@ -321,7 +567,7 @@ class RegistroClienteIntegrationTest {
         var claims=org.springframework.security.oauth2.jwt.JwtClaimsSet.builder().issuer(issuer)
             .audience(java.util.List.of(audience)).subject(id.toString())
             .issuedAt(java.time.Instant.now().minusSeconds(400)).notBefore(java.time.Instant.now().minusSeconds(400))
-            .expiresAt(expiry).claim("ver",version).build();
+            .expiresAt(expiry).claim("ver",version).claim("rol","CLIENTE").build();
         return jwtEncoder.encode(org.springframework.security.oauth2.jwt.JwtEncoderParameters.from(
             org.springframework.security.oauth2.jwt.JwsHeader.with(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256).build(),claims)).getTokenValue();
     }

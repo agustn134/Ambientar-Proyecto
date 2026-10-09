@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Order(-100)
 @Slf4j
-@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class,com.proyecto.servicios.controller.CatalogoController.class})
+@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class,com.proyecto.servicios.controller.CatalogoController.class,com.proyecto.servicios.controller.CuentaController.class,com.proyecto.servicios.controller.UsuarioController.class})
 public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
@@ -27,6 +27,21 @@ public class RegistroClienteExceptionHandler {
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ResponseEntity<ErrorRegistro> login(CredencialesInvalidasException ex, HttpServletRequest request) {
         return respuesta(401,"CREDENCIALES_INVALIDAS",ex.getMessage(),List.of(),request);
+    }
+
+    @ExceptionHandler(com.proyecto.servicios.exception.RecursoNoEncontradoException.class)
+    public ResponseEntity<ErrorRegistro> inexistente(com.proyecto.servicios.exception.RecursoNoEncontradoException ex,HttpServletRequest request) {
+        return respuesta(404,"RECURSO_NO_ENCONTRADO",ex.getMessage(),List.of(),request);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorRegistro> permiso(org.springframework.security.access.AccessDeniedException ex,HttpServletRequest request) {
+        return respuesta(403,"ACCESO_DENEGADO","Acceso no disponible",List.of(),request);
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorRegistro> tipoParametro(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,HttpServletRequest request) {
+        return respuesta(400,"VALIDACION","Parámetro inválido",List.of(new ErrorCampo(ex.getName(),"Verifica el tipo del parámetro")),request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -38,8 +53,15 @@ public class RegistroClienteExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.method.annotation.HandlerMethodValidationException.class)
     public ResponseEntity<ErrorRegistro> parametros(org.springframework.web.method.annotation.HandlerMethodValidationException ex, HttpServletRequest request) {
-        var errores=ex.getParameterValidationResults().stream().flatMap(r -> r.getResolvableErrors().stream()
-            .map(e -> new ErrorCampo(r.getMethodParameter().getParameterName(),e.getDefaultMessage()))).toList();
+        var errores=ex.getParameterValidationResults().stream().flatMap(r -> {
+            if (r instanceof org.springframework.validation.method.ParameterErrors campos) {
+                return campos.getAllErrors().stream().map(e -> new ErrorCampo(
+                    e instanceof org.springframework.validation.FieldError campo ? campo.getField()
+                        : r.getMethodParameter().getParameterName(), e.getDefaultMessage()));
+            }
+            return r.getResolvableErrors().stream()
+                .map(e -> new ErrorCampo(r.getMethodParameter().getParameterName(),e.getDefaultMessage()));
+        }).toList();
         return respuesta(400,"VALIDACION","Revisa los parámetros de la petición",errores,request);
     }
 

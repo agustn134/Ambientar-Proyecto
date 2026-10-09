@@ -1,0 +1,70 @@
+meta {
+  name: Registro Nancy
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Nancy",
+    "segundoNombre": "Guadalupe",
+    "apellidoPaterno": "Enríquez",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "1998-02-27",
+    "curp": "EIPN980227MDFNRN03",
+    "rfc": "EIPN980227ZZ3",
+    "correoElectronico": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+    "telefonoMovil": "4681205803",
+    "domicilio": {
+      "calle": "Nopaltzin",
+      "numeroExterior": "106",
+      "codigoPostal": "37903",
+      "asentamientoId": 110333883,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Ingeniería Industrial",
+      "empresa": "Empresa de prueba industrial",
+      "ingresoMensual": 14000
+    },
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7,
+    "password": "PruebaCliente2026!"
+  }
+}
+
+tests {
+  test("Cliente, usuario y cuenta creados", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().usuario.activo).to.equal(true);
+    expect(res.getBody().cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
+    expect(res.getBody().cuenta.saldo).to.equal(0);
+    expect(res.getBody().usuario).not.to.have.property("passwordHash");
+  });
+  if (res.getStatus() === 201) {
+    bru.setVar("nancyClienteId", res.getBody().clienteId);
+    bru.setVar("nancyUsuarioId", res.getBody().usuario.usuarioId);
+    bru.setVar("nancyCuenta", res.getBody().cuenta.numeroCuenta);
+  }
+}
+
+docs {
+  CURP y nacimiento 27/02/1998 confirmados por Agustín; sustituyen la fecha inicial 27/09/1998. Banda de Arriba, San Luis de la Paz. RFC, correo, empresa, ingreso y estado civil son auxiliares de QA. Alta pública CLIENTE. Ejecutar una sola vez; repetida devuelve 409. No asigna EJECUTIVO ni sustituye al perfil de mantenimiento.
+
+  HTTP esperado: 201.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: nancyClienteId, nancyUsuarioId, nancyCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

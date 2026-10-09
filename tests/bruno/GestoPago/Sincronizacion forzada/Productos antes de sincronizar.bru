@@ -1,0 +1,45 @@
+meta {
+  name: Productos antes de sincronizar
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/gestopago/productos
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("Responde 200 con productos guardados", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody()).to.be.an("array");
+  });
+  test("Identificadores sin duplicados", function () {
+    const productos = res.getBody();
+    expect(new Set(productos.map(p => p.idProducto)).size).to.equal(productos.length);
+  });
+  if (res.getStatus() === 200 && Array.isArray(res.getBody())) {
+    bru.setVar("catalogoAntes", JSON.stringify(res.getBody()));
+    bru.setVar("catalogoDescargado", "");
+  }
+}
+
+docs {
+  Ejecutar Auth/Acceso/Login valido primero para capturar token.
+  Guarda una referencia del catálogo local para comparar IDs y fechas tras la sincronización.
+  Leer docs/sincronizacion-gestopago.md. Repetir el ciclo antes, forzar, después para comprobar idempotencia.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer token. Renovar el login correspondiente si vence.
+  Variables que captura: catalogoAntes, catalogoDescargado.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

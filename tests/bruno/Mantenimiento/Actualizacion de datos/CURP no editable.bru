@@ -1,0 +1,62 @@
+meta {
+  name: CURP no editable
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/clientes/{{clienteMantId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{tokenMantenimiento}}
+}
+
+body:json {
+  {
+    "nombre": "Dulce",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2005-11-08",
+    "correoElectronico": "dulce.mantenimiento@example.com",
+    "telefonoMovil": "4681046222",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "844",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Gerente de bodega",
+      "empresa": "Bodega Aurrera QA",
+      "ingresoMensual": 18000.5
+    },
+    "segundoNombre": "María",
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7,
+    "curp": "LOPD051108MGTXXX09"
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
+  test("Campo protegido", function () { expect(res.getBody().errores.some(e => e.campo === "curp")).to.equal(true); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 400.
+  Autenticación: Bearer tokenMantenimiento. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}
