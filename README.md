@@ -324,3 +324,5 @@ python3 scripts/empaquetar-entrega.py --incluir-jar
 Se genera en `outputs/entrega-<fecha>/`, con un manifiesto SHA-256 por archivo. Se excluyen configuraciones privadas, cachés, archivos IDE. Se incluyen el ZIP postal en `datos/` y su registro de origen. [Índice de entrega](docs/entrega-final.md).
 
 La creación SQL y su iniciador Linux se comprobaron en PostgreSQL 17.11 sobre Linux/Docker. El arranque de la API desde ese esquema, la suite Java y los resultados JMeter se comprobaron en Windows. Los iniciadores Linux de API y carga se revisaron sintácticamente; la ejecución completa en una máquina Linux queda disponible para reproducción.
+
+La [documentación histórica de GestoPago](docs/integracion-gestopago-historica.md) conserva la explicación y las capturas de la etapa anterior del proyecto.
