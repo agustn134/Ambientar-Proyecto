@@ -1,0 +1,70 @@
+meta {
+  name: Registro Sofia
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Sofía",
+    "segundoNombre": "Jimena",
+    "apellidoPaterno": "Salazar",
+    "apellidoMaterno": "Godínez",
+    "fechaNacimiento": "2005-06-18",
+    "curp": "SAGS050618MGTLDFA4",
+    "rfc": "SAGS050618ZZ4",
+    "correoElectronico": "sofia.jimena.salazar.godinez.qa@gmail.com",
+    "telefonoMovil": "4181788464",
+    "domicilio": {
+      "calle": "Av. de los Héroes",
+      "numeroExterior": "S/N",
+      "codigoPostal": "37803",
+      "asentamientoId": 110140023,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Licenciatura en Turismo",
+      "empresa": "Empresa de prueba de turismo",
+      "ingresoMensual": 12000
+    },
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7,
+    "password": "PruebaCliente2026!"
+  }
+}
+
+tests {
+  test("Cliente, usuario y cuenta creados", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().usuario.activo).to.equal(true);
+    expect(res.getBody().cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
+    expect(res.getBody().cuenta.saldo).to.equal(0);
+    expect(res.getBody().usuario).not.to.have.property("passwordHash");
+  });
+  if (res.getStatus() === 201) {
+    bru.setVar("sofiaClienteId", res.getBody().clienteId);
+    bru.setVar("sofiaUsuarioId", res.getBody().usuario.usuarioId);
+    bru.setVar("sofiaCuenta", res.getBody().cuenta.numeroCuenta);
+  }
+}
+
+docs {
+  Apellidos y CP confirmados. Nacimiento inferido del segmento 050618 de la CURP. Número exterior S/N provisional: no fue proporcionado. RFC, correo, empresa, ingreso y estado civil son datos auxiliares de QA. Alta pública CLIENTE. Ejecutar una sola vez; repetida devuelve 409. No asigna EJECUTIVO ni sustituye al perfil de mantenimiento.
+
+  HTTP esperado: 201.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: sofiaClienteId, sofiaUsuarioId, sofiaCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

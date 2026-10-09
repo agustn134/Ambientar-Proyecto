@@ -1,0 +1,33 @@
+meta {
+  name: Sexos
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/catalogos/sexos
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Catálogo disponible", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body).to.be.an("array");
+    expect(body.map(p => p.id)).to.deep.equal([1, 2]);
+  });
+}
+
+docs {
+  Catálogo público sin datos personales, utilizado antes del registro.
+  Consultar docs/catalogos-mexico.md.
+
+  HTTP esperado: 200.
+  Autenticación: pública, sin Bearer.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

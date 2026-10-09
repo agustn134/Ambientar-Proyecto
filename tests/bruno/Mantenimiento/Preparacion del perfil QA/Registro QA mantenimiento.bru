@@ -1,0 +1,61 @@
+meta {
+  name: Registro QA mantenimiento
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Dulce",
+    "password": "PruebaCliente2026!",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2005-11-08",
+    "curp": "LOPD051108MGTXXX09",
+    "rfc": "LOPD051108ZZ2",
+    "correoElectronico": "dulce.mantenimiento@example.com",
+    "telefonoMovil": "4681046222",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "843",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Gerente de bodega",
+      "empresa": "Bodega Aurrera",
+      "ingresoMensual": 18000.5
+    },
+    "segundoNombre": "María",
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(201); });
+  if (res.getStatus() === 201) { bru.setVar("clienteMantId",res.getBody().clienteId); bru.setVar("usuarioMantId",res.getBody().usuario.usuarioId); bru.setVar("cuentaMant",res.getBody().cuenta.numeroCuenta); }
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 201.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: clienteMantId, usuarioMantId, cuentaMant.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

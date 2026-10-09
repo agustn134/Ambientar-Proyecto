@@ -1,0 +1,79 @@
+meta {
+  name: Registro valido
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Agustín",
+    "password": "PruebaCliente2026!",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2004-09-05",
+    "curp": "LOPA040905HGTPRGA7",
+    "rfc": "LOPA040905MQ3",
+    "correoElectronico": "agustinlopezparra13@gmail.com",
+    "telefonoMovil": "4681134553",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "843",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Tester / QA",
+      "empresa": "Empresa de prueba",
+      "ingresoMensual": 15000.5
+    },
+    "sexoId": 1,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(201); });
+  test("Cliente y cuenta generados", function () {
+    const body = res.getBody();
+    expect(body.clienteId).to.be.a("number");
+    expect(body.cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
+    expect(body.cuenta.saldo).to.equal(0);
+    expect(body.cuenta.estatus).to.equal("ACTIVA");
+    expect(body.usuario.activo).to.equal(true);
+    expect(body.usuario).not.to.have.property("passwordHash");
+    bru.setVar("usuarioId", String(body.usuario.usuarioId));
+    bru.setVar("clienteId", String(body.clienteId));
+    bru.setVar("numeroCuenta", body.cuenta.numeroCuenta);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
+}
+
+docs {
+  Consultar docs/datos-prueba.md y docs/registro-clientes.md. Los casos de duplicados requieren ejecutar primero Registro valido.
+  El registro válido crea datos; al repetirlo sin cambiarlos se espera 409.
+
+  HTTP esperado: 201.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: usuarioId, clienteId, numeroCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

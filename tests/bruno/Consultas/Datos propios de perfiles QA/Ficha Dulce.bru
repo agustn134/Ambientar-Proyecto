@@ -1,0 +1,33 @@
+meta {
+  name: Ficha Dulce
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/clientes/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenDulce}}
+}
+
+tests {
+  test("Ficha propia con datos confirmados", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("dulce.maria.lopez.parra.qa@gmail.com"); expect(res.getBody().telefonoMovil).to.equal("4681046222"); expect(res.getBody().domicilio.asentamientoId).to.equal(110333891); });
+  if (res.getStatus() === 200) { bru.setVar("dulceClienteId",res.getBody().cliente.clienteId); if (res.getBody().cuentas.length) bru.setVar("dulceCuenta",res.getBody().cuentas[0].numeroCuenta); }
+}
+
+docs {
+  Requiere Login Dulce. Consulta solamente su información. Teléfono confirmado 4681046222. Perfil permanente independiente del mantenimiento y del bloqueo. CURP, RFC, correo, ingreso y estado civil son sintéticos.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenDulce. Renovar el login correspondiente si vence.
+  Variables que captura: dulceClienteId, dulceCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

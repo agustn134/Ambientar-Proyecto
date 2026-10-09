@@ -1,0 +1,29 @@
+meta {
+  name: Consulta sin token
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/clientes
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
+  test("Autenticación requerida", function () { expect(res.getBody().codigo).to.equal("NO_AUTENTICADO"); });
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 401.
+  Se omite deliberadamente el Bearer de un endpoint protegido para comprobar el rechazo 401.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

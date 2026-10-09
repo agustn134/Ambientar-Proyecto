@@ -1,0 +1,29 @@
+meta {
+  name: Cliente inactivo por correo
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/clientes/buscar?correo=dulce.mantenimiento%40example.com
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("Ejecutivo consulta el registro dado de baja", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("dulce.mantenimiento@example.com"); expect(res.getBody().cliente.estatus).to.equal("INACTIVO"); expect(res.getBody().cuentas.length).to.be.greaterThan(0); expect(res.getBody().cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
+}
+
+docs {
+  HTTP esperado: 200. Después de la baja QA, el ejecutivo puede encontrar el cliente inactivo por correo y comprobar que conserva cuentas inactivas. No utiliza el JWT del cliente dado de baja ni depende de IDs copiados a mano.
+  Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

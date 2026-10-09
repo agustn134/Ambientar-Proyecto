@@ -1,0 +1,33 @@
+meta {
+  name: Nacionalidades
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/catalogos/nacionalidades
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Catálogo disponible", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body).to.be.an("array");
+    expect(body).to.have.lengthOf(1); expect(body[0].descripcion).to.equal("Mexicana");
+  });
+}
+
+docs {
+  Catálogo público sin datos personales, utilizado antes del registro.
+  Consultar docs/catalogos-mexico.md.
+
+  HTTP esperado: 200.
+  Autenticación: pública, sin Bearer.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

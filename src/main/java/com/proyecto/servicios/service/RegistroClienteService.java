@@ -24,7 +24,7 @@ public class RegistroClienteService {
     private final CuentaRepository cuentas;
     private final UsuarioRepository usuarios;
     private final PasswordEncoder passwordEncoder;
-    private final CatalogoRepository catalogos;
+    private final ValidacionDatosCliente validacion;
     private static final DateTimeFormatter FECHA_IDENTIFICADOR = DateTimeFormatter.ofPattern("uuuuMMdd")
             .withResolverStyle(ResolverStyle.STRICT);
 
@@ -42,17 +42,7 @@ public class RegistroClienteService {
     }
 
     private void validarDatosDeNegocio(RegistroClienteRequest request) {
-        validarCatalogo(CatalogoRepository.Tipo.SEXO,request.sexoId(),"sexoId");
-        validarCatalogo(CatalogoRepository.Tipo.NACIONALIDAD,request.nacionalidadId(),"nacionalidadId");
-        validarCatalogo(CatalogoRepository.Tipo.ESTADO_CIVIL,request.estadoCivilId(),"estadoCivilId");
-        validarCatalogo(CatalogoRepository.Tipo.PAIS,request.domicilio().paisId(),"domicilio.paisId");
-        var asentamiento=asentamiento(request.domicilio().asentamientoId());
-        if (!asentamiento.codigoPostal().equals(request.domicilio().codigoPostal())) {
-            throw new RegistroClienteException("domicilio.asentamientoId","El asentamiento no corresponde al código postal",400);
-        }
-        if (request.fechaNacimiento().plusYears(18).isAfter(LocalDate.now())) {
-            throw new RegistroClienteException("fechaNacimiento", "El cliente debe tener al menos 18 años", 400);
-        }
+        validacion.validar(request.fechaNacimiento(),request.sexoId(),request.nacionalidadId(),request.estadoCivilId(),request.domicilio());
         validarFechaIdentificador(request.curp().substring(4, 10), "curp");
         validarFechaIdentificador(request.rfc().substring(request.rfc().length()-9, request.rfc().length()-3), "rfc");
     }
@@ -80,19 +70,11 @@ public class RegistroClienteService {
     }
 
     private Domicilio crearDomicilio(RegistroClienteRequest.DomicilioRequest request, Cliente cliente) {
-        var asentamiento=asentamiento(request.asentamientoId());
+        var asentamiento=validacion.asentamiento(request.asentamientoId());
         return Domicilio.builder().cliente(cliente).calle(request.calle()).numeroExterior(request.numeroExterior())
             .numeroInterior(request.numeroInterior()).colonia(asentamiento.colonia()).municipio(asentamiento.municipio())
             .estado(asentamiento.estado()).codigoPostal(request.codigoPostal()).paisId(request.paisId().shortValue())
             .asentamientoId(asentamiento.id()).build();
-    }
-
-    private void validarCatalogo(CatalogoRepository.Tipo tipo, Integer id, String campo) {
-        if (!catalogos.habilitado(tipo,id)) throw new RegistroClienteException(campo,"Selecciona una opción habilitada del catálogo",400);
-    }
-
-    private CatalogoRepository.Asentamiento asentamiento(Integer id) {
-        return catalogos.porId(id).orElseThrow(() -> new RegistroClienteException("domicilio.asentamientoId","Selecciona un asentamiento del catálogo postal",400));
     }
 
     private Cuenta crearCuenta(Cliente cliente) {
@@ -107,6 +89,7 @@ public class RegistroClienteService {
         usuario.setCliente(cliente);
         usuario.setCorreo(cliente.getCorreoElectronico());
         usuario.setPasswordHash(passwordHash);
+        usuario.setRol(com.proyecto.servicios.entity.usuario.RolUsuario.CLIENTE);
         return usuario;
     }
 

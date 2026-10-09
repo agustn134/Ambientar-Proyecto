@@ -7,8 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
+public interface CuentaRepository extends JpaRepository<Cuenta, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Cuenta> {
     boolean existsByNumeroCuenta(String numeroCuenta);
     Optional<Cuenta> findByNumeroCuenta(String numeroCuenta);
     Optional<Cuenta> findByClienteId(Long clienteId);
+    java.util.List<Cuenta> findAllByClienteIdOrderByIdAsc(Long clienteId);
 }

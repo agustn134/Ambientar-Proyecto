@@ -72,4 +72,12 @@ public class Cliente {
     @Builder.Default
     @Column(name = "estatus", nullable = false)
     private String estatus = "ACTIVO";
+
+    @Column(name="fecha_registro",updatable=false)
+    private java.time.LocalDateTime fechaRegistro;
+
+    @PrePersist
+    void registrarFecha() {
+        if (fechaRegistro==null) fechaRegistro=java.time.LocalDateTime.now();
+    }
 }

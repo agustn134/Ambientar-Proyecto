@@ -86,7 +86,7 @@ Pendiente ejecutar la colección actualizada en Bruno contra el backend local y 
 
 ## Trabajo siguiente
 
-Los puntos de login, tres intentos, JWT y verificación de estado de la siguiente lista se completaron en `feature/login-jwt`; ver contrato y pruebas en [login-jwt.md](login-jwt.md). Continúan pendientes recuperación/cambio de contraseña, desbloqueo y alta de acceso para clientes históricos.
+Los puntos de login, tres intentos, JWT y verificación de estado de la siguiente lista se completaron en `feature/login-jwt`; ver contrato y pruebas en [login-jwt.md](login-jwt.md). Consulta de usuario y cambio de contraseña están implementados en [mantenimiento](actualizacion-baja-password.md). Recuperación, desbloqueo y alta de acceso para clientes históricos no forman parte de estos endpoints.
 
 - `POST /auth/login` con respuesta genérica para credenciales incorrectas.
 - Tres intentos incorrectos consecutivos bloquean el acceso; éxito reinicia el contador. El bloqueo se debe persistir incluso cuando la petición devuelve error.

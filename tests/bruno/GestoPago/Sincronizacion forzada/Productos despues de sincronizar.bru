@@ -1,0 +1,85 @@
+meta {
+  name: Productos despues de sincronizar
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/gestopago/productos
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+script:pre-request {
+  if (!bru.getVar("catalogoAntes") || !bru.getVar("catalogoDescargado")) {
+    throw new Error("Ejecuta Productos antes de sincronizar y Forzar sincronizacion en ese orden.");
+  }
+}
+
+tests {
+  function fechaEnMicrosegundos(fecha) {
+    const partes = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?$/.exec(fecha);
+    if (!partes) throw new Error("Fecha de creación con formato inesperado");
+    const milisegundos = Date.parse(partes[1] + "Z");
+    if (!Number.isFinite(milisegundos)) throw new Error("Fecha de creación inválida");
+    const fraccion = (partes[2] || "").padEnd(9, "0");
+    // PostgreSQL guarda microsegundos; una respuesta antigua en Redis puede conservar nanosegundos Java.
+    const microsegundos = Number(fraccion.slice(0, 6)) + (Number(fraccion[6]) >= 5 ? 1 : 0);
+    // Mantener segundos y fracción separados evita BigInt y pérdida de precisión por multiplicar el epoch.
+    const segundos = new Date(milisegundos + Math.floor(microsegundos / 1000000) * 1000);
+    return segundos.toISOString().slice(0, 19) + "." + String(microsegundos % 1000000).padStart(6, "0");
+  }
+
+  test("Responde 200 con catálogo actualizado", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody()).to.be.an("array");
+  });
+  test("Sin duplicados y conserva registros anteriores", function () {
+    const antes = JSON.parse(bru.getVar("catalogoAntes"));
+    const descargados = JSON.parse(bru.getVar("catalogoDescargado"));
+    const actuales = res.getBody();
+    const porId = new Map(actuales.map(p => [p.idProducto, p]));
+    expect(porId.size).to.equal(actuales.length);
+    antes.forEach(p => {
+      expect(porId.has(p.idProducto)).to.equal(true);
+      expect(porId.get(p.idProducto).id).to.equal(p.id);
+      expect(fechaEnMicrosegundos(porId.get(p.idProducto).fechaCreacion)).to.equal(fechaEnMicrosegundos(p.fechaCreacion));
+    });
+    descargados.forEach(p => expect(porId.has(p.idProducto)).to.equal(true));
+  });
+  test("La consulta refleja los campos descargados", function () {
+    const descargados = JSON.parse(bru.getVar("catalogoDescargado"));
+    const porId = new Map(res.getBody().map(p => [p.idProducto, p]));
+    descargados.forEach(p => {
+      const actual = porId.get(p.idProducto);
+      ["idServicio", "servicio", "producto", "idCatTipoServicio", "tipoFront", "hasDigitoVerificador", "showAyuda", "tipoReferencia", "legend"].forEach(campo => {
+        expect(actual[campo] == null ? null : actual[campo]).to.equal(p[campo] == null ? null : p[campo]);
+      });
+      if (p.precio == null) {
+        expect(actual.precio).to.equal(null);
+      } else {
+        expect(actual.precio).to.be.closeTo(p.precio, 0.0051);
+      }
+      expect(actual.activo).to.equal(true);
+    });
+  });
+}
+
+docs {
+  Comprueba lo guardado y consultado después de invalidar la caché.
+  No exige una cantidad fija: el proveedor puede agregar productos entre descargas.
+  Ejecutar el ciclo sin otras sincronizaciones simultáneas para comparar la misma respuesta del proveedor.
+  Las fechas se comparan a precisión de microsegundos, como PostgreSQL; se detectan diferencias desde un microsegundo.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer token. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

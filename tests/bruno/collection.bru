@@ -1,0 +1,21 @@
+docs {
+  GestoPago - Clientes, seguridad y catalogos
+
+  Guía principal: docs/bruno-guia-manual.md. Seleccionar Local; baseUrl es la API de Spring Boot.
+  Categorías: Catalogos, Registro, Auth, Consultas, Mantenimiento y GestoPago.
+  Cada petición documenta resultado HTTP, Bearer y variables capturadas.
+
+  Altas permanentes: Agustín, Sofía Jimena Salazar Godínez, Nancy Guadalupe Enríquez Parra y Dulce María López Parra.
+  Perfiles distintos: ejecutivo, bloqueo y mantenimiento. El registro público siempre crea CLIENTE.
+  Nuevos correos de QA: Gmail/Hotmail. RFC, empresas e ingresos auxiliares son sintéticos.
+
+  Mantenimiento validado el 8 de octubre de 2026: CURP protegida 400, baja 204,
+  cliente conservado INACTIVO y usuario desactivado consultables por ejecutivo, JWT y login rechazados con 401.
+  Cliente QA 6 / usuario 5 ya inactivos: no repetir login, recuperación o actualización con ese perfil.
+  Dulce permanente fue registrada por separado como cliente 7 / usuario 6; no fue dada de baja en este flujo.
+  Consultas, permisos, filtros y paginación validados. Última comprobación: /cuentas con CLIENTE vigente,
+  403 ACCESO_DENEGADO, un Test aprobado y cero fallos a las 23:28:26 del 8 de octubre de 2026.
+
+  No ejecutar toda la colección de una vez: altas repetidas dan 409 y la baja deja inactivo al perfil QA.
+  JWT de 5 minutos. Renovar login si vence.
+}

@@ -1,0 +1,37 @@
+meta {
+  name: Cuenta ajena denegada
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/cuentas/{{ejecutivoNumeroCuenta}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+script:pre-request {
+  if (!bru.getVar("ejecutivoNumeroCuenta")) throw new Error("Ejecuta Consultas/Preparacion del ejecutivo/Ficha del ejecutivo para capturar su cuenta sin repetir el registro.");
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(404); });
+  test("No revela cuenta ajena", function () { expect(res.getBody().codigo).to.equal("RECURSO_NO_ENCONTRADO"); });
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 404.
+  Autenticación: Bearer token. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const archivo = path.join(__dirname, 'GestoPago', 'Productos despues de sincronizar.bru');
+const archivo = path.join(__dirname, 'GestoPago', 'Sincronizacion forzada', 'Productos despues de sincronizar.bru');
 const contenido = fs.readFileSync(archivo, 'utf8');
 const bloque = contenido.match(/^tests \{\r?\n([\s\S]*?)^\}/m);
 assert.ok(bloque, 'La petición debe contener un bloque de pruebas');

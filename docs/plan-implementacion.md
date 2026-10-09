@@ -42,21 +42,23 @@ La aclaración oral del profesor conserva nombre de 3 a 38 caracteres; el docume
 
 El registro público creará CLIENTE y no aceptará un rol proporcionado por el usuario. La provisión de EJECUTIVO deberá ser explícita, documentada y con contraseña BCrypt; no convertir todos los usuarios históricos en ejecutivos ni publicar credenciales reales en el repositorio.
 
-La identidad se obtendrá del JWT y se verificará contra el usuario activo y su cliente. No confiar en un ID recibido desde la URL como prueba de pertenencia. Los permisos deben comprobarse en el backend. Falta implementar los roles, su persistencia y sus comprobaciones; esta tabla expresa el alcance acordado.
+La identidad se obtiene del JWT y se verifica contra el usuario activo, su cliente, rol y versión. No se confía en el ID de la URL como prueba de pertenencia. V8 implementa los roles y las consultas con comprobaciones en el backend; consultar [Consultas, roles y paginación](consultas-permisos.md).
 
 401 corresponde a autenticación ausente/inválida o acceso inactivo; 403 a una operación general sin rol autorizado; 404 a recursos inexistentes o fuera del ámbito de una consulta propia. Los permisos de actualización, baja lógica y cambio de contraseña se definirán junto con sus endpoints.
 
 ## Orden del trabajo pendiente
 
 - **Verificación manual de catálogos:** reiniciar App, ejecutar la nueva carpeta Bruno y revisar los domicilios históricos sin vinculación. Modelo, migración, importación nacional y pruebas automáticas implementados.
-- **Permisos de consultas:** roles CLIENTE/EJECUTIVO, provisión controlada y pruebas de acceso permitido/denegado.
-- **Consultas y paginación:** todos los clientes, ID, CURP, RFC, correo, número de cuenta, activos, saldo, filtros combinados y rango de fechas. Agregar fecha de registro del cliente si falta; no utilizar la fecha de su cuenta como sustituto sin documentarlo.
-- **Actualización y baja lógica:** completar PUT/DELETE, conservar CURP/RFC/número de cuenta, desactivar usuario y cuentas al desactivar cliente, probar consistencia transaccional.
-- **Consulta de usuario y contraseña:** completar los endpoints requeridos `GET /usuarios/{id}` y `PUT /usuarios/{id}/password`, con permisos y revocación de tokens cuando corresponda.
+- **Consultas y permisos validados:** consultas propias, acceso ajeno 404, listados generales denegados al CLIENTE con 403, paginación estable (7 clientes, 4 páginas), filtros y errores 400/404. La comprobación final `/cuentas` se repitió a las 23:28:26 con JWT CLIENTE vigente: 403 ACCESO_DENEGADO, un Test aprobado y cero fallos. Bloque manual cerrado; consolidar las evidencias. Las fechas históricas desconocidas permanecen NULL.
+- **Mantenimiento validado:** actualización, contraseña y secuencia final de CURP protegida/baja/consultas posteriores comprobadas en Bruno. Cliente QA 6 INACTIVO, usuario 5 desactivado, JWT rechazado antes de expirar y login tras baja 401. No repetir la secuencia con ese perfil; consolidar las evidencias para la entrega.
 - **Entrega y evidencias:** diagrama ER actualizado, migraciones/script de base de datos, documento técnico, matriz de casos y evidencias, pruebas de carga acordadas y README. Excel y JMeter forman parte del plan de entrega acordado; el documento pegado pide evidencias sin imponer esas herramientas por nombre.
 
 ## Avance ya validado
 
 Registro y cuenta automáticos, usuario y BCrypt, login/JWT/bloqueo y sincronización GestoPago fueron implementados y probados en los cambios anteriores. La suite de sincronización terminó con 40 pruebas Java aprobadas y el usuario confirmó las tres pruebas de consulta posterior de Bruno, además del rechazo 401 sin token. La auditoría de catálogos revela requisitos adicionales pendientes: esos resultados no prueban catálogos ni los nuevos permisos.
 
-Catálogos: suite completa posterior de 50 pruebas aprobadas y verificación final de 31 pruebas de registro/catálogos aprobadas, incluida carga postal nacional en PostgreSQL aislado. La carpeta Bruno está preparada; falta su ejecución manual. Los nuevos permisos todavía no se implementaron.
+Catálogos: suite completa posterior de 50 pruebas aprobadas y verificación final de 31 pruebas de registro/catálogos aprobadas, incluida carga postal nacional en PostgreSQL aislado.
+
+Consultas y permisos: V8, CLIENTE/EJECUTIVO, provisión auditada y consultas implementadas; suite completa inicial de **60 pruebas aprobadas**, sin omisiones. Asignación solicitada del usuario de prueba 4 a EJECUTIVO completada; bloque manual cerrado el 8 de octubre con el 403 final de listado de cuentas generales bajo CLIENTE.
+
+Mantenimiento: actualización, baja lógica y usuario/contraseña implementados; suite posterior de **67 pruebas aprobadas**, sin omisiones. Dos pruebas Java de regresión aprobaron después la corrección del nombre del campo de validación. La secuencia final manual quedó cerrada con las capturas del 8 de octubre: CURP 400, baja 204, consultas posteriores 200, JWT/login 401. Consultas/paginación también cerradas; pendientes consolidación de evidencias/entregables. Token anterior revocado por cambio de contraseña tiene cobertura Java, con evidencia manual independiente aún pendiente.

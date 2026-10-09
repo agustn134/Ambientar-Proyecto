@@ -1,0 +1,27 @@
+meta {
+  name: Codigo postal Sofia
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/catalogos/codigos-postales/37803
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Asentamiento esperado", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().some(a => a.id === 110140023 && a.colonia === "Héroes de San Cristóbal")).to.equal(true); });
+}
+
+docs {
+  Consulta pública del domicilio de Sofia. ID 110140023, CP 37803, Guanajuato. Primero verificar el catálogo, después registrar.
+
+  HTTP esperado: 200.
+  Autenticación: pública, sin Bearer.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

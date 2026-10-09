@@ -4,6 +4,12 @@
 
 [Catálogos de México](docs/catalogos-mexico.md): IDs de sexo, nacionalidad, país y estado civil; catálogo postal nacional con archivo local ignorado. Configurar SEPOMEX_ARCHIVO para la primera carga.
 
+[Consultas, roles y paginación](docs/consultas-permisos.md): CLIENTE/EJECUTIVO, provisión controlada, búsquedas, cuentas, saldo, filtros y respuestas 404. Después de aplicar V8, iniciar sesión nuevamente.
+
+[Actualización, baja lógica y contraseña](docs/actualizacion-baja-password.md): campos editables, correo sincronizado, desactivación transaccional de cliente/usuario/cuentas y cambio de contraseña del propietario. Peticiones QA separadas en `tests/bruno/Mantenimiento`.
+
+[Guía de Bruno y perfiles QA](docs/bruno-guia-manual.md): categorías, Sofía/Nancy/Dulce, variables separadas y orden para retomar actualización y baja del perfil existente.
+
 Registro de clientes: [contrato, validaciones y manejo de errores](docs/registro-clientes.md). Usuarios de acceso: [creación automática y BCrypt](docs/usuarios-autenticacion.md). [Login, JWT y bloqueo por intentos](docs/login-jwt.md), con colección versionable en `tests/bruno/Auth`. Configurar JWT_SECRET antes de arrancar.
 
 [Calidad de código, registro y monitoreo](docs/calidad-registro-monitoreo.md): logs de invocaciones y errores sin imprimir payloads ni credenciales.

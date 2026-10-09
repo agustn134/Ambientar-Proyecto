@@ -1,0 +1,46 @@
+meta {
+  name: Obtener o sincronizar productos
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/gestopago/productos/sincronizar
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("Responde 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Devuelve una lista de productos", function () {
+    expect(res.getBody()).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+}
+
+docs {
+  Objetivo: obtener el catálogo mediante la sincronización normal, distinta de la descarga forzada.
+  Requisitos: backend, PostgreSQL y Redis disponibles; ejecutar Auth/Acceso/Login valido.
+  Autenticación: Bearer token. Renovar login si vence.
+  HTTP esperado: 200 con array de productos y dos pruebas aprobadas.
+  No envía body. Para comprobar ausencia de duplicados usar GestoPago/Sincronizacion forzada.
+  Guía: docs/bruno-guia-manual.md.
+}

@@ -1,0 +1,38 @@
+meta {
+  name: Clientes por fechas
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/clientes?desde=2026-01-01&hasta=2026-12-31
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Página y fechas dentro del rango", function () {
+    expect(res.getStatus()).to.equal(200);
+    const b=res.getBody();
+    expect(b.contenido).to.be.an("array"); expect(b.totalElementos).to.be.a("number"); expect(b.page).to.equal(0);
+    expect(b.contenido.every(c => typeof c.fechaRegistro === "string" && c.fechaRegistro.slice(0,10) >= "2026-01-01" && c.fechaRegistro.slice(0,10) <= "2026-12-31")).to.equal(true);
+  });
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

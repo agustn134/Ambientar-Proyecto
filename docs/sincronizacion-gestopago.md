@@ -36,7 +36,7 @@ Ninguna de estas peticiones requiere body. Sin JWT se devuelve 401 antes de ejec
 
 ## Comprobación en Bruno
 
-Reiniciar el backend con los cambios. Abrir la colección `tests/bruno`, seleccionar el entorno Local y ejecutar `Auth/Login valido`. El JWT dura cinco minutos; renovar el login si vence.
+Reiniciar el backend con los cambios. Abrir la colección `tests/bruno`, seleccionar el entorno Local y ejecutar `Auth/Acceso/Login valido`. El JWT dura cinco minutos; renovar el login si vence.
 
 En la carpeta `GestoPago`, ejecutar en este orden:
 

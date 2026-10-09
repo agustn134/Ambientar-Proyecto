@@ -32,7 +32,7 @@ public class JwtService {
         Instant expires=now.plusSeconds(ttl);
         JwtClaimsSet claims=JwtClaimsSet.builder().issuer(issuer).audience(List.of(audience))
                 .subject(usuario.getId().toString()).issuedAt(now).notBefore(now).expiresAt(expires)
-                .id(UUID.randomUUID().toString()).claim("ver", usuario.getVersionToken()).build();
+                .id(UUID.randomUUID().toString()).claim("ver", usuario.getVersionToken()).claim("rol",usuario.getRol().name()).build();
         String token=encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(),claims)).getTokenValue();
         return new LoginResponse(token,"Bearer",ttl,expires);
     }
