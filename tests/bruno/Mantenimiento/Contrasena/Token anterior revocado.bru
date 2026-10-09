@@ -1,0 +1,37 @@
+meta {
+  name: Token anterior revocado
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenMantAnterior}}
+}
+
+script:pre-request {
+  if (!bru.getVar("tokenMantAnterior")) throw new Error("Falta el JWT anterior guardado por Cambiar password QA. No uses un token ausente para probar revocación; consulta la guía para preparar otro ciclo QA si perdiste la variable.");
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
+  test("JWT revocado", function () { expect(res.getBody().codigo).to.equal("NO_AUTENTICADO"); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 401.
+  Autenticación: Bearer tokenMantAnterior. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

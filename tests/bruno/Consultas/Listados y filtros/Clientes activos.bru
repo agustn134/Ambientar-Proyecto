@@ -1,0 +1,29 @@
+meta {
+  name: Clientes activos
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/clientes?activo=true
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("Sólo clientes activos", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().contenido).to.be.an("array"); expect(res.getBody().contenido.every(c => c.estatus === "ACTIVO")).to.equal(true); expect(res.getBody().totalElementos).to.be.at.least(1); });
+}
+
+docs {
+  HTTP esperado: 200. Todos los clientes de la página deben estar ACTIVO. No exigir una cantidad fija.
+  Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

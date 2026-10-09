@@ -1,0 +1,29 @@
+meta {
+  name: Listado cuentas denegado a cliente
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/cuentas
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("Cliente no consulta cuentas generales", function () { expect(res.getStatus()).to.equal(403); expect(res.getBody().codigo).to.equal("ACCESO_DENEGADO"); });
+}
+
+docs {
+  HTTP esperado: 403. Usa el JWT del cliente principal, que sí puede consultar sus propias cuentas.
+  Autenticación: Bearer token; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

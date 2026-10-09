@@ -1,0 +1,37 @@
+meta {
+  name: Login tras baja
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "correo": "dulce.mantenimiento@example.com",
+    "password": "NuevaPrueba2026!"
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
+  test("Login rechazado", function () { expect(res.getBody().codigo).to.equal("CREDENCIALES_INVALIDAS"); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 401.
+  Autenticación: pública, sin Bearer.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

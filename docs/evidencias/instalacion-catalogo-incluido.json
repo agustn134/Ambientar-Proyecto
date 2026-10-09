@@ -1,0 +1,53 @@
+{
+  "fecha": "2026-10-09T13:27:00.993321-06:00",
+  "catalogo": {
+    "ruta": "datos/CPdescargatxt.zip",
+    "sha256": "7c4c61f673998ee1f261df87aa6e49353541d643f53acfae4c85026c87b2696d",
+    "estados": 32,
+    "municipios": 2478,
+    "asentamientos": 159340
+  },
+  "creacion_windows": {
+    "base": "revision_postal_20261009131858",
+    "comando": "scripts/crear-base-datos.ps1 -Base <base_nueva> -Contenedor postgres-dev",
+    "tablas_aplicacion": 15,
+    "versiones_flyway": 8,
+    "clientes": 0,
+    "carga_postal_antes_de_arrancar_api": true
+  },
+  "repeticion_importacion": {
+    "mismo_hash": true,
+    "asentamientos": 159340,
+    "duplicados_por_repeticion": 0
+  },
+  "creacion_shell": {
+    "base": "revision_postal_sh_20261009132227",
+    "comando": "sh scripts/crear-base-datos.sh <base_nueva>",
+    "entorno": "Git Bash en Windows, Java 21 Windows y PostgreSQL 17 en Docker Linux",
+    "estados": 32,
+    "municipios": 2478,
+    "asentamientos": 159340,
+    "clientes": 0
+  },
+  "limite_linux": "Sintaxis POSIX verificada en Linux/Docker. La ejecución completa de los iniciadores actualizados se comprobó en Windows y Git Bash; no se ejecutó la JVM de esta entrega en un equipo Linux nativo.",
+  "api": {
+    "estado": 200,
+    "opciones": 14,
+    "cpCorrecto": true,
+    "sanIsidro": true
+  },
+  "tests_catalogo_postgres": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "hashes": {
+    "scripts/crear-base-datos.sql": "12acc5dd79749c32dfb3edafb53038dcfac9da82e91471e6fd233289da9cddc9",
+    "scripts/crear-base-datos.ps1": "cb1e2748208d44b1887a7d33d64f2e1b04c8232020e9c7b88b698d16f5e0ae2f",
+    "scripts/crear-base-datos.sh": "88de27992ed1e1cc8d56332922649e68592b29da676e130a0333e4171866a313",
+    "scripts/importar-catalogo-postal.ps1": "62e5eb50c21dd544a5d6f88c9755c5d5eb9426f570d29f0329d9c5da0d8697ea",
+    "scripts/importar-catalogo-postal.sh": "a1749f4beaee05675703241b52acd5a7725353ad25a85def8971a273cb943dd8",
+    "build/libs/prueba-1.0.jar": "3df0a6665fc193ee5c85a2b0fb9aa58b964ff6383ae83e23a8c635a30fa2b3c1"
+  }
+}

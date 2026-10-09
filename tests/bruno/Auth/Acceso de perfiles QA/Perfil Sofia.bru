@@ -1,0 +1,33 @@
+meta {
+  name: Perfil Sofia
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenSofia}}
+}
+
+tests {
+  test("Perfil CLIENTE propio", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().correo).to.equal("sofia.jimena.salazar.godinez.qa@gmail.com"); expect(res.getBody().rol).to.equal("CLIENTE"); expect(res.getBody()).not.to.have.property("passwordHash"); });
+  if (res.getStatus() === 200) { bru.setVar("sofiaClienteId",res.getBody().clienteId); bru.setVar("sofiaUsuarioId",res.getBody().usuarioId); }
+}
+
+docs {
+  Requiere Login Sofia. Confirma el rol CLIENTE y recupera los IDs del perfil sin mostrar contraseña.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenSofia. Renovar el login correspondiente si vence.
+  Variables que captura: sofiaClienteId, sofiaUsuarioId.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

@@ -7,6 +7,7 @@ import com.proyecto.servicios.exception.GestoPagoException;
 import com.proyecto.servicios.model.gestopago.GestoPagoProductResponse;
 import com.proyecto.servicios.model.gestopago.ProductoDto;
 import com.proyecto.servicios.repositorys.gestopago.GestoPagoProductoRepository;
+import com.proyecto.servicios.mapper.GestoPagoProductoMapper;
 import com.proyecto.servicios.service.Impl.GestoPagoProductServiceImpl;
 import feign.FeignException;
 import jakarta.xml.bind.JAXBContext;
@@ -43,10 +44,16 @@ class GestoPagoProductServiceTest {
     @Mock
     private GestoPagoProductoRepository productoRepository;
 
+    @Mock
+    private GestoPagoProductoMapper productoMapper;
+
+    @Mock
+    private GestoPagoCatalogoService catalogoService;
+
     @InjectMocks
     private GestoPagoProductServiceImpl productService;
 
-    private static final String TEST_TOKEN = "qmzAAEYFmqQbIT/Ktxme8FDV343iYQPwVJM4T39cEinWq1yjc1pp9oxSo4Rjmo5Fk27YzkCDaCr5RM4xtGZNCBZk1MH1tMNbykJ/WzfVjxSEXc9FERnZJPsVuFcAgfsfHmEYEfsLSmLZgovuGmnpDA==";
+    private static final String TEST_TOKEN = "token-sintetico-pruebas";
 
     @BeforeEach
     void setUp() {
@@ -119,7 +126,9 @@ class GestoPagoProductServiceTest {
         mockResponse.setProductos(List.of(prod1));
 
         when(gestoPagoProductClient.getProductList(anyString())).thenReturn(mockResponse);
-        when(productoRepository.findByIdProducto(101)).thenReturn(Optional.empty());
+        GestoPagoProducto entidad = new GestoPagoProducto();
+        entidad.setIdProducto(101);
+        when(productoMapper.toEntityList(mockResponse.getProductos())).thenReturn(List.of(entidad));
 
         GestoPagoProductResponse response = productService.sincronizarCatalogoProductos();
 
@@ -127,11 +136,12 @@ class GestoPagoProductServiceTest {
         assertEquals(1, response.getProductos().size());
         
         // Verifica que se haya mandado a guardar
-        verify(productoRepository, times(1)).saveAll(anyList());
+        verify(catalogoService).guardarCatalogo(List.of(entidad));
+        verify(productoRepository, never()).saveAll(anyList());
     }
 
     @Test
-    @DisplayName("Sincronización debe retornar sin error si la respuesta es vacía o nula")
+    @DisplayName("Sincronización rechaza catálogo vacío sin guardar registros")
     void debeSincronizarCatalogoProductosRespuestaVacia() {
         GestoPagoProductResponse mockResponse = new GestoPagoProductResponse();
         // Productos nulos o lista vacia
@@ -139,12 +149,11 @@ class GestoPagoProductServiceTest {
 
         when(gestoPagoProductClient.getProductList(anyString())).thenReturn(mockResponse);
 
-        GestoPagoProductResponse response = productService.sincronizarCatalogoProductos();
-
-        assertNotNull(response);
-        assertTrue(response.getProductos().isEmpty());
+        GestoPagoException error = assertThrows(GestoPagoException.class, productService::sincronizarCatalogoProductos);
+        assertEquals(502, error.getStatus());
         // No se debe llamar a base de datos
         verify(productoRepository, never()).saveAll(anyList());
+        verifyNoInteractions(catalogoService);
     }
 
     @Test
@@ -195,5 +204,27 @@ class GestoPagoProductServiceTest {
         assertFalse(productos.isEmpty());
         assertEquals("Producto Local", productos.get(0).getProducto());
         verify(productoRepository, times(1)).findByActivoTrue();
+    }
+
+    @Test void cargaInicialUsaElMismoGuardadoYDevuelveIdsPersistidos() {
+        var dto = new ProductoDto();
+        dto.setIdProducto(101);
+        var respuesta = new GestoPagoProductResponse();
+        respuesta.setProductos(List.of(dto));
+        var mapeado = GestoPagoProducto.builder().idProducto(101).build();
+        var guardado = GestoPagoProducto.builder().id(7).idProducto(101).build();
+        when(productoRepository.findByActivoTrue()).thenReturn(List.of(), List.of(guardado));
+        when(gestoPagoProductClient.getProductList(anyString())).thenReturn(respuesta);
+        when(productoMapper.toEntityList(respuesta.getProductos())).thenReturn(List.of(mapeado));
+        assertEquals(7, productService.obtenerOSincronizarProductos().get(0).getId());
+        verify(catalogoService).guardarCatalogo(List.of(mapeado));
+        verify(productoRepository, never()).saveAll(anyList());
+    }
+
+    @Test void productosLocalesEvitanDescargaYEscritura() {
+        var guardado = GestoPagoProducto.builder().id(7).idProducto(101).build();
+        when(productoRepository.findByActivoTrue()).thenReturn(List.of(guardado));
+        assertEquals(List.of(guardado), productService.obtenerOSincronizarProductos());
+        verifyNoInteractions(catalogoService, gestoPagoProductClient);
     }
 }

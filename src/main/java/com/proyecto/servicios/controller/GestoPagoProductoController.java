@@ -29,7 +29,7 @@ public class GestoPagoProductoController {
     }
 
     @PostMapping("/forzar-sincronizacion")
-    @Operation(summary = "Forzar sincronización de catálogo", description = "Descarga el catálogo forzadamente desde GestoPago e invalida la caché.")
+    @Operation(summary = "Forzar sincronización de catálogo", description = "Descarga el catálogo desde GestoPago, actualiza por idProducto y agrega productos nuevos en una transacción. Conserva el ID local y la fecha de creación e invalida la caché después de confirmar el guardado.")
     public ResponseEntity<GestoPagoProductResponse> forzarSincronizacion() {
         return ResponseEntity.ok(productService.sincronizarCatalogoProductos());
     }

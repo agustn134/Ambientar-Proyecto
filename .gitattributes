@@ -1,0 +1,5 @@
+# Los ejecutables de shell conservan LF también al extraerlos desde Windows.
+*.sh text eol=lf
+gradlew text eol=lf
+*.sql text eol=lf
+*.md text eol=lf

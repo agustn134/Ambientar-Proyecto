@@ -1,0 +1,49 @@
+meta {
+  name: Listado paginado ejecutivo
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/clientes?page=0&size=2&ordenarPor=id&direccion=ASC
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Página inicial, tamaño y totales", function () {
+    expect(res.getStatus()).to.equal(200);
+    const b=res.getBody();
+    expect(b.page).to.equal(0);
+    expect(b.size).to.equal(2);
+    expect(b.totalElementos).to.be.a("number").that.is.at.least(0);
+    expect(b.totalPaginas).to.equal(Math.ceil(b.totalElementos / 2));
+    expect(b.contenido).to.have.lengthOf(Math.min(2,b.totalElementos));
+    expect(b.contenido.every((c,i) => i === 0 || c.clienteId > b.contenido[i-1].clienteId)).to.equal(true);
+  });
+  if (res.getStatus() === 200) {
+    bru.setVar("paginaInicialIds",JSON.stringify(res.getBody().contenido.map(c => c.clienteId)));
+    bru.setVar("paginacionTotalElementos",res.getBody().totalElementos);
+    bru.setVar("paginaFueraResultado",res.getBody().totalPaginas);
+  }
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 200.
+  Ejecutar esta petición antes de Siguiente pagina ejecutivo y Pagina fuera del resultado.
+  Captura paginaInicialIds, paginacionTotalElementos y paginaFueraResultado; no depende de una cantidad fija de clientes.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

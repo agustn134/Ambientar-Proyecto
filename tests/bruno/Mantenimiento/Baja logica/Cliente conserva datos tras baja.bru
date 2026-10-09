@@ -1,0 +1,33 @@
+meta {
+  name: Cliente conserva datos tras baja
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/clientes/{{clienteMantId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Baja lógica", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.estatus).to.equal("INACTIVO"); expect(res.getBody().cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

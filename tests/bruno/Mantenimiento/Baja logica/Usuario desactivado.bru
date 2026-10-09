@@ -1,0 +1,33 @@
+meta {
+  name: Usuario desactivado
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/usuarios/{{usuarioMantId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Sin acceso de usuario", function () { expect(res.getBody().activo).to.equal(false); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

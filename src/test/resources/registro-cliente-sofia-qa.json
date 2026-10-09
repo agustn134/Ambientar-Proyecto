@@ -1,0 +1,27 @@
+{
+  "nombre": "Sofía",
+  "segundoNombre": "Jimena",
+  "apellidoPaterno": "Salazar",
+  "apellidoMaterno": "Godínez",
+  "fechaNacimiento": "2005-06-18",
+  "curp": "SAGS050618MGTLDFA4",
+  "rfc": "SAGS050618ZZ4",
+  "correoElectronico": "sofia.jimena.salazar.godinez.qa@gmail.com",
+  "telefonoMovil": "4181788464",
+  "domicilio": {
+    "calle": "Av. de los Héroes",
+    "numeroExterior": "S/N",
+    "codigoPostal": "37803",
+    "asentamientoId": 110140023,
+    "paisId": 1
+  },
+  "informacionLaboral": {
+    "ocupacion": "Licenciatura en Turismo",
+    "empresa": "Empresa de prueba de turismo",
+    "ingresoMensual": 12000
+  },
+  "sexoId": 2,
+  "nacionalidadId": 1,
+  "estadoCivilId": 7,
+  "password": "PruebaCliente2026!"
+}

@@ -1,0 +1,33 @@
+meta {
+  name: Mis cuentas
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/clientes/{{clienteId}}/cuentas
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+script:pre-request {
+  if (!bru.getVar("clienteId") || !bru.getVar("numeroCuenta")) throw new Error("Ejecuta primero Consultas/Datos propios/Mi cliente.");
+}
+
+tests {
+  test("Cuentas del cliente autenticado", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody()).to.be.an("array"); expect(res.getBody().length).to.be.greaterThan(0); expect(res.getBody().every(c => c.clienteId === Number(bru.getVar("clienteId")))).to.equal(true); expect(res.getBody().some(c => c.numeroCuenta === bru.getVar("numeroCuenta"))).to.equal(true); });
+}
+
+docs {
+  HTTP esperado: 200, array de cuentas propias. Ejecutar después de Mi cliente para capturar clienteId y numeroCuenta.
+  Autenticación: Bearer token; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

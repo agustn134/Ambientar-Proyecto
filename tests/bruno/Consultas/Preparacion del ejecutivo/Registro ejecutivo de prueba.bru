@@ -1,0 +1,61 @@
+meta {
+  name: Registro ejecutivo de prueba
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/clientes
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nombre": "Agustín",
+    "password": "PruebaCliente2026!",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2004-09-05",
+    "curp": "LOPA040905HGTXXX09",
+    "rfc": "LOPA040905ZZ1",
+    "correoElectronico": "agustin.ejecutivo@example.com",
+    "telefonoMovil": "4681134553",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "843",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Tester / QA",
+      "empresa": "Empresa de prueba",
+      "ingresoMensual": 15000.5
+    },
+    "sexoId": 1,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7
+  }
+}
+
+tests {
+  test("Registro de preparación o duplicado conocido", function () { expect([201, 409]).to.include(res.getStatus()); });
+  if (res.getStatus() === 201) { bru.setVar("ejecutivoUsuarioId",res.getBody().usuario.usuarioId); bru.setVar("ejecutivoClienteId",res.getBody().clienteId); bru.setVar("ejecutivoNumeroCuenta",res.getBody().cuenta.numeroCuenta); }
+}
+
+docs {
+  Perfil adicional de Agustin para QA, con CURP/RFC/correo sintéticos; no representa otra identidad oficial.
+  Este registro SIEMPRE crea CLIENTE. Después ejecutar scripts/asignar-ejecutivo.sql con su usuarioId.
+  No ejecutar el resto de casos de ejecutivo hasta completar ese paso. Repetir registro devuelve 409.
+
+  HTTP esperado: consultar las aserciones.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: ejecutivoUsuarioId, ejecutivoClienteId, ejecutivoNumeroCuenta.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

@@ -1,0 +1,33 @@
+meta {
+  name: Recuperar ficha mantenimiento
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/clientes/me
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenMantenimiento}}
+}
+
+tests {
+  test("Ficha QA correcta", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("dulce.mantenimiento@example.com"); expect(res.getBody().cuentas.length).to.be.greaterThan(0); });
+  if (res.getStatus() === 200 && res.getBody().cliente.correo === "dulce.mantenimiento@example.com") { bru.setVar("clienteMantId",res.getBody().cliente.clienteId); bru.setVar("cuentaMant",res.getBody().cuentas[0].numeroCuenta); }
+}
+
+docs {
+  Después de recuperar el perfil, guarda cuentaMant para comprobar que la actualización conserva la cuenta. Si ya se dio de baja, el cliente no puede consultar esta ficha.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenMantenimiento. Renovar el login correspondiente si vence.
+  Variables que captura: clienteMantId, cuentaMant.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

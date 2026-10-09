@@ -1,0 +1,27 @@
+meta {
+  name: Codigo postal Nancy
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/catalogos/codigos-postales/37903
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("Asentamiento esperado", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().some(a => a.id === 110333883 && a.colonia === "Banda de Arriba")).to.equal(true); });
+}
+
+docs {
+  Consulta pública del domicilio de Nancy. ID 110333883, CP 37903, Guanajuato. Primero verificar el catálogo, después registrar.
+
+  HTTP esperado: 200.
+  Autenticación: pública, sin Bearer.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

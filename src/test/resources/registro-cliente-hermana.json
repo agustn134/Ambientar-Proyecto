@@ -1,0 +1,27 @@
+{
+  "nombre": "Dulce",
+  "password": "PruebaCliente2026!",
+  "apellidoPaterno": "López",
+  "apellidoMaterno": "Parra",
+  "fechaNacimiento": "2005-11-08",
+  "curp": "LOPD051108MGTPRLA8",
+  "rfc": "LOPD051108AB1",
+  "correoElectronico": "dulce.lopez.parra@example.com",
+  "telefonoMovil": "4681046222",
+  "domicilio": {
+    "calle": "Guerrero",
+    "numeroExterior": "843",
+    "codigoPostal": "37907",
+    "asentamientoId": 110333891,
+    "paisId": 1
+  },
+  "informacionLaboral": {
+    "ocupacion": "Gerente de bodega",
+    "empresa": "Bodega Aurrera",
+    "ingresoMensual": 18000.5
+  },
+  "segundoNombre": "María",
+  "sexoId": 2,
+  "nacionalidadId": 1,
+  "estadoCivilId": 7
+}

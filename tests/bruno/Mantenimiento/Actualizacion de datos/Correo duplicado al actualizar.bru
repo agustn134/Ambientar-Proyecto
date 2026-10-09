@@ -1,0 +1,61 @@
+meta {
+  name: Correo duplicado al actualizar
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/clientes/{{clienteMantId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{tokenMantenimiento}}
+}
+
+body:json {
+  {
+    "nombre": "Dulce",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2005-11-08",
+    "correoElectronico": "agustinlopezparra13@gmail.com",
+    "telefonoMovil": "4681046222",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "844",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Gerente de bodega",
+      "empresa": "Bodega Aurrera QA",
+      "ingresoMensual": 18000.5
+    },
+    "segundoNombre": "María",
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7
+  }
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(409); });
+  test("Unicidad", function () { expect(res.getBody().codigo).to.equal("DATO_DUPLICADO"); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 409.
+  Autenticación: Bearer tokenMantenimiento. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

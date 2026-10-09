@@ -1,0 +1,39 @@
+meta {
+  name: Baja QA por ejecutivo
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{baseUrl}}/clientes/{{clienteMantId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+script:pre-request {
+  if (!bru.getVar("clienteMantId") || !bru.getVar("tokenEjecutivo")) throw new Error("Prepara el perfil QA y renueva Login ejecutivo antes de la baja.");
+  var vence = Date.parse(bru.getVar("tokenEjecutivoExpiresAt"));
+  if (!isFinite(vence) || Date.now() >= vence) throw new Error("Renueva Consultas/Preparacion del ejecutivo/Login ejecutivo: el JWT dura 5 minutos. Después ejecuta la baja.");
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(204); });
+
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 204.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

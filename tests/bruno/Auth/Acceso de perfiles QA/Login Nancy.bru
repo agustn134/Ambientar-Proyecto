@@ -1,0 +1,37 @@
+meta {
+  name: Login Nancy
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "correo": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+    "password": "PruebaCliente2026!"
+  }
+}
+
+tests {
+  test("JWT recibido", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().tokenType).to.equal("Bearer"); });
+  if (res.getStatus() === 200) { bru.setVar("tokenNancy", res.getBody().accessToken); bru.setVar("tokenNancyExpiresAt", res.getBody().expiresAt); }
+}
+
+docs {
+  Primero Registro Nancy una sola vez. Guarda tokenNancy, separado de token y tokenMantenimiento. JWT de 5 minutos; repetir login si vence. Correo de QA propuesto, no confirmado.
+
+  HTTP esperado: 200.
+  Autenticación: pública, sin Bearer.
+  Variables que captura: tokenNancy, tokenNancyExpiresAt.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

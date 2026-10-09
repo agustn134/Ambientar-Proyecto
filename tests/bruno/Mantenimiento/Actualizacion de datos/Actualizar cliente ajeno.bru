@@ -1,0 +1,65 @@
+meta {
+  name: Actualizar cliente ajeno
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/clientes/{{clienteId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{tokenMantenimiento}}
+}
+
+body:json {
+  {
+    "nombre": "Dulce",
+    "apellidoPaterno": "López",
+    "apellidoMaterno": "Parra",
+    "fechaNacimiento": "2005-11-08",
+    "correoElectronico": "dulce.mantenimiento@example.com",
+    "telefonoMovil": "4681046222",
+    "domicilio": {
+      "calle": "Guerrero",
+      "numeroExterior": "844",
+      "codigoPostal": "37907",
+      "asentamientoId": 110333891,
+      "paisId": 1
+    },
+    "informacionLaboral": {
+      "ocupacion": "Gerente de bodega",
+      "empresa": "Bodega Aurrera QA",
+      "ingresoMensual": 18000.5
+    },
+    "segundoNombre": "María",
+    "sexoId": 2,
+    "nacionalidadId": 1,
+    "estadoCivilId": 7
+  }
+}
+
+script:pre-request {
+  if (!bru.getVar("clienteId")) throw new Error("Ejecuta Consultas/Datos propios/Mi cliente para capturar el ID principal.");
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(404); });
+  test("Sin acceso ajeno", function () { expect(res.getBody().codigo).to.equal("RECURSO_NO_ENCONTRADO"); });
+}
+
+docs {
+  Leer docs/actualizacion-baja-password.md. Usar exclusivamente el perfil QA de mantenimiento.
+  La baja va al final y deja ese perfil inactivo; no repetir toda la carpeta tras darlo de baja.
+
+  HTTP esperado: 404.
+  Autenticación: Bearer tokenMantenimiento. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

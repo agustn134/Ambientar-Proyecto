@@ -1,0 +1,33 @@
+meta {
+  name: Filtro por CURP
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/clientes?curp=LOPA040905HGTPRGA7
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Un cliente encontrado", function () { expect(res.getBody().totalElementos).to.equal(1); expect(res.getBody().contenido[0].clienteId).to.equal(Number(bru.getVar("clienteId"))); });
+}
+
+docs {
+  Leer docs/consultas-permisos.md y preparar el ejecutivo mediante el script de base de datos.
+  CLIENTE usa token; EJECUTIVO usa tokenEjecutivo. Mi cliente captura clienteId y numeroCuenta.
+
+  HTTP esperado: 200.
+  Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
+  Guía de ejecución: docs/bruno-guia-manual.md.
+}

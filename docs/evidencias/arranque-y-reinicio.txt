@@ -1,0 +1,17 @@
+2026-10-09T11:58:46.643-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 8 migrations (execution time 00:00.074s)
+2026-10-09T11:58:46.935-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-10-09T11:58:46.976-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - create gestopago tokens"
+2026-10-09T11:58:47.167-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - create gestopago productos"
+2026-10-09T11:58:47.346-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "3 - create clientes domicilios cuentas"
+2026-10-09T11:58:47.523-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "4 - unique correo clientes ignore case"
+2026-10-09T11:58:47.589-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "5 - create usuarios"
+2026-10-09T11:58:47.669-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "6 - version token usuarios"
+2026-10-09T11:58:47.745-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "7 - catalogos mexico"
+2026-10-09T11:58:48.075-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "8 - roles y fecha registro"
+2026-10-09T11:58:48.209-06:00  INFO 24160 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 8 migrations to schema "public", now at version v8 (execution time 00:00.733s)
+2026-10-09T11:59:36.339-06:00  INFO 24160 --- [           main] c.p.s.config.CatalogoPostalConfig        : Catálogo postal listo; asentamientos=159340; estados=32; municipios=2478
+2026-10-09T12:00:03.253-06:00  INFO 24160 --- [           main] com.proyecto.servicios.App               : Started App in 103.795 seconds (process running for 108.384)
+2026-10-09T12:07:04.460-06:00  INFO 15736 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 8 migrations (execution time 00:00.106s)
+2026-10-09T12:07:04.552-06:00  INFO 15736 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-10-09T12:07:04.774-06:00  INFO 15736 --- [           main] c.p.s.config.CatalogoPostalConfig        : Catálogo postal listo; asentamientos=159340; estados=32; municipios=2478
+2026-10-09T12:07:33.388-06:00  INFO 15736 --- [           main] com.proyecto.servicios.App               : Started App in 56.263 seconds (process running for 61.601)

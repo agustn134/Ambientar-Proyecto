@@ -1,0 +1,26 @@
+{
+  "nombre": "Agustín",
+  "password": "PruebaCliente2026!",
+  "apellidoPaterno": "López",
+  "apellidoMaterno": "Parra",
+  "fechaNacimiento": "2004-09-05",
+  "curp": "LOPA040905HGTPRGA7",
+  "rfc": "LOPA040905MQ3",
+  "correoElectronico": "agustinlopezparra13@gmail.com",
+  "telefonoMovil": "4681134553",
+  "domicilio": {
+    "calle": "Guerrero",
+    "numeroExterior": "843",
+    "codigoPostal": "37907",
+    "asentamientoId": 110333891,
+    "paisId": 1
+  },
+  "informacionLaboral": {
+    "ocupacion": "Tester / QA",
+    "empresa": "Empresa de prueba",
+    "ingresoMensual": 15000.5
+  },
+  "sexoId": 1,
+  "nacionalidadId": 1,
+  "estadoCivilId": 7
+}

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "GestoPago - Clientes, seguridad y catalogos",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

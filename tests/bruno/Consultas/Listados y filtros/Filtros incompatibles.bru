@@ -1,0 +1,33 @@
+meta {
+  name: Filtros incompatibles
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/clientes?correo=agustinlopezparra13%40gmail.com&curp={{ejecutivoCurp}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+script:pre-request {
+  if (!bru.getVar("ejecutivoCurp")) throw new Error("Ejecuta primero Ficha del ejecutivo para recuperar su CURP.");
+}
+
+tests {
+  test("AND de identificadores distintos no devuelve clientes", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().contenido).to.have.lengthOf(0); expect(res.getBody().totalElementos).to.equal(0); expect(res.getBody().totalPaginas).to.equal(0); });
+}
+
+docs {
+  HTTP esperado: 200 vacío. Combina el correo del cliente principal con la CURP del ejecutivo: cada identificador existe, pero pertenece a una persona distinta. Comprueba AND, sin aceptar un resultado OR.
+  Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

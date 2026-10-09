@@ -1,0 +1,29 @@
+meta {
+  name: Rango de fechas invertido
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/clientes?desde=2026-10-09&hasta=2026-10-08
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{tokenEjecutivo}}
+}
+
+tests {
+  test("Rango invertido rechazado", function () { expect(res.getStatus()).to.equal(400); expect(res.getBody().codigo).to.equal("VALIDACION"); });
+}
+
+docs {
+  HTTP esperado: 400 VALIDACION. Ambas fechas existen, pero desde es posterior a hasta.
+  Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
+  Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}

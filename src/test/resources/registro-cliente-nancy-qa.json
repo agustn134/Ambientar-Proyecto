@@ -1,0 +1,27 @@
+{
+  "nombre": "Nancy",
+  "segundoNombre": "Guadalupe",
+  "apellidoPaterno": "Enríquez",
+  "apellidoMaterno": "Parra",
+  "fechaNacimiento": "1998-02-27",
+  "curp": "EIPN980227MDFNRN03",
+  "rfc": "EIPN980227ZZ3",
+  "correoElectronico": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+  "telefonoMovil": "4681205803",
+  "domicilio": {
+    "calle": "Nopaltzin",
+    "numeroExterior": "106",
+    "codigoPostal": "37903",
+    "asentamientoId": 110333883,
+    "paisId": 1
+  },
+  "informacionLaboral": {
+    "ocupacion": "Ingeniería Industrial",
+    "empresa": "Empresa de prueba industrial",
+    "ingresoMensual": 14000
+  },
+  "sexoId": 2,
+  "nacionalidadId": 1,
+  "estadoCivilId": 7,
+  "password": "PruebaCliente2026!"
+}
