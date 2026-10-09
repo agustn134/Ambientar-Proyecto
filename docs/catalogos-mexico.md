@@ -1,5 +1,7 @@
 # Catálogos de registro y domicilio en México
 
+Estado al 09/10/2026: los 13 casos de catálogos pasaron en la ejecución HTTP automatizada de los `.bru`. Se comprobó además una base vacía con V1–V8, carga nacional y reinicio sin duplicados: [guía y resultados](instalacion-ejecucion.md). La suite completa terminó con 67 pruebas aprobadas sin omisiones. Los apartados de pruebas del 8 de octubre se conservan como antecedentes; V8 y los roles ya están implementados.
+
 V7 reemplaza textos libres por IDs `SMALLINT` con llaves foráneas. El registro comprueba que las opciones existan y estén habilitadas antes de guardar.
 
 | Campo del request | Opciones iniciales |
@@ -44,13 +46,13 @@ Las opciones simples devuelven `id` y `descripcion`. La consulta postal devuelve
 
 Descarga nacional TXT realizada el 8 de octubre de 2026 desde [SEPOMEX oficial](https://www.correosdemexico.gob.mx/SSLServicios/ConsultaCP/CodigoPostal_Exportar.aspx): **159,340 asentamientos de las 32 entidades**. El importador registra SHA-256 y cantidad en `cat_postal_version`.
 
-El aviso del archivo oficial prohíbe redistribuirlo. El ZIP se mantiene en `.local-data/CPdescargatxt.zip`, ignorado por Git; no se incluye en recursos ni en el PR. Se versionan la migración, el importador, las pruebas y el procedimiento de descarga.
+El entregable académico incluye el ZIP nacional original en `datos/CPdescargatxt.zip`, junto con su [origen y hash](../datos/README.md). Su aviso original se conserva dentro del TXT. Los iniciadores de creación cargan el catálogo automáticamente utilizando el mismo importador Java de la API.
 
 Otra máquina debe descargar su archivo local:
 
 ```powershell
 .\scripts\descargar-sepomex.ps1
-$env:SEPOMEX_ARCHIVO = (Resolve-Path '.local-data/CPdescargatxt.zip').Path
+$env:SEPOMEX_ARCHIVO = (Resolve-Path 'datos/CPdescargatxt.zip').Path
 # Configurar también DB_PASSWORD, GESTOPAGO_PASSWORD y JWT_SECRET.
 .\gradlew.bat bootRun
 ```
@@ -88,7 +90,7 @@ Las pruebas HTTP cubren opciones públicas, IDs inválidos/deshabilitados, tipos
 $env:POSTGRES_TEST_URL = 'jdbc:postgresql://localhost:5432/DBGestoPago'
 $env:POSTGRES_TEST_USER = 'postgres'
 $env:POSTGRES_TEST_PASSWORD = $env:DB_PASSWORD
-$env:POSTAL_TEST_ARCHIVO = (Resolve-Path '.local-data/CPdescargatxt.zip').Path
+$env:POSTAL_TEST_ARCHIVO = (Resolve-Path 'datos/CPdescargatxt.zip').Path
 .\gradlew.bat test
 ```
 
@@ -96,4 +98,4 @@ Sin esas variables, las pruebas PostgreSQL/nacionales se omiten explícitamente.
 
 Bruno: abrir `tests/bruno` y ejecutar **Catalogos**, cinco consultas y seis registros inválidos. Los registros existentes y el caso de usuario para bloqueo ya usan IDs. Repetir un registro válido ya existente devuelve 409; no necesita eliminarse ni recrearse para consultar las opciones.
 
-Roles EJECUTIVO/CLIENTE y consultas/paginación siguen pendientes del siguiente cambio. Este cambio no otorga permisos de ejecutivo ni habilita las rutas antiguas de personas.
+Los roles EJECUTIVO/CLIENTE y consultas/paginación se implementaron posteriormente en V8. V7 por sí sola no otorga permisos de ejecutivo ni habilita las rutas antiguas de personas; consultar [Consultas y permisos](consultas-permisos.md).

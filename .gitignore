@@ -43,3 +43,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Paquetes de entrega y configuración local del IDE ###
+/outputs/
+/.idea/dataSources.xml
+/.idea/db-forest-config.xml

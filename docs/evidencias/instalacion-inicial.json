@@ -1,0 +1,61 @@
+{
+  "postgresql": "17.11",
+  "database": "entrega_qa_2026100911580943d48d",
+  "migraciones": [
+    {
+      "version": "1",
+      "success": true,
+      "checksum": 1861448253
+    },
+    {
+      "version": "2",
+      "success": true,
+      "checksum": 1600801127
+    },
+    {
+      "version": "3",
+      "success": true,
+      "checksum": 895515499
+    },
+    {
+      "version": "4",
+      "success": true,
+      "checksum": 379645690
+    },
+    {
+      "version": "5",
+      "success": true,
+      "checksum": 1690143136
+    },
+    {
+      "version": "6",
+      "success": true,
+      "checksum": -140642946
+    },
+    {
+      "version": "7",
+      "success": true,
+      "checksum": 499011389
+    },
+    {
+      "version": "8",
+      "success": true,
+      "checksum": -1093282346
+    }
+  ],
+  "tablas_aplicacion": 15,
+  "estados": 32,
+  "municipios": 2478,
+  "asentamientos": 159340,
+  "postal_version": {
+    "sha256": "7c4c61f673998ee1f261df87aa6e49353541d643f53acfae4c85026c87b2696d",
+    "registros": 159340
+  },
+  "clientes": 0,
+  "usuarios": 0,
+  "cuentas": 0,
+  "tablas_antes_del_arranque": 0,
+  "comprobado_en": "2026-10-09T12:04:35.1475598-06:00",
+  "postal_archivo_sha256": "7c4c61f673998ee1f261df87aa6e49353541d643f53acfae4c85026c87b2696d",
+  "consulta_postal_http": 200
+}

@@ -1,5 +1,11 @@
 # Plan de implementación conforme a la actividad
 
+## Cierre documental del 9 de octubre de 2026
+
+V1–V8 y la carga nacional se comprobaron desde una base vacía y tras reiniciar, con una guía reproducible. La suite completa terminó con 67 pruebas aprobadas sin omisiones. Los 105 casos de Bruno se evaluaron por script HTTP con sus aserciones originales: 96 aprobados, 7 fallidos y 2 bloqueados. Las altas de Sofía/Nancy y la revocación por cambio de contraseña ya tienen resultados individuales. JMeter ejecutó 1/10/25 usuarios durante 60 segundos por nivel, con 3,043 muestras y cero errores en consultas QA locales.
+
+La entrega incluye [instalación](instalacion-ejecucion.md), [JMeter](jmeter-plan-resultados.md), [índice del paquete](entrega-final.md), diagramas y resultados. Los apartados siguientes conservan el contexto histórico de implementación; sus referencias a verificaciones pendientes del 8 de octubre quedan sustituidas por este cierre. Siguen visibles los siete fallos funcionales y dos bloqueos, especialmente los endpoints GestoPago con 500.
+
 ## Alcance confirmado
 
 La actividad de onboarding de personas físicas exige registro, cuenta y usuario automáticos, autenticación, consultas generales y por identificadores, actualización, baja lógica, validaciones, persistencia y evidencias. El 8 de octubre de 2026 el usuario aclaró los catálogos solicitados por el profesor y eligió separar los accesos de EJECUTIVO y CLIENTE.

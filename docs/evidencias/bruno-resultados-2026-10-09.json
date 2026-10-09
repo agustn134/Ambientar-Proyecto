@@ -1,0 +1,4525 @@
+{
+  "runId": "mv18qen6",
+  "fixtures": {
+    "mantenimiento": {
+      "email": "qa.mantenimiento.mv18qen6@example.com",
+      "curp": "LOPD051108MGTWTTA1",
+      "rfc": "LOPD051108EN6"
+    },
+    "bloqueo": {
+      "email": "qa.bloqueo.mv18qen6@example.com",
+      "curp": "LOPD051108MGTWTTA2",
+      "rfc": "LOPD051108EN7"
+    }
+  },
+  "startedAt": "2026-10-09T17:29:57.666Z",
+  "results": [
+    {
+      "id": "CP-001",
+      "index": 1,
+      "name": "Sexos",
+      "source": "tests/bruno/Catalogos/Opciones personales/Sexos.bru",
+      "executedAt": "2026-10-09T17:29:58.306Z",
+      "tests": [
+        {
+          "name": "Catálogo disponible",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/sexos",
+      "http": 200,
+      "durationMs": 20,
+      "response": [
+        {
+          "id": 1,
+          "descripcion": "Masculino"
+        },
+        {
+          "id": 2,
+          "descripcion": "Femenino"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-002",
+      "index": 2,
+      "name": "Nacionalidades",
+      "source": "tests/bruno/Catalogos/Opciones personales/Nacionalidades.bru",
+      "executedAt": "2026-10-09T17:29:58.337Z",
+      "tests": [
+        {
+          "name": "Catálogo disponible",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/nacionalidades",
+      "http": 200,
+      "durationMs": 18,
+      "response": [
+        {
+          "id": 1,
+          "descripcion": "Mexicana"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-003",
+      "index": 3,
+      "name": "Paises",
+      "source": "tests/bruno/Catalogos/Opciones personales/Paises.bru",
+      "executedAt": "2026-10-09T17:29:58.366Z",
+      "tests": [
+        {
+          "name": "Catálogo disponible",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/paises",
+      "http": 200,
+      "durationMs": 19,
+      "response": [
+        {
+          "id": 1,
+          "descripcion": "México"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-004",
+      "index": 4,
+      "name": "Estados civiles",
+      "source": "tests/bruno/Catalogos/Opciones personales/Estados civiles.bru",
+      "executedAt": "2026-10-09T17:29:58.397Z",
+      "tests": [
+        {
+          "name": "Catálogo disponible",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/estados-civiles",
+      "http": 200,
+      "durationMs": 24,
+      "response": [
+        {
+          "id": 1,
+          "descripcion": "Soltero/a"
+        },
+        {
+          "id": 2,
+          "descripcion": "Casado/a"
+        },
+        {
+          "id": 3,
+          "descripcion": "Divorciado/a"
+        },
+        {
+          "id": 4,
+          "descripcion": "Viudo/a"
+        },
+        {
+          "id": 5,
+          "descripcion": "Unión libre"
+        },
+        {
+          "id": 6,
+          "descripcion": "Separado/a"
+        },
+        {
+          "id": 7,
+          "descripcion": "No especificado"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-005",
+      "index": 5,
+      "name": "Codigo postal",
+      "source": "tests/bruno/Catalogos/Domicilios/Codigo postal.bru",
+      "executedAt": "2026-10-09T17:29:58.433Z",
+      "tests": [
+        {
+          "name": "Catálogo disponible",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/codigos-postales/37907",
+      "http": 200,
+      "durationMs": 77,
+      "response": [
+        {
+          "id": 110330007,
+          "codigoPostal": "37907",
+          "colonia": "Ancona Residencial",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110330008,
+          "codigoPostal": "37907",
+          "colonia": "Catania",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333873,
+          "codigoPostal": "37907",
+          "colonia": "El Panteón",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333854,
+          "codigoPostal": "37907",
+          "colonia": "La Purísima",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110330006,
+          "codigoPostal": "37907",
+          "colonia": "La Toscana",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333853,
+          "codigoPostal": "37907",
+          "colonia": "La Virgencita",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333890,
+          "codigoPostal": "37907",
+          "colonia": "Lindavista",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333874,
+          "codigoPostal": "37907",
+          "colonia": "Los Pinos",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338607,
+          "codigoPostal": "37907",
+          "colonia": "Los Sauces (El Derramadero)",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338786,
+          "codigoPostal": "37907",
+          "colonia": "Nuevo San Luis",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333891,
+          "codigoPostal": "37907",
+          "colonia": "San Isidro",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333896,
+          "codigoPostal": "37907",
+          "colonia": "San Luis Gonzaga",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338787,
+          "codigoPostal": "37907",
+          "colonia": "San Luis González",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333892,
+          "codigoPostal": "37907",
+          "colonia": "Siglo XXI",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-006",
+      "index": 6,
+      "name": "Codigo postal Sofia",
+      "source": "tests/bruno/Catalogos/Domicilios/Codigo postal Sofia.bru",
+      "executedAt": "2026-10-09T17:29:58.520Z",
+      "tests": [
+        {
+          "name": "Asentamiento esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/codigos-postales/37803",
+      "http": 200,
+      "durationMs": 21,
+      "response": [
+        {
+          "id": 110144192,
+          "codigoPostal": "37803",
+          "colonia": "Arboledas",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140022,
+          "codigoPostal": "37803",
+          "colonia": "Gladiolas",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110144190,
+          "codigoPostal": "37803",
+          "colonia": "Guanajuato",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140023,
+          "codigoPostal": "37803",
+          "colonia": "Héroes de San Cristóbal",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140014,
+          "codigoPostal": "37803",
+          "colonia": "La Cruz del Padre Razo (Las Crucitas)",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140045,
+          "codigoPostal": "37803",
+          "colonia": "La Providencia",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140027,
+          "codigoPostal": "37803",
+          "colonia": "Lomas Verde",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110145303,
+          "codigoPostal": "37803",
+          "colonia": "Los Olivos",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140026,
+          "codigoPostal": "37803",
+          "colonia": "Lázaro Cárdenas",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140028,
+          "codigoPostal": "37803",
+          "colonia": "Margaritas",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110144188,
+          "codigoPostal": "37803",
+          "colonia": "Margaritas II",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110144187,
+          "codigoPostal": "37803",
+          "colonia": "Mariano Balleza",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140006,
+          "codigoPostal": "37803",
+          "colonia": "Nuevo Milenio",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140047,
+          "codigoPostal": "37803",
+          "colonia": "Rancho Verde",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110144191,
+          "codigoPostal": "37803",
+          "colonia": "SOP",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110144189,
+          "codigoPostal": "37803",
+          "colonia": "San Antonio del Carmen",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140034,
+          "codigoPostal": "37803",
+          "colonia": "Todos los Santos",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140010,
+          "codigoPostal": "37803",
+          "colonia": "Universidad",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110140011,
+          "codigoPostal": "37803",
+          "colonia": "Valle Verde",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110144196,
+          "codigoPostal": "37803",
+          "colonia": "Vista Hermosa",
+          "tipo": "Colonia",
+          "municipioId": 11014,
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-007",
+      "index": 7,
+      "name": "Codigo postal Nancy",
+      "source": "tests/bruno/Catalogos/Domicilios/Codigo postal Nancy.bru",
+      "executedAt": "2026-10-09T17:29:58.550Z",
+      "tests": [
+        {
+          "name": "Asentamiento esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/catalogos/codigos-postales/37903",
+      "http": 200,
+      "durationMs": 19,
+      "response": [
+        {
+          "id": 110333876,
+          "codigoPostal": "37903",
+          "colonia": "Banda de Abajo",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333883,
+          "codigoPostal": "37903",
+          "colonia": "Banda de Arriba",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110330004,
+          "codigoPostal": "37903",
+          "colonia": "Dos Plazas",
+          "tipo": "Fraccionamiento",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333887,
+          "codigoPostal": "37903",
+          "colonia": "Insurgentes",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333882,
+          "codigoPostal": "37903",
+          "colonia": "La Panorámica",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338783,
+          "codigoPostal": "37903",
+          "colonia": "La Quinta",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338395,
+          "codigoPostal": "37903",
+          "colonia": "Lomas de Santa Elena",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333884,
+          "codigoPostal": "37903",
+          "colonia": "Planta Solar",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333872,
+          "codigoPostal": "37903",
+          "colonia": "San Luisito",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338788,
+          "codigoPostal": "37903",
+          "colonia": "Santa Cruz",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338759,
+          "codigoPostal": "37903",
+          "colonia": "Santa Elena",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110338761,
+          "codigoPostal": "37903",
+          "colonia": "Santa Isabel",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        },
+        {
+          "id": 110333875,
+          "codigoPostal": "37903",
+          "colonia": "Y Griega",
+          "tipo": "Colonia",
+          "municipioId": 11033,
+          "municipio": "San Luis de la Paz",
+          "estadoId": 11,
+          "estado": "Guanajuato"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-008",
+      "index": 8,
+      "name": "Sexo inexistente",
+      "source": "tests/bruno/Catalogos/Validaciones/Sexo inexistente.bru",
+      "executedAt": "2026-10-09T17:29:58.581Z",
+      "tests": [
+        {
+          "name": "Rechaza catálogo inválido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 249,
+      "response": {
+        "timestamp": "2026-10-09T11:29:58.83437",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Selecciona una opción habilitada del catálogo",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "sexoId",
+            "mensaje": "Selecciona una opción habilitada del catálogo"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-009",
+      "index": 9,
+      "name": "Nacionalidad inexistente",
+      "source": "tests/bruno/Catalogos/Validaciones/Nacionalidad inexistente.bru",
+      "executedAt": "2026-10-09T17:29:58.855Z",
+      "tests": [
+        {
+          "name": "Rechaza catálogo inválido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 25,
+      "response": {
+        "timestamp": "2026-10-09T11:29:58.8808204",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Selecciona una opción habilitada del catálogo",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "nacionalidadId",
+            "mensaje": "Selecciona una opción habilitada del catálogo"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-010",
+      "index": 10,
+      "name": "Pais inexistente",
+      "source": "tests/bruno/Catalogos/Validaciones/Pais inexistente.bru",
+      "executedAt": "2026-10-09T17:29:58.888Z",
+      "tests": [
+        {
+          "name": "Rechaza catálogo inválido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 34,
+      "response": {
+        "timestamp": "2026-10-09T11:29:58.9243281",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Selecciona una opción habilitada del catálogo",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "domicilio.paisId",
+            "mensaje": "Selecciona una opción habilitada del catálogo"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-011",
+      "index": 11,
+      "name": "Estado civil inexistente",
+      "source": "tests/bruno/Catalogos/Validaciones/Estado civil inexistente.bru",
+      "executedAt": "2026-10-09T17:29:58.933Z",
+      "tests": [
+        {
+          "name": "Rechaza catálogo inválido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 33,
+      "response": {
+        "timestamp": "2026-10-09T11:29:58.9662583",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Selecciona una opción habilitada del catálogo",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "estadoCivilId",
+            "mensaje": "Selecciona una opción habilitada del catálogo"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-012",
+      "index": 12,
+      "name": "Id de catalogo con tipo incorrecto",
+      "source": "tests/bruno/Catalogos/Validaciones/Id de catalogo con tipo incorrecto.bru",
+      "executedAt": "2026-10-09T17:29:58.974Z",
+      "tests": [
+        {
+          "name": "Rechaza catálogo inválido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 23,
+      "response": {
+        "timestamp": "2026-10-09T11:29:58.9981243",
+        "status": 400,
+        "codigo": "JSON_INVALIDO",
+        "mensaje": "JSON, tipo de dato o fecha inválidos",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "sexoId",
+            "mensaje": "Verifica el tipo y formato; fechas YYYY-MM-DD, texto entre comillas e ingreso numérico"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-013",
+      "index": 13,
+      "name": "Asentamiento de otro codigo postal",
+      "source": "tests/bruno/Catalogos/Validaciones/Asentamiento de otro codigo postal.bru",
+      "executedAt": "2026-10-09T17:29:59.006Z",
+      "tests": [
+        {
+          "name": "Rechaza catálogo inválido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 45,
+      "response": {
+        "timestamp": "2026-10-09T11:29:59.0527522",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "El asentamiento no corresponde al código postal",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "domicilio.asentamientoId",
+            "mensaje": "El asentamiento no corresponde al código postal"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-014",
+      "index": 14,
+      "name": "Registro valido",
+      "source": "tests/bruno/Registro/Altas de clientes/Registro valido.bru",
+      "executedAt": "2026-10-09T17:29:59.060Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": false,
+          "error": "expected 409 to equal 201"
+        },
+        {
+          "name": "Cliente y cuenta generados",
+          "passed": false,
+          "error": "expected undefined to be a number"
+        }
+      ],
+      "notes": "Alta repetida: el perfil ya existe. Se esperaba 201.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 409,
+      "durationMs": 49,
+      "response": {
+        "timestamp": "2026-10-09T11:29:59.1113744",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-015",
+      "index": 15,
+      "name": "Registro Sofia",
+      "source": "tests/bruno/Registro/Altas de clientes/Registro Sofia.bru",
+      "executedAt": "2026-10-09T17:29:59.120Z",
+      "tests": [
+        {
+          "name": "Cliente, usuario y cuenta creados",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 201,
+      "durationMs": 636,
+      "response": {
+        "clienteId": 8,
+        "estatus": "ACTIVO",
+        "cuenta": {
+          "numeroCuenta": "00000000000000000008",
+          "saldo": 0,
+          "estatus": "ACTIVA"
+        },
+        "usuario": {
+          "usuarioId": 7,
+          "correo": "sofia.jimena.salazar.godinez.qa@gmail.com",
+          "activo": true
+        }
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-016",
+      "index": 16,
+      "name": "Registro Nancy",
+      "source": "tests/bruno/Registro/Altas de clientes/Registro Nancy.bru",
+      "executedAt": "2026-10-09T17:29:59.772Z",
+      "tests": [
+        {
+          "name": "Cliente, usuario y cuenta creados",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 201,
+      "durationMs": 368,
+      "response": {
+        "clienteId": 9,
+        "estatus": "ACTIVO",
+        "cuenta": {
+          "numeroCuenta": "00000000000000000009",
+          "saldo": 0,
+          "estatus": "ACTIVA"
+        },
+        "usuario": {
+          "usuarioId": 8,
+          "correo": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+          "activo": true
+        }
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-017",
+      "index": 17,
+      "name": "Registro Dulce",
+      "source": "tests/bruno/Registro/Altas de clientes/Registro Dulce.bru",
+      "executedAt": "2026-10-09T17:30:00.153Z",
+      "tests": [
+        {
+          "name": "Cliente, usuario y cuenta creados",
+          "passed": false,
+          "error": "expected 409 to equal 201"
+        }
+      ],
+      "notes": "Alta repetida: el perfil ya existe. Se esperaba 201.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 409,
+      "durationMs": 45,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.1994433",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-018",
+      "index": 18,
+      "name": "Nombre invalido",
+      "source": "tests/bruno/Registro/Validaciones/Nombre invalido.bru",
+      "executedAt": "2026-10-09T17:30:00.209Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 102,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.3116007",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los campos de la petición",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "password",
+            "mensaje": "La contraseña requiere al menos 8 caracteres, mayúscula, minúscula, número y carácter especial; sin espacios y máximo 72 bytes UTF-8"
+          },
+          {
+            "campo": "nombre",
+            "mensaje": "must match \"[\\p{L} ]+\""
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-019",
+      "index": 19,
+      "name": "Menor de edad",
+      "source": "tests/bruno/Registro/Validaciones/Menor de edad.bru",
+      "executedAt": "2026-10-09T17:30:00.329Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 19,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.3471697",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "El cliente debe tener al menos 18 años",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "fechaNacimiento",
+            "mensaje": "El cliente debe tener al menos 18 años"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-020",
+      "index": 20,
+      "name": "Ingreso con tipo incorrecto",
+      "source": "tests/bruno/Registro/Validaciones/Ingreso con tipo incorrecto.bru",
+      "executedAt": "2026-10-09T17:30:00.357Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 12,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.3671433",
+        "status": 400,
+        "codigo": "JSON_INVALIDO",
+        "mensaje": "JSON, tipo de dato o fecha inválidos",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "informacionLaboral.ingresoMensual",
+            "mensaje": "Verifica el tipo y formato; fechas YYYY-MM-DD, texto entre comillas e ingreso numérico"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-021",
+      "index": 21,
+      "name": "Password invalida",
+      "source": "tests/bruno/Registro/Validaciones/Password invalida.bru",
+      "executedAt": "2026-10-09T17:30:00.377Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 14,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.386822",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los campos de la petición",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "password",
+            "mensaje": "La contraseña requiere al menos 8 caracteres, mayúscula, minúscula, número y carácter especial; sin espacios y máximo 72 bytes UTF-8"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-022",
+      "index": 22,
+      "name": "Password ausente",
+      "source": "tests/bruno/Registro/Validaciones/Password ausente.bru",
+      "executedAt": "2026-10-09T17:30:00.404Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 16,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.4168966",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los campos de la petición",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "password",
+            "mensaje": "La contraseña requiere al menos 8 caracteres, mayúscula, minúscula, número y carácter especial; sin espacios y máximo 72 bytes UTF-8"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-023",
+      "index": 23,
+      "name": "Password tipo incorrecto",
+      "source": "tests/bruno/Registro/Validaciones/Password tipo incorrecto.bru",
+      "executedAt": "2026-10-09T17:30:00.431Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 400,
+      "durationMs": 12,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.4417213",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los campos de la petición",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "password",
+            "mensaje": "La contraseña requiere al menos 8 caracteres, mayúscula, minúscula, número y carácter especial; sin espacios y máximo 72 bytes UTF-8"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-024",
+      "index": 24,
+      "name": "CURP duplicada",
+      "source": "tests/bruno/Registro/Duplicados/CURP duplicada.bru",
+      "executedAt": "2026-10-09T17:30:00.453Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 409,
+      "durationMs": 38,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.4929963",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-025",
+      "index": 25,
+      "name": "RFC duplicado",
+      "source": "tests/bruno/Registro/Duplicados/RFC duplicado.bru",
+      "executedAt": "2026-10-09T17:30:00.500Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": false,
+          "error": "expected [ 'curp' ] to include 'rfc'"
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 409,
+      "durationMs": 41,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.5433375",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-026",
+      "index": 26,
+      "name": "Correo duplicado",
+      "source": "tests/bruno/Registro/Duplicados/Correo duplicado.bru",
+      "executedAt": "2026-10-09T17:30:00.552Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo rechazado",
+          "passed": false,
+          "error": "expected [ 'curp' ] to include 'correoElectronico'"
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 409,
+      "durationMs": 41,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.5946783",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-027",
+      "index": 27,
+      "name": "Login valido",
+      "source": "tests/bruno/Auth/Acceso/Login valido.bru",
+      "executedAt": "2026-10-09T17:30:00.602Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 267,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:00.858244400Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-028",
+      "index": 28,
+      "name": "Perfil autenticado",
+      "source": "tests/bruno/Auth/Acceso/Perfil autenticado.bru",
+      "executedAt": "2026-10-09T17:30:00.884Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Perfil propio sin hash",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 200,
+      "durationMs": 92,
+      "response": {
+        "usuarioId": 2,
+        "clienteId": 3,
+        "correo": "agustinlopezparra13@gmail.com",
+        "activo": true,
+        "rol": "CLIENTE"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-029",
+      "index": 29,
+      "name": "Login formato invalido",
+      "source": "tests/bruno/Auth/Acceso/Login formato invalido.bru",
+      "executedAt": "2026-10-09T17:30:00.986Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 400,
+      "durationMs": 14,
+      "response": {
+        "timestamp": "2026-10-09T11:30:00.9971537",
+        "status": 400,
+        "codigo": "JSON_INVALIDO",
+        "mensaje": "JSON, tipo de dato o fecha inválidos",
+        "path": "/auth/login",
+        "errores": [
+          {
+            "campo": "password",
+            "mensaje": "Verifica el tipo y formato; fechas YYYY-MM-DD, texto entre comillas e ingreso numérico"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-030",
+      "index": 30,
+      "name": "Login inexistente",
+      "source": "tests/bruno/Auth/Acceso/Login inexistente.bru",
+      "executedAt": "2026-10-09T17:30:01.011Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 401,
+      "durationMs": 279,
+      "response": {
+        "timestamp": "2026-10-09T11:30:01.291083",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/auth/login",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-031",
+      "index": 31,
+      "name": "Perfil sin token",
+      "source": "tests/bruno/Auth/Tokens y permisos/Perfil sin token.bru",
+      "executedAt": "2026-10-09T17:30:01.301Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 401,
+      "durationMs": 18,
+      "response": {
+        "timestamp": "2026-10-09T11:30:01.3169783",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/auth/me",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-032",
+      "index": 32,
+      "name": "Token alterado",
+      "source": "tests/bruno/Auth/Tokens y permisos/Token alterado.bru",
+      "executedAt": "2026-10-09T17:30:01.327Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 401,
+      "durationMs": 9,
+      "response": {
+        "timestamp": "2026-10-09T11:30:01.3391599",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/auth/me",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-033",
+      "index": 33,
+      "name": "Token vencido",
+      "source": "tests/bruno/Auth/Tokens y permisos/Token vencido.bru",
+      "executedAt": "2026-10-09T17:34:59.515Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 401,
+      "durationMs": 67,
+      "response": {
+        "timestamp": "2026-10-09T11:34:59.5849645",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/auth/me",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-034",
+      "index": 34,
+      "name": "Operacion sin permiso",
+      "source": "tests/bruno/Auth/Tokens y permisos/Operacion sin permiso.bru",
+      "executedAt": "2026-10-09T17:30:01.344Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/personas",
+      "http": 403,
+      "durationMs": 40,
+      "response": {
+        "timestamp": "2026-10-09T11:30:01.386826",
+        "status": 403,
+        "codigo": "ACCESO_DENEGADO",
+        "mensaje": "No tienes permiso para esta operación",
+        "path": "/personas",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-035",
+      "index": 35,
+      "name": "Registro usuario para bloqueo",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Registro usuario para bloqueo.bru",
+      "executedAt": "2026-10-09T17:30:01.395Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 201,
+      "durationMs": 803,
+      "response": {
+        "clienteId": 10,
+        "estatus": "ACTIVO",
+        "cuenta": {
+          "numeroCuenta": "00000000000000000010",
+          "saldo": 0,
+          "estatus": "ACTIVA"
+        },
+        "usuario": {
+          "usuarioId": 9,
+          "correo": "qa.bloqueo.mv18qen6@example.com",
+          "activo": true
+        }
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-036",
+      "index": 36,
+      "name": "Login usuario de bloqueo",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Login usuario de bloqueo.bru",
+      "executedAt": "2026-10-09T17:30:02.211Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 279,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:02.480584800Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-037",
+      "index": 37,
+      "name": "Intento incorrecto usuario de bloqueo",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Intento incorrecto usuario de bloqueo.bru",
+      "executedAt": "2026-10-09T17:30:02.502Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 401,
+      "durationMs": 270,
+      "response": {
+        "timestamp": "2026-10-09T11:30:02.773603",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/auth/login",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-038",
+      "index": 38,
+      "name": "Login usuario bloqueado",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Login usuario bloqueado.bru",
+      "executedAt": "2026-10-09T17:30:03.294Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 401,
+      "durationMs": 234,
+      "response": {
+        "timestamp": "2026-10-09T11:30:03.5286455",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/auth/login",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-039",
+      "index": 39,
+      "name": "Token usuario bloqueado",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Token usuario bloqueado.bru",
+      "executedAt": "2026-10-09T17:30:03.539Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 401,
+      "durationMs": 21,
+      "response": {
+        "timestamp": "2026-10-09T11:30:03.5623032",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/auth/me",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-040",
+      "index": 40,
+      "name": "Login Sofia",
+      "source": "tests/bruno/Auth/Acceso de perfiles QA/Login Sofia.bru",
+      "executedAt": "2026-10-09T17:30:03.569Z",
+      "tests": [
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 259,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:03.821401600Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-041",
+      "index": 41,
+      "name": "Perfil Sofia",
+      "source": "tests/bruno/Auth/Acceso de perfiles QA/Perfil Sofia.bru",
+      "executedAt": "2026-10-09T17:30:03.840Z",
+      "tests": [
+        {
+          "name": "Perfil CLIENTE propio",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 200,
+      "durationMs": 34,
+      "response": {
+        "usuarioId": 7,
+        "clienteId": 8,
+        "correo": "sofia.jimena.salazar.godinez.qa@gmail.com",
+        "activo": true,
+        "rol": "CLIENTE"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-042",
+      "index": 42,
+      "name": "Login Nancy",
+      "source": "tests/bruno/Auth/Acceso de perfiles QA/Login Nancy.bru",
+      "executedAt": "2026-10-09T17:30:03.881Z",
+      "tests": [
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 276,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:04.147125900Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-043",
+      "index": 43,
+      "name": "Perfil Nancy",
+      "source": "tests/bruno/Auth/Acceso de perfiles QA/Perfil Nancy.bru",
+      "executedAt": "2026-10-09T17:30:04.168Z",
+      "tests": [
+        {
+          "name": "Perfil CLIENTE propio",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 200,
+      "durationMs": 34,
+      "response": {
+        "usuarioId": 8,
+        "clienteId": 9,
+        "correo": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+        "activo": true,
+        "rol": "CLIENTE"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-044",
+      "index": 44,
+      "name": "Login Dulce",
+      "source": "tests/bruno/Auth/Acceso de perfiles QA/Login Dulce.bru",
+      "executedAt": "2026-10-09T17:30:04.210Z",
+      "tests": [
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 237,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:04.436934300Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-045",
+      "index": 45,
+      "name": "Perfil Dulce",
+      "source": "tests/bruno/Auth/Acceso de perfiles QA/Perfil Dulce.bru",
+      "executedAt": "2026-10-09T17:30:04.460Z",
+      "tests": [
+        {
+          "name": "Perfil CLIENTE propio",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 200,
+      "durationMs": 33,
+      "response": {
+        "usuarioId": 6,
+        "clienteId": 7,
+        "correo": "dulce.maria.lopez.parra.qa@gmail.com",
+        "activo": true,
+        "rol": "CLIENTE"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-046",
+      "index": 46,
+      "name": "Registro ejecutivo de prueba",
+      "source": "tests/bruno/Consultas/Preparacion del ejecutivo/Registro ejecutivo de prueba.bru",
+      "executedAt": "2026-10-09T17:30:04.503Z",
+      "tests": [
+        {
+          "name": "Registro de preparación o duplicado conocido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 409,
+      "durationMs": 37,
+      "response": {
+        "timestamp": "2026-10-09T11:30:04.54085",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-047",
+      "index": 47,
+      "name": "Login ejecutivo",
+      "source": "tests/bruno/Consultas/Preparacion del ejecutivo/Login ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:04.547Z",
+      "tests": [
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 238,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:04.777279500Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-048",
+      "index": 48,
+      "name": "Perfil ejecutivo",
+      "source": "tests/bruno/Consultas/Preparacion del ejecutivo/Perfil ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:04.796Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Rol ejecutivo confirmado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 200,
+      "durationMs": 34,
+      "response": {
+        "usuarioId": 4,
+        "clienteId": 5,
+        "correo": "agustin.ejecutivo@example.com",
+        "activo": true,
+        "rol": "EJECUTIVO"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-049",
+      "index": 49,
+      "name": "Ficha del ejecutivo",
+      "source": "tests/bruno/Consultas/Preparacion del ejecutivo/Ficha del ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:04.837Z",
+      "tests": [
+        {
+          "name": "Ficha del ejecutivo correcta",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 200,
+      "durationMs": 116,
+      "response": {
+        "cliente": {
+          "clienteId": 5,
+          "nombre": "Agustín",
+          "segundoNombre": null,
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPA040905HGTXXX09",
+          "rfc": "LOPA040905ZZ1",
+          "correo": "agustin.ejecutivo@example.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": "2026-10-08T18:39:52.414006"
+        },
+        "fechaNacimiento": "2004-09-05",
+        "sexoId": 1,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681134553",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Tester / QA",
+          "empresa": "Empresa de prueba",
+          "ingresoMensual": 15000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000005",
+            "clienteId": 5,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T18:39:52.473116"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-050",
+      "index": 50,
+      "name": "Mi cliente",
+      "source": "tests/bruno/Consultas/Datos propios/Mi cliente.bru",
+      "executedAt": "2026-10-09T17:30:04.997Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Detalle propio sin credenciales",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 200,
+      "durationMs": 40,
+      "response": {
+        "cliente": {
+          "clienteId": 3,
+          "nombre": "Agustín",
+          "segundoNombre": null,
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPA040905HGTPRGA7",
+          "rfc": "LOPA040905MQ3",
+          "correo": "agustinlopezparra13@gmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": null
+        },
+        "fechaNacimiento": "2004-09-05",
+        "sexoId": 1,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681134553",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Tester / QA",
+          "empresa": "Empresa de prueba",
+          "ingresoMensual": 15000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000003",
+            "clienteId": 3,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T11:27:25.042862"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-051",
+      "index": 51,
+      "name": "Cliente propio por ID",
+      "source": "tests/bruno/Consultas/Datos propios/Cliente propio por ID.bru",
+      "executedAt": "2026-10-09T17:30:05.044Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Identidad propia",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/3",
+      "http": 200,
+      "durationMs": 97,
+      "response": {
+        "cliente": {
+          "clienteId": 3,
+          "nombre": "Agustín",
+          "segundoNombre": null,
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPA040905HGTPRGA7",
+          "rfc": "LOPA040905MQ3",
+          "correo": "agustinlopezparra13@gmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": null
+        },
+        "fechaNacimiento": "2004-09-05",
+        "sexoId": 1,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681134553",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Tester / QA",
+          "empresa": "Empresa de prueba",
+          "ingresoMensual": 15000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000003",
+            "clienteId": 3,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T11:27:25.042862"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-052",
+      "index": 52,
+      "name": "Mi cuenta",
+      "source": "tests/bruno/Consultas/Datos propios/Mi cuenta.bru",
+      "executedAt": "2026-10-09T17:30:05.149Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Cuenta propia",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/cuentas/00000000000000000003",
+      "http": 200,
+      "durationMs": 65,
+      "response": {
+        "numeroCuenta": "00000000000000000003",
+        "clienteId": 3,
+        "saldo": 0,
+        "estatus": "ACTIVA",
+        "fechaCreacion": "2026-10-08T11:27:25.042862"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-053",
+      "index": 53,
+      "name": "Mi saldo",
+      "source": "tests/bruno/Consultas/Datos propios/Mi saldo.bru",
+      "executedAt": "2026-10-09T17:30:05.223Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Saldo numérico no negativo",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/cuentas/00000000000000000003/saldo",
+      "http": 200,
+      "durationMs": 42,
+      "response": {
+        "numeroCuenta": "00000000000000000003",
+        "saldo": 0
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-054",
+      "index": 54,
+      "name": "Mis cuentas",
+      "source": "tests/bruno/Consultas/Datos propios/Mis cuentas.bru",
+      "executedAt": "2026-10-09T17:30:05.274Z",
+      "tests": [
+        {
+          "name": "Cuentas del cliente autenticado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/3/cuentas",
+      "http": 200,
+      "durationMs": 62,
+      "response": [
+        {
+          "numeroCuenta": "00000000000000000003",
+          "clienteId": 3,
+          "saldo": 0,
+          "estatus": "ACTIVA",
+          "fechaCreacion": "2026-10-08T11:27:25.042862"
+        }
+      ],
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-055",
+      "index": 55,
+      "name": "Listado paginado ejecutivo",
+      "source": "tests/bruno/Consultas/Listados y filtros/Listado paginado ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:05.346Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Página inicial, tamaño y totales",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?page=0&size=2&ordenarPor=id&direccion=ASC",
+      "http": 200,
+      "durationMs": 198,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 1,
+            "nombre": "José",
+            "segundoNombre": null,
+            "apellidoPaterno": "Pérez",
+            "apellidoMaterno": "García",
+            "curp": "PEGJ900101HDFRRS09",
+            "rfc": "PEGJ900101AB1",
+            "correo": "registro.prueba@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          },
+          {
+            "clienteId": 2,
+            "nombre": "José",
+            "segundoNombre": null,
+            "apellidoPaterno": "Pérez",
+            "apellidoMaterno": "García",
+            "curp": "LOPA910202HDFPRS09",
+            "rfc": "LOPA910202AB1",
+            "correo": "registro.usuario@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          }
+        ],
+        "page": 0,
+        "size": 2,
+        "totalElementos": 10,
+        "totalPaginas": 5
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-056",
+      "index": 56,
+      "name": "Siguiente pagina ejecutivo",
+      "source": "tests/bruno/Consultas/Listados y filtros/Siguiente pagina ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:05.557Z",
+      "tests": [
+        {
+          "name": "Página siguiente sin repetir clientes",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?page=1&size=2&ordenarPor=id&direccion=ASC",
+      "http": 200,
+      "durationMs": 52,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 3,
+            "nombre": "Agustín",
+            "segundoNombre": null,
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPA040905HGTPRGA7",
+            "rfc": "LOPA040905MQ3",
+            "correo": "agustinlopezparra13@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          },
+          {
+            "clienteId": 4,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTPRLA8",
+            "rfc": "LOPD051108AB1",
+            "correo": "dulce.lopez.parra@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          }
+        ],
+        "page": 1,
+        "size": 2,
+        "totalElementos": 10,
+        "totalPaginas": 5
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-057",
+      "index": 57,
+      "name": "Pagina fuera del resultado",
+      "source": "tests/bruno/Consultas/Listados y filtros/Pagina fuera del resultado.bru",
+      "executedAt": "2026-10-09T17:30:05.621Z",
+      "tests": [
+        {
+          "name": "Página vacía conserva los totales",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?page=5&size=2&ordenarPor=id&direccion=ASC",
+      "http": 200,
+      "durationMs": 53,
+      "response": {
+        "contenido": [],
+        "page": 5,
+        "size": 2,
+        "totalElementos": 10,
+        "totalPaginas": 5
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-058",
+      "index": 58,
+      "name": "Filtro por CURP",
+      "source": "tests/bruno/Consultas/Listados y filtros/Filtro por CURP.bru",
+      "executedAt": "2026-10-09T17:30:05.683Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Un cliente encontrado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?curp=LOPA040905HGTPRGA7",
+      "http": 200,
+      "durationMs": 52,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 3,
+            "nombre": "Agustín",
+            "segundoNombre": null,
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPA040905HGTPRGA7",
+            "rfc": "LOPA040905MQ3",
+            "correo": "agustinlopezparra13@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          }
+        ],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 1,
+        "totalPaginas": 1
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-059",
+      "index": 59,
+      "name": "Buscar por RFC",
+      "source": "tests/bruno/Consultas/Listados y filtros/Buscar por RFC.bru",
+      "executedAt": "2026-10-09T17:30:05.743Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Cliente identificado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/buscar?rfc=LOPA040905MQ3",
+      "http": 200,
+      "durationMs": 58,
+      "response": {
+        "cliente": {
+          "clienteId": 3,
+          "nombre": "Agustín",
+          "segundoNombre": null,
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPA040905HGTPRGA7",
+          "rfc": "LOPA040905MQ3",
+          "correo": "agustinlopezparra13@gmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": null
+        },
+        "fechaNacimiento": "2004-09-05",
+        "sexoId": 1,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681134553",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Tester / QA",
+          "empresa": "Empresa de prueba",
+          "ingresoMensual": 15000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000003",
+            "clienteId": 3,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T11:27:25.042862"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-060",
+      "index": 60,
+      "name": "Buscar por cuenta",
+      "source": "tests/bruno/Consultas/Listados y filtros/Buscar por cuenta.bru",
+      "executedAt": "2026-10-09T17:30:05.824Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Cliente de la cuenta",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/buscar?numeroCuenta=00000000000000000003",
+      "http": 200,
+      "durationMs": 98,
+      "response": {
+        "cliente": {
+          "clienteId": 3,
+          "nombre": "Agustín",
+          "segundoNombre": null,
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPA040905HGTPRGA7",
+          "rfc": "LOPA040905MQ3",
+          "correo": "agustinlopezparra13@gmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": null
+        },
+        "fechaNacimiento": "2004-09-05",
+        "sexoId": 1,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681134553",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Tester / QA",
+          "empresa": "Empresa de prueba",
+          "ingresoMensual": 15000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000003",
+            "clienteId": 3,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T11:27:25.042862"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-061",
+      "index": 61,
+      "name": "Clientes por fechas",
+      "source": "tests/bruno/Consultas/Listados y filtros/Clientes por fechas.bru",
+      "executedAt": "2026-10-09T17:30:05.937Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Página y fechas dentro del rango",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?desde=2026-01-01&hasta=2026-12-31",
+      "http": 200,
+      "durationMs": 82,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 5,
+            "nombre": "Agustín",
+            "segundoNombre": null,
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPA040905HGTXXX09",
+            "rfc": "LOPA040905ZZ1",
+            "correo": "agustin.ejecutivo@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-08T18:39:52.414006"
+          },
+          {
+            "clienteId": 6,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTXXX09",
+            "rfc": "LOPD051108ZZ2",
+            "correo": "dulce.mantenimiento@example.com",
+            "estatus": "INACTIVO",
+            "fechaRegistro": "2026-10-08T21:43:23.103035"
+          },
+          {
+            "clienteId": 7,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTXXX08",
+            "rfc": "LOPD051108ZZ8",
+            "correo": "dulce.maria.lopez.parra.qa@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-08T22:44:14.647275"
+          },
+          {
+            "clienteId": 8,
+            "nombre": "Sofía",
+            "segundoNombre": "Jimena",
+            "apellidoPaterno": "Salazar",
+            "apellidoMaterno": "Godínez",
+            "curp": "SAGS050618MGTLDFA4",
+            "rfc": "SAGS050618ZZ4",
+            "correo": "sofia.jimena.salazar.godinez.qa@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-09T11:29:59.447632"
+          },
+          {
+            "clienteId": 9,
+            "nombre": "Nancy",
+            "segundoNombre": "Guadalupe",
+            "apellidoPaterno": "Enríquez",
+            "apellidoMaterno": "Parra",
+            "curp": "EIPN980227MDFNRN03",
+            "rfc": "EIPN980227ZZ3",
+            "correo": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-09T11:30:00.109804"
+          },
+          {
+            "clienteId": 10,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTWTTA2",
+            "rfc": "LOPD051108EN7",
+            "correo": "qa.bloqueo.mv18qen6@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-09T11:30:02.158629"
+          }
+        ],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 6,
+        "totalPaginas": 1
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-062",
+      "index": 62,
+      "name": "Cuentas activas",
+      "source": "tests/bruno/Consultas/Listados y filtros/Cuentas activas.bru",
+      "executedAt": "2026-10-09T17:30:06.031Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Sólo activas",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/cuentas?activo=true",
+      "http": 200,
+      "durationMs": 60,
+      "response": {
+        "contenido": [
+          {
+            "numeroCuenta": "00000000000000000001",
+            "clienteId": 1,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T02:40:44.76257"
+          },
+          {
+            "numeroCuenta": "00000000000000000002",
+            "clienteId": 2,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T11:11:36.365316"
+          },
+          {
+            "numeroCuenta": "00000000000000000003",
+            "clienteId": 3,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T11:27:25.042862"
+          },
+          {
+            "numeroCuenta": "00000000000000000004",
+            "clienteId": 4,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T12:34:01.143531"
+          },
+          {
+            "numeroCuenta": "00000000000000000005",
+            "clienteId": 5,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T18:39:52.473116"
+          },
+          {
+            "numeroCuenta": "00000000000000000007",
+            "clienteId": 7,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T22:44:14.753687"
+          },
+          {
+            "numeroCuenta": "00000000000000000008",
+            "clienteId": 8,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:29:59.605595"
+          },
+          {
+            "numeroCuenta": "00000000000000000009",
+            "clienteId": 9,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:30:00.12372"
+          },
+          {
+            "numeroCuenta": "00000000000000000010",
+            "clienteId": 10,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:30:02.176671"
+          }
+        ],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 9,
+        "totalPaginas": 1
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-063",
+      "index": 63,
+      "name": "Filtros combinados",
+      "source": "tests/bruno/Consultas/Listados y filtros/Filtros combinados.bru",
+      "executedAt": "2026-10-09T17:30:06.100Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Filtros AND",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?correo=agustinlopezparra13%40gmail.com&activo=true",
+      "http": 200,
+      "durationMs": 50,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 3,
+            "nombre": "Agustín",
+            "segundoNombre": null,
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPA040905HGTPRGA7",
+            "rfc": "LOPA040905MQ3",
+            "correo": "agustinlopezparra13@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          }
+        ],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 1,
+        "totalPaginas": 1
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-064",
+      "index": 64,
+      "name": "Filtros incompatibles",
+      "source": "tests/bruno/Consultas/Listados y filtros/Filtros incompatibles.bru",
+      "executedAt": "2026-10-09T17:30:06.160Z",
+      "tests": [
+        {
+          "name": "AND de identificadores distintos no devuelve clientes",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?correo=agustinlopezparra13%40gmail.com&curp=LOPA040905HGTXXX09",
+      "http": 200,
+      "durationMs": 38,
+      "response": {
+        "contenido": [],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 0,
+        "totalPaginas": 0
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-065",
+      "index": 65,
+      "name": "Clientes activos",
+      "source": "tests/bruno/Consultas/Listados y filtros/Clientes activos.bru",
+      "executedAt": "2026-10-09T17:30:06.208Z",
+      "tests": [
+        {
+          "name": "Sólo clientes activos",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?activo=true",
+      "http": 200,
+      "durationMs": 68,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 1,
+            "nombre": "José",
+            "segundoNombre": null,
+            "apellidoPaterno": "Pérez",
+            "apellidoMaterno": "García",
+            "curp": "PEGJ900101HDFRRS09",
+            "rfc": "PEGJ900101AB1",
+            "correo": "registro.prueba@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          },
+          {
+            "clienteId": 2,
+            "nombre": "José",
+            "segundoNombre": null,
+            "apellidoPaterno": "Pérez",
+            "apellidoMaterno": "García",
+            "curp": "LOPA910202HDFPRS09",
+            "rfc": "LOPA910202AB1",
+            "correo": "registro.usuario@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          },
+          {
+            "clienteId": 3,
+            "nombre": "Agustín",
+            "segundoNombre": null,
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPA040905HGTPRGA7",
+            "rfc": "LOPA040905MQ3",
+            "correo": "agustinlopezparra13@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          },
+          {
+            "clienteId": 4,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTPRLA8",
+            "rfc": "LOPD051108AB1",
+            "correo": "dulce.lopez.parra@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": null
+          },
+          {
+            "clienteId": 5,
+            "nombre": "Agustín",
+            "segundoNombre": null,
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPA040905HGTXXX09",
+            "rfc": "LOPA040905ZZ1",
+            "correo": "agustin.ejecutivo@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-08T18:39:52.414006"
+          },
+          {
+            "clienteId": 7,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTXXX08",
+            "rfc": "LOPD051108ZZ8",
+            "correo": "dulce.maria.lopez.parra.qa@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-08T22:44:14.647275"
+          },
+          {
+            "clienteId": 8,
+            "nombre": "Sofía",
+            "segundoNombre": "Jimena",
+            "apellidoPaterno": "Salazar",
+            "apellidoMaterno": "Godínez",
+            "curp": "SAGS050618MGTLDFA4",
+            "rfc": "SAGS050618ZZ4",
+            "correo": "sofia.jimena.salazar.godinez.qa@gmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-09T11:29:59.447632"
+          },
+          {
+            "clienteId": 9,
+            "nombre": "Nancy",
+            "segundoNombre": "Guadalupe",
+            "apellidoPaterno": "Enríquez",
+            "apellidoMaterno": "Parra",
+            "curp": "EIPN980227MDFNRN03",
+            "rfc": "EIPN980227ZZ3",
+            "correo": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-09T11:30:00.109804"
+          },
+          {
+            "clienteId": 10,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTWTTA2",
+            "rfc": "LOPD051108EN7",
+            "correo": "qa.bloqueo.mv18qen6@example.com",
+            "estatus": "ACTIVO",
+            "fechaRegistro": "2026-10-09T11:30:02.158629"
+          }
+        ],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 9,
+        "totalPaginas": 1
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-066",
+      "index": 66,
+      "name": "Clientes inactivos",
+      "source": "tests/bruno/Consultas/Listados y filtros/Clientes inactivos.bru",
+      "executedAt": "2026-10-09T17:30:06.285Z",
+      "tests": [
+        {
+          "name": "Sólo clientes inactivos",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?activo=false",
+      "http": 200,
+      "durationMs": 48,
+      "response": {
+        "contenido": [
+          {
+            "clienteId": 6,
+            "nombre": "Dulce",
+            "segundoNombre": "María",
+            "apellidoPaterno": "López",
+            "apellidoMaterno": "Parra",
+            "curp": "LOPD051108MGTXXX09",
+            "rfc": "LOPD051108ZZ2",
+            "correo": "dulce.mantenimiento@example.com",
+            "estatus": "INACTIVO",
+            "fechaRegistro": "2026-10-08T21:43:23.103035"
+          }
+        ],
+        "page": 0,
+        "size": 20,
+        "totalElementos": 1,
+        "totalPaginas": 1
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-067",
+      "index": 67,
+      "name": "Cliente inactivo por correo",
+      "source": "tests/bruno/Consultas/Listados y filtros/Cliente inactivo por correo.bru",
+      "executedAt": "2026-10-09T17:30:06.342Z",
+      "tests": [
+        {
+          "name": "Ejecutivo consulta el registro dado de baja",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/buscar?correo=dulce.mantenimiento%40example.com",
+      "http": 200,
+      "durationMs": 51,
+      "response": {
+        "cliente": {
+          "clienteId": 6,
+          "nombre": "Dulce",
+          "segundoNombre": "María",
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPD051108MGTXXX09",
+          "rfc": "LOPD051108ZZ2",
+          "correo": "dulce.mantenimiento@example.com",
+          "estatus": "INACTIVO",
+          "fechaRegistro": "2026-10-08T21:43:23.103035"
+        },
+        "fechaNacimiento": "2005-11-08",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681046222",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "844",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Gerente de bodega",
+          "empresa": "Bodega Aurrera QA",
+          "ingresoMensual": 18000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000006",
+            "clienteId": 6,
+            "saldo": 0,
+            "estatus": "INACTIVA",
+            "fechaCreacion": "2026-10-08T21:43:23.140863"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-068",
+      "index": 68,
+      "name": "Cliente ajeno denegado",
+      "source": "tests/bruno/Consultas/Permisos y errores/Cliente ajeno denegado.bru",
+      "executedAt": "2026-10-09T17:30:06.402Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "No revela cliente ajeno",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/5",
+      "http": 404,
+      "durationMs": 31,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.4341614",
+        "status": 404,
+        "codigo": "RECURSO_NO_ENCONTRADO",
+        "mensaje": "Recurso no encontrado",
+        "path": "/clientes/5",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-069",
+      "index": 69,
+      "name": "Cuenta ajena denegada",
+      "source": "tests/bruno/Consultas/Permisos y errores/Cuenta ajena denegada.bru",
+      "executedAt": "2026-10-09T17:30:06.441Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "No revela cuenta ajena",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/cuentas/00000000000000000005",
+      "http": 404,
+      "durationMs": 44,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.4868522",
+        "status": 404,
+        "codigo": "RECURSO_NO_ENCONTRADO",
+        "mensaje": "Recurso no encontrado",
+        "path": "/cuentas/00000000000000000005",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-070",
+      "index": 70,
+      "name": "Cliente inexistente",
+      "source": "tests/bruno/Consultas/Permisos y errores/Cliente inexistente.bru",
+      "executedAt": "2026-10-09T17:30:06.494Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "404 controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/999999999999",
+      "http": 404,
+      "durationMs": 32,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.5271418",
+        "status": 404,
+        "codigo": "RECURSO_NO_ENCONTRADO",
+        "mensaje": "Recurso no encontrado",
+        "path": "/clientes/999999999999",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-071",
+      "index": 71,
+      "name": "Busqueda inexistente ejecutivo",
+      "source": "tests/bruno/Consultas/Permisos y errores/Busqueda inexistente ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:06.533Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "404 controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/buscar?correo=no.existe.consulta%40example.com",
+      "http": 404,
+      "durationMs": 43,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.579064",
+        "status": 404,
+        "codigo": "RECURSO_NO_ENCONTRADO",
+        "mensaje": "Recurso no encontrado",
+        "path": "/clientes/buscar",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-072",
+      "index": 72,
+      "name": "Listado denegado a cliente",
+      "source": "tests/bruno/Consultas/Permisos y errores/Listado denegado a cliente.bru",
+      "executedAt": "2026-10-09T17:30:06.590Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Permiso denegado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes",
+      "http": 403,
+      "durationMs": 29,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.6216381",
+        "status": 403,
+        "codigo": "ACCESO_DENEGADO",
+        "mensaje": "No tienes permiso para esta operación",
+        "path": "/clientes",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-073",
+      "index": 73,
+      "name": "Consulta sin token",
+      "source": "tests/bruno/Consultas/Permisos y errores/Consulta sin token.bru",
+      "executedAt": "2026-10-09T17:30:06.629Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Autenticación requerida",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes",
+      "http": 401,
+      "durationMs": 9,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.6408524",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/clientes",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-074",
+      "index": 74,
+      "name": "Pagina invalida",
+      "source": "tests/bruno/Consultas/Permisos y errores/Pagina invalida.bru",
+      "executedAt": "2026-10-09T17:30:06.648Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Validación controlada",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?size=101",
+      "http": 400,
+      "durationMs": 27,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.6776082",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los campos de la petición",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "size",
+            "mensaje": "must be less than or equal to 100"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-075",
+      "index": 75,
+      "name": "Fecha invalida",
+      "source": "tests/bruno/Consultas/Permisos y errores/Fecha invalida.bru",
+      "executedAt": "2026-10-09T17:30:06.686Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Fecha rechazada",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?desde=2026-02-30",
+      "http": 400,
+      "durationMs": 36,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.7242861",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Fecha inválida; utiliza YYYY-MM-DD",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "desde",
+            "mensaje": "Fecha inválida; utiliza YYYY-MM-DD"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-076",
+      "index": 76,
+      "name": "Rango de fechas invertido",
+      "source": "tests/bruno/Consultas/Permisos y errores/Rango de fechas invertido.bru",
+      "executedAt": "2026-10-09T17:30:06.732Z",
+      "tests": [
+        {
+          "name": "Rango invertido rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes?desde=2026-10-09&hasta=2026-10-08",
+      "http": 400,
+      "durationMs": 34,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.7686551",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Desde no puede ser posterior a hasta",
+        "path": "/clientes",
+        "errores": [
+          {
+            "campo": "desde",
+            "mensaje": "Desde no puede ser posterior a hasta"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-077",
+      "index": 77,
+      "name": "Listado cuentas denegado a cliente",
+      "source": "tests/bruno/Consultas/Permisos y errores/Listado cuentas denegado a cliente.bru",
+      "executedAt": "2026-10-09T17:30:06.776Z",
+      "tests": [
+        {
+          "name": "Cliente no consulta cuentas generales",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/cuentas",
+      "http": 403,
+      "durationMs": 15,
+      "response": {
+        "timestamp": "2026-10-09T11:30:06.7930601",
+        "status": 403,
+        "codigo": "ACCESO_DENEGADO",
+        "mensaje": "No tienes permiso para esta operación",
+        "path": "/cuentas",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-078",
+      "index": 78,
+      "name": "Ficha Sofia",
+      "source": "tests/bruno/Consultas/Datos propios de perfiles QA/Ficha Sofia.bru",
+      "executedAt": "2026-10-09T17:30:06.800Z",
+      "tests": [
+        {
+          "name": "Ficha propia con datos confirmados",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 200,
+      "durationMs": 42,
+      "response": {
+        "cliente": {
+          "clienteId": 8,
+          "nombre": "Sofía",
+          "segundoNombre": "Jimena",
+          "apellidoPaterno": "Salazar",
+          "apellidoMaterno": "Godínez",
+          "curp": "SAGS050618MGTLDFA4",
+          "rfc": "SAGS050618ZZ4",
+          "correo": "sofia.jimena.salazar.godinez.qa@gmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": "2026-10-09T11:29:59.447632"
+        },
+        "fechaNacimiento": "2005-06-18",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4181788464",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Av. de los Héroes",
+          "numeroExterior": "S/N",
+          "numeroInterior": null,
+          "colonia": "Héroes de San Cristóbal",
+          "municipio": "Dolores Hidalgo Cuna de la Independencia Nacional",
+          "estado": "Guanajuato",
+          "codigoPostal": "37803",
+          "paisId": 1,
+          "asentamientoId": 110140023
+        },
+        "informacionLaboral": {
+          "ocupacion": "Licenciatura en Turismo",
+          "empresa": "Empresa de prueba de turismo",
+          "ingresoMensual": 12000
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000008",
+            "clienteId": 8,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:29:59.605595"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-079",
+      "index": 79,
+      "name": "Ficha Nancy",
+      "source": "tests/bruno/Consultas/Datos propios de perfiles QA/Ficha Nancy.bru",
+      "executedAt": "2026-10-09T17:30:06.852Z",
+      "tests": [
+        {
+          "name": "Ficha propia con datos confirmados",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 200,
+      "durationMs": 39,
+      "response": {
+        "cliente": {
+          "clienteId": 9,
+          "nombre": "Nancy",
+          "segundoNombre": "Guadalupe",
+          "apellidoPaterno": "Enríquez",
+          "apellidoMaterno": "Parra",
+          "curp": "EIPN980227MDFNRN03",
+          "rfc": "EIPN980227ZZ3",
+          "correo": "nancy.guadalupe.enriquez.parra.qa@hotmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": "2026-10-09T11:30:00.109804"
+        },
+        "fechaNacimiento": "1998-02-27",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681205803",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Nopaltzin",
+          "numeroExterior": "106",
+          "numeroInterior": null,
+          "colonia": "Banda de Arriba",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37903",
+          "paisId": 1,
+          "asentamientoId": 110333883
+        },
+        "informacionLaboral": {
+          "ocupacion": "Ingeniería Industrial",
+          "empresa": "Empresa de prueba industrial",
+          "ingresoMensual": 14000
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000009",
+            "clienteId": 9,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:30:00.12372"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-080",
+      "index": 80,
+      "name": "Ficha Dulce",
+      "source": "tests/bruno/Consultas/Datos propios de perfiles QA/Ficha Dulce.bru",
+      "executedAt": "2026-10-09T17:30:06.902Z",
+      "tests": [
+        {
+          "name": "Ficha propia con datos confirmados",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 200,
+      "durationMs": 46,
+      "response": {
+        "cliente": {
+          "clienteId": 7,
+          "nombre": "Dulce",
+          "segundoNombre": "María",
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPD051108MGTXXX08",
+          "rfc": "LOPD051108ZZ8",
+          "correo": "dulce.maria.lopez.parra.qa@gmail.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": "2026-10-08T22:44:14.647275"
+        },
+        "fechaNacimiento": "2005-11-08",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681046222",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Gerente de bodega",
+          "empresa": "Bodega Aurrera",
+          "ingresoMensual": 18000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000007",
+            "clienteId": 7,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-08T22:44:14.753687"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-081",
+      "index": 81,
+      "name": "Registro QA mantenimiento",
+      "source": "tests/bruno/Mantenimiento/Preparacion del perfil QA/Registro QA mantenimiento.bru",
+      "executedAt": "2026-10-09T17:30:06.964Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "POST",
+      "endpoint": "/clientes",
+      "http": 201,
+      "durationMs": 583,
+      "response": {
+        "clienteId": 11,
+        "estatus": "ACTIVO",
+        "cuenta": {
+          "numeroCuenta": "00000000000000000011",
+          "saldo": 0,
+          "estatus": "ACTIVA"
+        },
+        "usuario": {
+          "usuarioId": 10,
+          "correo": "qa.mantenimiento.mv18qen6@example.com",
+          "activo": true
+        }
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-082",
+      "index": 82,
+      "name": "Login mantenimiento",
+      "source": "tests/bruno/Mantenimiento/Preparacion del perfil QA/Login mantenimiento.bru",
+      "executedAt": "2026-10-09T17:30:07.558Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 272,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:07.817031600Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-083",
+      "index": 83,
+      "name": "Usuario propio",
+      "source": "tests/bruno/Mantenimiento/Preparacion del perfil QA/Usuario propio.bru",
+      "executedAt": "2026-10-09T17:30:07.842Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Sin credenciales",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/usuarios/10",
+      "http": 200,
+      "durationMs": 58,
+      "response": {
+        "usuarioId": 10,
+        "clienteId": 11,
+        "correo": "qa.mantenimiento.mv18qen6@example.com",
+        "activo": true,
+        "rol": "CLIENTE",
+        "fechaCreacion": "2026-10-09T11:30:07.536818",
+        "fechaActualizacion": "2026-10-09T11:30:07.536818"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-084",
+      "index": 84,
+      "name": "Recuperar perfil mantenimiento",
+      "source": "tests/bruno/Mantenimiento/Preparacion del perfil QA/Recuperar perfil mantenimiento.bru",
+      "executedAt": "2026-10-09T17:30:07.912Z",
+      "tests": [
+        {
+          "name": "Perfil QA correcto",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 200,
+      "durationMs": 29,
+      "response": {
+        "usuarioId": 10,
+        "clienteId": 11,
+        "correo": "qa.mantenimiento.mv18qen6@example.com",
+        "activo": true,
+        "rol": "CLIENTE"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-085",
+      "index": 85,
+      "name": "Recuperar ficha mantenimiento",
+      "source": "tests/bruno/Mantenimiento/Preparacion del perfil QA/Recuperar ficha mantenimiento.bru",
+      "executedAt": "2026-10-09T17:30:07.952Z",
+      "tests": [
+        {
+          "name": "Ficha QA correcta",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 200,
+      "durationMs": 40,
+      "response": {
+        "cliente": {
+          "clienteId": 11,
+          "nombre": "Dulce",
+          "segundoNombre": "María",
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPD051108MGTWTTA1",
+          "rfc": "LOPD051108EN6",
+          "correo": "qa.mantenimiento.mv18qen6@example.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": "2026-10-09T11:30:07.51156"
+        },
+        "fechaNacimiento": "2005-11-08",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681046222",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "843",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Gerente de bodega",
+          "empresa": "Bodega Aurrera",
+          "ingresoMensual": 18000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000011",
+            "clienteId": 11,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:30:07.52683"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-086",
+      "index": 86,
+      "name": "Actualizar datos QA",
+      "source": "tests/bruno/Mantenimiento/Actualizacion de datos/Actualizar datos QA.bru",
+      "executedAt": "2026-10-09T17:30:08.001Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Datos actualizados",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/clientes/11",
+      "http": 200,
+      "durationMs": 273,
+      "response": {
+        "cliente": {
+          "clienteId": 11,
+          "nombre": "Dulce",
+          "segundoNombre": "María",
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPD051108MGTWTTA1",
+          "rfc": "LOPD051108EN6",
+          "correo": "qa.mantenimiento.mv18qen6@example.com",
+          "estatus": "ACTIVO",
+          "fechaRegistro": "2026-10-09T11:30:07.51156"
+        },
+        "fechaNacimiento": "2005-11-08",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681046222",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "844",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Gerente de bodega",
+          "empresa": "Bodega Aurrera QA",
+          "ingresoMensual": 18000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000011",
+            "clienteId": 11,
+            "saldo": 0,
+            "estatus": "ACTIVA",
+            "fechaCreacion": "2026-10-09T11:30:07.52683"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-087",
+      "index": 87,
+      "name": "CURP no editable",
+      "source": "tests/bruno/Mantenimiento/Actualizacion de datos/CURP no editable.bru",
+      "executedAt": "2026-10-09T17:30:08.287Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Campo protegido",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/clientes/11",
+      "http": 400,
+      "durationMs": 38,
+      "response": {
+        "timestamp": "2026-10-09T11:30:08.3271165",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los parámetros de la petición",
+        "path": "/clientes/11",
+        "errores": [
+          {
+            "campo": "curp",
+            "mensaje": "CURP no se puede modificar"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-088",
+      "index": 88,
+      "name": "Correo duplicado al actualizar",
+      "source": "tests/bruno/Mantenimiento/Actualizacion de datos/Correo duplicado al actualizar.bru",
+      "executedAt": "2026-10-09T17:30:08.339Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Unicidad",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/clientes/11",
+      "http": 409,
+      "durationMs": 78,
+      "response": {
+        "timestamp": "2026-10-09T11:30:08.4197379",
+        "status": 409,
+        "codigo": "DATO_DUPLICADO",
+        "mensaje": "Ya existe un cliente con este dato",
+        "path": "/clientes/11",
+        "errores": [
+          {
+            "campo": "correoElectronico",
+            "mensaje": "Ya existe un cliente con este dato"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-089",
+      "index": 89,
+      "name": "Actualizar cliente ajeno",
+      "source": "tests/bruno/Mantenimiento/Actualizacion de datos/Actualizar cliente ajeno.bru",
+      "executedAt": "2026-10-09T17:30:08.427Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Sin acceso ajeno",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/clientes/3",
+      "http": 404,
+      "durationMs": 33,
+      "response": {
+        "timestamp": "2026-10-09T11:30:08.4628276",
+        "status": 404,
+        "codigo": "RECURSO_NO_ENCONTRADO",
+        "mensaje": "Recurso no encontrado",
+        "path": "/clientes/3",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-090",
+      "index": 90,
+      "name": "Password actual incorrecta",
+      "source": "tests/bruno/Mantenimiento/Contrasena/Password actual incorrecta.bru",
+      "executedAt": "2026-10-09T17:30:08.472Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Rechazo controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/usuarios/10/password",
+      "http": 401,
+      "durationMs": 282,
+      "response": {
+        "timestamp": "2026-10-09T11:30:08.7561213",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/usuarios/10/password",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-091",
+      "index": 91,
+      "name": "Password nueva invalida",
+      "source": "tests/bruno/Mantenimiento/Contrasena/Password nueva invalida.bru",
+      "executedAt": "2026-10-09T17:30:08.763Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Validación",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/usuarios/10/password",
+      "http": 400,
+      "durationMs": 21,
+      "response": {
+        "timestamp": "2026-10-09T11:30:08.7858691",
+        "status": 400,
+        "codigo": "VALIDACION",
+        "mensaje": "Revisa los parámetros de la petición",
+        "path": "/usuarios/10/password",
+        "errores": [
+          {
+            "campo": "passwordNueva",
+            "mensaje": "La contraseña requiere al menos 8 caracteres, mayúscula, minúscula, número y carácter especial; sin espacios y máximo 72 bytes UTF-8"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-092",
+      "index": 92,
+      "name": "Cambiar password QA",
+      "source": "tests/bruno/Mantenimiento/Contrasena/Cambiar password QA.bru",
+      "executedAt": "2026-10-09T17:30:08.793Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "PUT",
+      "endpoint": "/usuarios/10/password",
+      "http": 204,
+      "durationMs": 507,
+      "response": null,
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-093",
+      "index": 93,
+      "name": "Token anterior revocado",
+      "source": "tests/bruno/Mantenimiento/Contrasena/Token anterior revocado.bru",
+      "executedAt": "2026-10-09T17:30:09.312Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "JWT revocado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/auth/me",
+      "http": 401,
+      "durationMs": 15,
+      "response": {
+        "timestamp": "2026-10-09T11:30:09.3286921",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/auth/me",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-094",
+      "index": 94,
+      "name": "Login con nueva password",
+      "source": "tests/bruno/Mantenimiento/Contrasena/Login con nueva password.bru",
+      "executedAt": "2026-10-09T17:30:09.335Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 333,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:09.627235700Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-095",
+      "index": 95,
+      "name": "Baja QA por ejecutivo",
+      "source": "tests/bruno/Mantenimiento/Baja logica/Baja QA por ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:10.102Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "DELETE",
+      "endpoint": "/clientes/11",
+      "http": 204,
+      "durationMs": 100,
+      "response": null,
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-096",
+      "index": 96,
+      "name": "Cliente conserva datos tras baja",
+      "source": "tests/bruno/Mantenimiento/Baja logica/Cliente conserva datos tras baja.bru",
+      "executedAt": "2026-10-09T17:30:10.215Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Baja lógica",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/clientes/11",
+      "http": 200,
+      "durationMs": 40,
+      "response": {
+        "cliente": {
+          "clienteId": 11,
+          "nombre": "Dulce",
+          "segundoNombre": "María",
+          "apellidoPaterno": "López",
+          "apellidoMaterno": "Parra",
+          "curp": "LOPD051108MGTWTTA1",
+          "rfc": "LOPD051108EN6",
+          "correo": "qa.mantenimiento.mv18qen6@example.com",
+          "estatus": "INACTIVO",
+          "fechaRegistro": "2026-10-09T11:30:07.51156"
+        },
+        "fechaNacimiento": "2005-11-08",
+        "sexoId": 2,
+        "nacionalidadId": 1,
+        "estadoCivilId": 7,
+        "telefonoMovil": "4681046222",
+        "telefonoAlternativo": null,
+        "domicilio": {
+          "calle": "Guerrero",
+          "numeroExterior": "844",
+          "numeroInterior": null,
+          "colonia": "San Isidro",
+          "municipio": "San Luis de la Paz",
+          "estado": "Guanajuato",
+          "codigoPostal": "37907",
+          "paisId": 1,
+          "asentamientoId": 110333891
+        },
+        "informacionLaboral": {
+          "ocupacion": "Gerente de bodega",
+          "empresa": "Bodega Aurrera QA",
+          "ingresoMensual": 18000.5
+        },
+        "cuentas": [
+          {
+            "numeroCuenta": "00000000000000000011",
+            "clienteId": 11,
+            "saldo": 0,
+            "estatus": "INACTIVA",
+            "fechaCreacion": "2026-10-09T11:30:07.52683"
+          }
+        ]
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-097",
+      "index": 97,
+      "name": "Usuario desactivado",
+      "source": "tests/bruno/Mantenimiento/Baja logica/Usuario desactivado.bru",
+      "executedAt": "2026-10-09T17:30:10.264Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Sin acceso de usuario",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/usuarios/10",
+      "http": 200,
+      "durationMs": 29,
+      "response": {
+        "usuarioId": 10,
+        "clienteId": 11,
+        "correo": "qa.mantenimiento.mv18qen6@example.com",
+        "activo": false,
+        "rol": "CLIENTE",
+        "fechaCreacion": "2026-10-09T11:30:07.536818",
+        "fechaActualizacion": "2026-10-09T11:30:10.185116"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-098",
+      "index": 98,
+      "name": "JWT del cliente dado de baja",
+      "source": "tests/bruno/Mantenimiento/Baja logica/JWT del cliente dado de baja.bru",
+      "executedAt": "2026-10-09T17:30:10.302Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Sin sesión activa",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "GET",
+      "endpoint": "/clientes/me",
+      "http": 401,
+      "durationMs": 13,
+      "response": {
+        "timestamp": "2026-10-09T11:30:10.3172705",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/clientes/me",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-099",
+      "index": 99,
+      "name": "Login tras baja",
+      "source": "tests/bruno/Mantenimiento/Baja logica/Login tras baja.bru",
+      "executedAt": "2026-10-09T17:30:10.323Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Login rechazado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo de mantenimiento.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 401,
+      "durationMs": 234,
+      "response": {
+        "timestamp": "2026-10-09T11:30:10.5593325",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/auth/login",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-100",
+      "index": 100,
+      "name": "Consultar productos guardados",
+      "source": "tests/bruno/GestoPago/Consulta del catalogo/Consultar productos guardados.bru",
+      "executedAt": "2026-10-09T17:30:10.569Z",
+      "tests": [
+        {
+          "name": "Responde 200",
+          "passed": false,
+          "error": "expected 500 to equal 200"
+        },
+        {
+          "name": "Devuelve una lista de productos",
+          "passed": false,
+          "error": "expected { …(5) } to be an array"
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/api/gestopago/productos",
+      "http": 500,
+      "durationMs": 1281,
+      "response": {
+        "timestamp": "2026-10-09T11:30:11.8472552",
+        "status": 500,
+        "error": "Internal Server Error",
+        "message": "Ha ocurrido un error inesperado en el servidor.",
+        "path": "/api/gestopago/productos"
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-101",
+      "index": 101,
+      "name": "Obtener o sincronizar productos",
+      "source": "tests/bruno/GestoPago/Consulta del catalogo/Obtener o sincronizar productos.bru",
+      "executedAt": "2026-10-09T17:30:11.866Z",
+      "tests": [
+        {
+          "name": "Responde 200",
+          "passed": false,
+          "error": "expected 500 to equal 200"
+        },
+        {
+          "name": "Devuelve una lista de productos",
+          "passed": false,
+          "error": "expected { …(5) } to be an array"
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/api/gestopago/productos/sincronizar",
+      "http": 500,
+      "durationMs": 30,
+      "response": {
+        "timestamp": "2026-10-09T11:30:11.8969354",
+        "status": 500,
+        "error": "Internal Server Error",
+        "message": "Ha ocurrido un error inesperado en el servidor.",
+        "path": "/api/gestopago/productos/sincronizar"
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-102",
+      "index": 102,
+      "name": "Productos antes de sincronizar",
+      "source": "tests/bruno/GestoPago/Sincronizacion forzada/Productos antes de sincronizar.bru",
+      "executedAt": "2026-10-09T17:30:11.913Z",
+      "tests": [
+        {
+          "name": "Responde 200 con productos guardados",
+          "passed": false,
+          "error": "expected 500 to equal 200"
+        },
+        {
+          "name": "Identificadores sin duplicados",
+          "passed": false,
+          "error": "productos.map is not a function"
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "GET",
+      "endpoint": "/api/gestopago/productos",
+      "http": 500,
+      "durationMs": 32,
+      "response": {
+        "timestamp": "2026-10-09T11:30:11.9470153",
+        "status": 500,
+        "error": "Internal Server Error",
+        "message": "Ha ocurrido un error inesperado en el servidor.",
+        "path": "/api/gestopago/productos"
+      },
+      "state": "Fallido"
+    },
+    {
+      "id": "CP-103",
+      "index": 103,
+      "name": "Forzar sincronizacion",
+      "source": "tests/bruno/GestoPago/Sincronizacion forzada/Forzar sincronizacion.bru",
+      "executedAt": "2026-10-09T17:30:11.955Z",
+      "tests": [],
+      "notes": "No ejecutado: Ejecuta Productos antes de sincronizar antes de forzar la descarga.",
+      "error": "Ejecuta Productos antes de sincronizar antes de forzar la descarga.",
+      "state": "Bloqueado"
+    },
+    {
+      "id": "CP-104",
+      "index": 104,
+      "name": "Productos despues de sincronizar",
+      "source": "tests/bruno/GestoPago/Sincronizacion forzada/Productos despues de sincronizar.bru",
+      "executedAt": "2026-10-09T17:30:11.964Z",
+      "tests": [],
+      "notes": "No ejecutado: Ejecuta Productos antes de sincronizar y Forzar sincronizacion en ese orden.",
+      "error": "Ejecuta Productos antes de sincronizar y Forzar sincronizacion en ese orden.",
+      "state": "Bloqueado"
+    },
+    {
+      "id": "CP-105",
+      "index": 105,
+      "name": "Sincronizacion sin token",
+      "source": "tests/bruno/GestoPago/Sincronizacion forzada/Sincronizacion sin token.bru",
+      "executedAt": "2026-10-09T17:30:11.971Z",
+      "tests": [
+        {
+          "name": "Rechaza la sincronización sin JWT",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/api/gestopago/productos/forzar-sincronizacion",
+      "http": 401,
+      "durationMs": 6,
+      "response": {
+        "timestamp": "2026-10-09T11:30:11.9770893",
+        "status": 401,
+        "codigo": "NO_AUTENTICADO",
+        "mensaje": "Token ausente, inválido o acceso no disponible",
+        "path": "/api/gestopago/productos/forzar-sincronizacion",
+        "errores": []
+      },
+      "state": "Aprobado"
+    }
+  ],
+  "setup": [
+    {
+      "id": "CP-027",
+      "index": 27,
+      "name": "Login valido",
+      "source": "tests/bruno/Auth/Acceso/Login valido.bru",
+      "executedAt": "2026-10-09T17:29:57.679Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 607,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:34:58.256999100Z"
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-037",
+      "index": 37,
+      "name": "Intento incorrecto usuario de bloqueo",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Intento incorrecto usuario de bloqueo.bru",
+      "executedAt": "2026-10-09T17:30:02.785Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 401,
+      "durationMs": 251,
+      "response": {
+        "timestamp": "2026-10-09T11:30:03.0375396",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/auth/login",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-037",
+      "index": 37,
+      "name": "Intento incorrecto usuario de bloqueo",
+      "source": "tests/bruno/Auth/Bloqueo por intentos/Intento incorrecto usuario de bloqueo.bru",
+      "executedAt": "2026-10-09T17:30:03.045Z",
+      "tests": [
+        {
+          "name": "HTTP esperado",
+          "passed": true
+        },
+        {
+          "name": "Error controlado",
+          "passed": true
+        }
+      ],
+      "notes": "Perfil QA nuevo para bloqueo.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 401,
+      "durationMs": 239,
+      "response": {
+        "timestamp": "2026-10-09T11:30:03.2866213",
+        "status": 401,
+        "codigo": "CREDENCIALES_INVALIDAS",
+        "mensaje": "Credenciales inválidas o acceso no disponible",
+        "path": "/auth/login",
+        "errores": []
+      },
+      "state": "Aprobado"
+    },
+    {
+      "id": "CP-047",
+      "index": 47,
+      "name": "Login ejecutivo",
+      "source": "tests/bruno/Consultas/Preparacion del ejecutivo/Login ejecutivo.bru",
+      "executedAt": "2026-10-09T17:30:09.693Z",
+      "tests": [
+        {
+          "name": "JWT recibido",
+          "passed": true
+        }
+      ],
+      "notes": "Ejecución automática.",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "http": 200,
+      "durationMs": 389,
+      "response": {
+        "accessToken": "[omitido por seguridad]",
+        "tokenType": "Bearer",
+        "expiresIn": 300,
+        "expiresAt": "2026-10-09T17:35:10.079212300Z"
+      },
+      "state": "Aprobado"
+    }
+  ],
+  "expiredAt": 1791567298000,
+  "finishedAt": "2026-10-09T17:34:59.593Z"
+}

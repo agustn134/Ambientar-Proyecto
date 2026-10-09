@@ -1,5 +1,11 @@
 # Guía de Bruno: perfiles y pruebas manuales
 
+## Estado actualizado: 9 de octubre de 2026
+
+Se ejecutaron por script HTTP las peticiones y aserciones originales de los 105 casos: 96 aprobados, 7 fallidos y 2 bloqueados. No fue una ejecución mediante la interfaz de Bruno. Sofía y Nancy se registraron y sus flujos de login/perfil/ficha pasaron. Mantenimiento y bloqueo utilizaron perfiles QA sintéticos nuevos; el nuevo perfil de mantenimiento quedó dado de baja al terminar. La revocación del token anterior por cambio de contraseña pasó antes de expirar.
+
+Los párrafos posteriores sobre el cliente 6/usuario 5 y las capturas del 8 de octubre son históricos. No reutilizar esos IDs inactivos. La [matriz actual](https://docs.google.com/spreadsheets/d/1wuJ65P2yGV9EE4FCUEvcD3ppr8lwz2MxvaRizK-WxH0/edit) y [los resultados completos](evidencias/bruno-resultados-2026-10-09.json) documentan la nueva ejecución, incluidos los fallos.
+
 Abrir la colección de `tests/bruno`, **GestoPago - Clientes, seguridad y catalogos**, y seleccionar **Local** con `baseUrl=http://localhost:8080`. Las peticiones están ordenadas mediante `seq`; los nombres de archivo no llevan números. La pestaña **Docs** de cada carpeta y petición explica propósito, autenticación, resultado HTTP y variables capturadas.
 
 No ejecutar la colección completa como una única secuencia: contiene altas que se realizan una vez, bloqueo por intentos y una baja al final. Ejecutar el flujo correspondiente al estado actual del perfil. Mover las peticiones no modifica PostgreSQL.

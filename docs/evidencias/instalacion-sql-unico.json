@@ -1,0 +1,89 @@
+{
+  "fecha": "2026-10-09",
+  "script": "scripts/crear-base-datos.sql",
+  "sha256": "0df520d1847d5a7e746c19122665fc2cdba1269142e629dce84e3c0f0cd6254f",
+  "metodo": "Esquema consolidado e historial original de una instalación verificada V1–V8",
+  "creacion_windows": {
+    "iniciador": "crear-base-datos.ps1",
+    "base": "revision_windows_final_20261009",
+    "tablas": 15,
+    "versiones": 8
+  },
+  "creacion_linux": {
+    "iniciador": "crear-base-datos.sh",
+    "entorno": "PostgreSQL 17.11 Alpine en Docker; cliente y shell Linux",
+    "base": "revision_linux_final_20261009",
+    "tablas": 15,
+    "versiones": 8
+  },
+  "proteccion_base_existente": {
+    "base": "revision_linux_20261009",
+    "salida_psql": 3,
+    "clientes_antes_y_despues": 0,
+    "versiones_conservadas": 8
+  },
+  "arranque_api": {
+    "entorno": "Windows, JDK 21.0.12",
+    "puerto": 8082,
+    "flyway_valida_ocho_migraciones": true,
+    "migraciones_adicionales": 0,
+    "consulta_postal_http": 200,
+    "datos": {
+      "database": "revision_sql_20261009124248",
+      "migraciones": [
+        {
+          "version": "1",
+          "success": true,
+          "checksum": 1861448253
+        },
+        {
+          "version": "2",
+          "success": true,
+          "checksum": 1600801127
+        },
+        {
+          "version": "3",
+          "success": true,
+          "checksum": 895515499
+        },
+        {
+          "version": "4",
+          "success": true,
+          "checksum": 379645690
+        },
+        {
+          "version": "5",
+          "success": true,
+          "checksum": 1690143136
+        },
+        {
+          "version": "6",
+          "success": true,
+          "checksum": -140642946
+        },
+        {
+          "version": "7",
+          "success": true,
+          "checksum": 499011389
+        },
+        {
+          "version": "8",
+          "success": true,
+          "checksum": -1093282346
+        }
+      ],
+      "tablas_aplicacion": 15,
+      "asentamientos": 159340,
+      "estados": 32,
+      "municipios": 2478,
+      "clientes_qa": 25,
+      "postal_sha256": "7c4c61f673998ee1f261df87aa6e49353541d643f53acfae4c85026c87b2696d"
+    }
+  },
+  "preparacion_portable_qa": {
+    "perfiles": 25,
+    "primera_preparacion": "Altas nuevas",
+    "repeticion": "Recuperación propia, sin borrar ni modificar perfiles"
+  },
+  "linux_api_carga": "Iniciadores verificados sintácticamente; no se ejecutó la API/JMeter nativos en Linux en esta sesión"
+}
