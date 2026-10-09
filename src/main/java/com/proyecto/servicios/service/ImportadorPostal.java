@@ -11,7 +11,7 @@ import java.security.MessageDigest;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
-/** Importa el ZIP oficial local; no redistribuye el catálogo ni extrae rutas del ZIP al disco. */
+/** Importa el ZIP oficial local sin extraer rutas del ZIP al disco. */
 public class ImportadorPostal {
     public record Resultado(int asentamientos, int estados, int municipios, String sha256) {}
     private record Fila(int id, int municipioId, String codigoPostal, String nombre, String tipo) {}

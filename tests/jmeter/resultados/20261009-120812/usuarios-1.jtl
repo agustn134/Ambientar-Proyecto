@@ -1,0 +1,91 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1791569306335,2606,POST Login QA,200,,Usuarios concurrentes 1-1,text,true,,682,270,1,1,http://localhost:8081/auth/login,2604,0,110
+1791569310439,437,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,435,0,0
+1791569311591,254,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,248,0,0
+1791569312496,154,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,152,0,0
+1791569313240,55,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,53,0,0
+1791569313921,96,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,94,0,0
+1791569314527,81,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,80,0,0
+1791569315126,92,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,90,0,0
+1791569315740,48,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,47,0,0
+1791569316304,71,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,69,0,0
+1791569316885,80,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,78,0,0
+1791569317473,103,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,101,0,0
+1791569318086,52,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,49,0,0
+1791569318653,59,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,57,0,0
+1791569319222,80,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,78,0,0
+1791569319810,149,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,147,0,0
+1791569320465,50,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,48,0,0
+1791569321025,89,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,88,0,0
+1791569321633,69,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,68,0,0
+1791569322213,67,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,65,0,0
+1791569322794,38,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,36,0,0
+1791569323339,66,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,65,0,0
+1791569323923,202,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,201,0,0
+1791569324639,67,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,66,0,0
+1791569325223,43,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,42,0,0
+1791569325784,62,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,60,0,0
+1791569326365,90,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,88,0,0
+1791569326964,61,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,60,0,0
+1791569327537,42,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,41,0,0
+1791569328086,59,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,58,0,0
+1791569328654,73,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,71,0,0
+1791569329240,78,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,76,0,0
+1791569329824,39,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,38,0,0
+1791569330369,47,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,47,0,0
+1791569330926,77,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,76,0,0
+1791569331521,79,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,78,0,0
+1791569332107,40,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,39,0,0
+1791569332653,59,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,58,0,0
+1791569333217,67,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,66,0,0
+1791569333794,57,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,56,0,0
+1791569334366,32,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,31,0,0
+1791569334914,46,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,45,0,0
+1791569335477,66,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,65,0,0
+1791569336049,62,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,62,0,0
+1791569336618,29,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,29,0,0
+1791569337155,47,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,46,0,0
+1791569337707,117,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,115,0,0
+1791569338330,61,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,60,0,0
+1791569338900,40,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,39,0,0
+1791569339452,49,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,48,0,0
+1791569340016,125,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,124,0,0
+1791569340659,59,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,58,0,0
+1791569341235,38,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,37,0,0
+1791569341791,47,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,45,0,0
+1791569342357,53,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,53,0,0
+1791569342923,57,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,56,0,0
+1791569343498,28,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,27,0,0
+1791569344038,139,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,137,0,0
+1791569344695,58,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,58,0,0
+1791569345265,53,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,53,0,0
+1791569345829,41,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,40,0,0
+1791569346381,54,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,52,0,0
+1791569346943,67,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,65,0,0
+1791569347528,67,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,66,0,0
+1791569348105,38,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,37,0,0
+1791569348655,42,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,40,0,0
+1791569349207,59,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,57,0,0
+1791569349770,70,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,69,0,0
+1791569350350,32,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,31,0,0
+1791569350896,53,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,51,0,0
+1791569351458,62,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,61,0,0
+1791569352024,147,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,146,0,0
+1791569352677,33,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,32,0,0
+1791569353228,41,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,40,0,0
+1791569353776,78,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,77,0,0
+1791569354361,115,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,113,0,0
+1791569354986,39,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,38,0,0
+1791569355539,53,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,52,0,0
+1791569356101,61,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,60,0,0
+1791569356669,50,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,49,0,0
+1791569357228,33,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,32,0,0
+1791569357791,64,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,63,0,0
+1791569358372,107,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,106,0,0
+1791569358986,56,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,55,0,0
+1791569359558,61,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,60,0,0
+1791569360139,44,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,43,0,0
+1791569360690,66,GET Ficha propia,200,,Usuarios concurrentes 1-1,text,true,,1192,519,1,1,http://localhost:8081/clientes/me,65,0,0
+1791569361270,77,GET Saldo propio,200,,Usuarios concurrentes 1-1,text,true,,395,542,1,1,http://localhost:8081/cuentas/00000000000000000001/saldo,76,0,0
+1791569361853,37,GET Catálogo postal,200,,Usuarios concurrentes 1-1,text,true,,2787,540,1,1,http://localhost:8081/catalogos/codigos-postales/37907,36,0,0
+1791569362401,46,GET Perfil,200,,Usuarios concurrentes 1-1,text,true,,367,515,1,1,http://localhost:8081/auth/me,45,0,0

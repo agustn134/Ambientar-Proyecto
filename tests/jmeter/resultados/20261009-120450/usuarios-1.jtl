@@ -1,0 +1,2 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1791569107857,1291,POST Login QA,200,,Usuarios concurrentes 1-1,text,true,,685,270,1,1,http://localhost:8081/auth/login,1289,0,133
