@@ -21,6 +21,8 @@ Este README es el documento técnico principal. La revisión puede seguir tres p
 
 Acceso rápido: [Windows](#windows) · [Linux](#linux) · [Diseño de datos](#diseno) · [Solución Java y API](#solucion) · [Pruebas y resultados](#evidencias).
 
+Para publicar la API, consultar la [guía de despliegue en Render](docs/despliegue-render.md). Incluye Docker con Java 21, PostgreSQL, Redis y las variables de entorno. El despliegue remoto está pendiente de verificación; las evidencias existentes corresponden a las ejecuciones locales documentadas.
+
 ## Ejecución para la revisión: Windows y Linux
 
 La base completa se prepara con **una orden**, utilizando el iniciador Windows o Linux mostrado abajo. El DDL está reunido en [`scripts/crear-base-datos.sql`](scripts/crear-base-datos.sql): crea una base nueva, las 15 tablas, sus secuencias, índices y restricciones, los catálogos personales y el historial de Flyway correspondiente al esquema entregado. A continuación, el iniciador carga el ZIP postal incluido mediante el importador Java. Ejecutar únicamente el SQL prepara el esquema; los iniciadores completan también sus datos postales.
