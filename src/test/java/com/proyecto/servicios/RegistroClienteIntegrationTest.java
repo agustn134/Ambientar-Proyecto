@@ -680,4 +680,14 @@ class RegistroClienteIntegrationTest {
         mvc.perform(post("/personas").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
             .andExpect(status().isForbidden()).andExpect(jsonPath("codigo").value("ACCESO_DENEGADO"));
     }
+    @Test void usuarioPropioYErroresDeIdDescriptivos() throws Exception {
+        String token=extraerToken(registrarYToken());
+        mvc.perform(get("/usuarios/me").header("Authorization","Bearer "+token))
+            .andExpect(status().isOk()).andExpect(jsonPath("passwordHash").doesNotExist());
+        mvc.perform(get("/usuarios/0").header("Authorization","Bearer "+token))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"))
+            .andExpect(jsonPath("errores[0].mensaje").value("El ID del usuario debe ser un número entero mayor que cero"));
+        mvc.perform(get("/usuarios/999999").header("Authorization","Bearer "+token))
+            .andExpect(status().isNotFound()).andExpect(jsonPath("codigo").value("RECURSO_NO_ENCONTRADO"));
+    }
 }
