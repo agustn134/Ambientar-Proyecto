@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Order(-100)
 @Slf4j
-@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class,com.proyecto.servicios.controller.CatalogoController.class,com.proyecto.servicios.controller.CuentaController.class,com.proyecto.servicios.controller.UsuarioController.class})
+@RestControllerAdvice
 public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
@@ -41,7 +41,7 @@ public class RegistroClienteExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorRegistro> tipoParametro(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,HttpServletRequest request) {
-        return respuesta(400,"VALIDACION","Parámetro inválido",List.of(new ErrorCampo(ex.getName(),"Verifica el tipo del parámetro")),request);
+        return respuesta(400,"VALIDACION","Parámetro inválido",List.of(new ErrorCampo(ex.getName(),"El parámetro debe tener el tipo requerido; el ID del usuario debe ser un número entero")),request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -78,7 +78,7 @@ public class RegistroClienteExceptionHandler {
             cause = cause.getCause();
         }
         return respuesta(400, "JSON_INVALIDO", "JSON, tipo de dato o fecha inválidos",
-            List.of(new ErrorCampo(campo, "Verifica el tipo y formato; fechas YYYY-MM-DD, texto entre comillas e ingreso numérico")), request);
+            List.of(new ErrorCampo(campo, "Envía JSON válido con el tipo requerido para este campo; las contraseñas deben ser texto entre comillas")), request);
     }
 
     @ExceptionHandler(RegistroClienteException.class)

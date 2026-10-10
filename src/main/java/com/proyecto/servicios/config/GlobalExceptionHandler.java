@@ -4,7 +4,6 @@ import com.proyecto.servicios.exception.GestoPagoAuthException;
 import com.proyecto.servicios.exception.GestoPagoException;
 import com.proyecto.servicios.exception.GestoPagoNotFoundException;
 import com.proyecto.servicios.exception.GestoPagoServiceUnavailableException;
-import com.proyecto.servicios.model.error.ErrorResponseDto;
 import feign.RetryableException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +20,13 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(GestoPagoAuthException.class)
-    public ResponseEntity<ErrorResponseDto> handleGestoPagoAuthException(GestoPagoAuthException ex, HttpServletRequest request) {
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoAuthException(GestoPagoAuthException ex, HttpServletRequest request) {
         log.warn("Error de autenticación GestoPago; status=401");
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(GestoPagoException.class)
-    public ResponseEntity<ErrorResponseDto> handleGestoPagoException(GestoPagoException ex, HttpServletRequest request) {
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoException(GestoPagoException ex, HttpServletRequest request) {
         log.error("Error GestoPago; status={}; tipo={}", ex.getStatus(), ex.getClass().getSimpleName());
         HttpStatus status = HttpStatus.resolve(ex.getStatus());
         if (status == null) {
@@ -37,38 +36,32 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(GestoPagoNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleGestoPagoNotFoundException(GestoPagoNotFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoNotFoundException(GestoPagoNotFoundException ex, HttpServletRequest request) {
         log.warn("Recurso no encontrado en GestoPago; status=404");
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(GestoPagoServiceUnavailableException.class)
-    public ResponseEntity<ErrorResponseDto> handleGestoPagoServiceUnavailableException(GestoPagoServiceUnavailableException ex, HttpServletRequest request) {
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoServiceUnavailableException(GestoPagoServiceUnavailableException ex, HttpServletRequest request) {
         log.error("Servicio GestoPago no disponible; status={}", ex.getStatus());
         HttpStatus status = ex.getStatus() == 504 ? HttpStatus.GATEWAY_TIMEOUT : HttpStatus.SERVICE_UNAVAILABLE;
         return buildErrorResponse(status, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler({RetryableException.class, SocketTimeoutException.class})
-    public ResponseEntity<ErrorResponseDto> handleTimeoutException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleTimeoutException(Exception ex, HttpServletRequest request) {
         log.error("Error de comunicación; status=504; tipo={}", ex.getClass().getSimpleName());
         return buildErrorResponse(HttpStatus.GATEWAY_TIMEOUT, "Error de comunicación o timeout al intentar conectar con el servicio externo.", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Error interno; status=500; tipo={}", ex.getClass().getSimpleName());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ha ocurrido un error inesperado en el servidor.", request.getRequestURI());
     }
 
-    private ResponseEntity<ErrorResponseDto> buildErrorResponse(HttpStatus status, String message, String path) {
-        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
-                .timestamp(LocalDateTime.now())
-                .status(status.value())
-                .error(status.getReasonPhrase())
-                .message(message)
-                .path(path)
-                .build();
+    private ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> buildErrorResponse(HttpStatus status, String message, String path) {
+        var errorResponse = new RegistroClienteExceptionHandler.ErrorRegistro(LocalDateTime.now(), status.value(), status == HttpStatus.INTERNAL_SERVER_ERROR ? "ERROR_INTERNO" : "SERVICIO_EXTERNO", message, path, java.util.List.of());
         return new ResponseEntity<>(errorResponse, status);
     }
 }
