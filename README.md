@@ -1,167 +1,37 @@
 # Ambientar-Proyecto
 
-API REST para registrar y administrar personas físicas. Cada alta crea su domicilio, cuenta y usuario de acceso en una operación transaccional. La solución incluye autenticación JWT, permisos CLIENTE/EJECUTIVO, consultas, catálogos mexicanos e integración de productos GestoPago.
+API REST para registrar y administrar clientes personas físicas, sus usuarios y cuentas. Incluye catálogos mexicanos, autenticación, permisos por rol e integración con el catálogo de productos GestoPago.
 
-**Tecnología:** Java 17 como nivel de compilación; JDK 21 para la ejecución comprobada; Spring Boot 3.4.0; PostgreSQL 17; Flyway; JUnit y JMeter.
+**API desplegada:** https://ambientar-proyecto.onrender.com
 
-## Guía de revisión del entregable
+**Swagger:** [Abrir documentación interactiva y ejecutar peticiones](https://ambientar-proyecto.onrender.com/swagger-ui/index.html).
 
-Este README es el documento técnico principal. La revisión puede seguir tres pasos: **ejecutar la instalación**, **contrastar el diseño con el código** y **consultar las evidencias**.
+Este README reúne el documento técnico de la solución. La revisión de los endpoints se realiza desde Swagger, siguiendo el orden de la sección API REST y consultas.
 
-| Entregable del profesor | Acceso directo |
-|---|---|
-| Diagrama entidad–relación | Incluido en este README; [PDF](docs/diagramas/V3%20DIAGRAMA%20E%20R%20Integracion%20de%20clientes.pdf) y [editable](docs/diagramas/modelo-er-v8.drawio.xml) |
-| Script de creación de base de datos | [Un único archivo SQL](scripts/crear-base-datos.sql), con iniciadores Windows y Linux |
-| Código fuente completo | [Java](src/main/java/), [recursos](src/main/resources/) y Gradle Wrapper |
-| API REST | Procedimiento de inicio, Swagger y contrato de rutas descritos abajo |
-| Evidencias de pruebas | [Resultados funcionales](docs/evidencias/bruno-resultados-2026-10-09.json), [suite Java](docs/evidencias/suite-java.json) y [reportes JMeter](tests/jmeter/resultados/20261009-120812/) |
-| Documento técnico | Este README; `docs/` contiene las explicaciones complementarias |
+**Accesos directos:**
 
-**Estado de la evidencia funcional:** 96 casos aprobados, 7 fallidos y 2 bloqueados. Los pendientes se detallan al final y no se presentan como funcionalidades acreditadas.
+- [Diagrama entidad–relación](#diagrama-entidadrelación), [PDF](docs/diagramas/V3%20DIAGRAMA%20E%20R%20Integracion%20de%20clientes.pdf) y [archivo editable](docs/diagramas/modelo-er-v8.drawio.xml).
+- [Script único de creación de base de datos](scripts/crear-base-datos.sql).
+- [Código fuente Java](src/main/java/) y [recursos y migraciones](src/main/resources/).
+- [Reglas de negocio](#solución-java-y-reglas-de-negocio) y [secuencia de endpoints](#api-rest-y-consultas).
+- [Matriz de pruebas funcionales](https://docs.google.com/spreadsheets/d/1wuJ65P2yGV9EE4FCUEvcD3ppr8lwz2MxvaRizK-WxH0/edit).
+- [Resultados de la suite Java](docs/evidencias/suite-java.json) y [plan y resultados de JMeter](docs/jmeter-plan-resultados.md).
 
-Acceso rápido: [Windows](#windows) · [Linux](#linux) · [Diseño de datos](#diseno) · [Solución Java y API](#solucion) · [Pruebas y resultados](#evidencias).
+## Ejecución local en Linux
 
-Para publicar la API, consultar la [guía de despliegue en Render](docs/despliegue-render.md). Incluye Docker con Java 21, PostgreSQL, Redis y las variables de entorno. El despliegue remoto está pendiente de verificación; las evidencias existentes corresponden a las ejecuciones locales documentadas.
-
-## Ejecución para la revisión: Windows y Linux
-
-La base completa se prepara con **una orden**, utilizando el iniciador Windows o Linux mostrado abajo. El DDL está reunido en [`scripts/crear-base-datos.sql`](scripts/crear-base-datos.sql): crea una base nueva, las 15 tablas, sus secuencias, índices y restricciones, los catálogos personales y el historial de Flyway correspondiente al esquema entregado. A continuación, el iniciador carga el ZIP postal incluido mediante el importador Java. Ejecutar únicamente el SQL prepara el esquema; los iniciadores completan también sus datos postales.
-
-V1–V8 se conservan como historial del desarrollo. No es necesario ejecutarlas por separado al utilizar el SQL de entrega. Su historial procede de la base QA comprobada; al arrancar, Flyway valida los archivos originales y reconoce el esquema en versión 8.
-
-### Requisitos previos
-
-| Requisito | Uso |
-|---|---|
-| JDK 21 | Ejecutar el JAR y compilar si se usa el código fuente |
-| PostgreSQL 17 | Persistencia; usuario con permiso para crear una base |
-| Cliente `psql` o PostgreSQL en Docker | Ejecutar el SQL único |
-| ZIP postal incluido en `datos/` | Cargar automáticamente el catálogo al crear la base |
-| Python 3 y JMeter 5.6.3 | Opcionales, para repetir la carga |
-
-PostgreSQL debe estar iniciado. Si `psql` no está en PATH, añadir la carpeta `bin` de PostgreSQL o utilizar la alternativa Docker descrita más abajo. No se necesita instalar Gradle: el proyecto incluye su Wrapper. En una primera compilación necesita Internet para descargar dependencias.
-
-El catálogo nacional ya está incluido en `datos/CPdescargatxt.zip`: **159,340 asentamientos, 2,478 municipios y 32 entidades**. Procede de [Correos de México](https://www.correosdemexico.gob.mx/SSLServicios/ConsultaCP/CodigoPostal_Exportar.aspx); se conserva completo, con su aviso original. La orden de creación ejecuta el SQL y después importa este ZIP en una transacción. No hay que descargarlo, descomprimirlo ni indicar una ruta. El [registro de origen y SHA-256](datos/README.md) permite verificar la copia entregada.
-
-[Comprobación de creación y carga automática](docs/evidencias/instalacion-catalogo-incluido.json): base nueva, importación repetida sin duplicados y consulta HTTP del catálogo. Los iniciadores actualizados se ejecutaron en Windows y Git Bash; su sintaxis POSIX se verificó dentro de Linux/Docker. La ejecución completa con JVM Linux queda disponible para reproducirla siguiendo las mismas instrucciones.
-
-<a id="windows"></a>
-
-### Windows — PowerShell 7
-
-Desde la raíz del proyecto, configurar la conexión y crear la base:
-
-```powershell
-java -version # Debe mostrar Java 21; configurar PATH o JAVA_HOME si hace falta.
-$env:PGHOST = 'localhost'
-$env:PGPORT = '5432'
-$env:PGUSER = 'postgres'
-$claveRevision = Read-Host 'Contraseña de PostgreSQL' -AsSecureString
-$env:PGPASSWORD = [System.Net.NetworkCredential]::new('', $claveRevision).Password
-
-.\scripts\crear-base-datos.ps1 -Base revision_hasani
-```
-
-Resultado esperado: `15` tablas de aplicación, `8` versiones de Flyway y el mensaje **Catálogo postal listo: 159340 asentamientos, 32 estados, 2478 municipios**. El catálogo queda cargado antes de iniciar la API:
-
-```powershell
-.\scripts\iniciar-api.ps1 -Base revision_hasani
-```
-
-El iniciador genera la clave JWT en memoria si no se configuró y compila el JAR si hace falta. Utiliza la contraseña de PostgreSQL del entorno; no la guarda en archivos. Esperar el mensaje `Started App` y abrir **http://localhost:8081/swagger-ui.html**. La API permanece en esa terminal; `Ctrl+C` la detiene.
-
-<a id="linux"></a>
-
-### Linux — terminal
-
-Con Java 21 y PostgreSQL 17 disponibles, desde la raíz del proyecto:
+Desde la raíz del proyecto, configurar la conexión y ejecutar:
 
 ```bash
-java -version
 export PGHOST=localhost PGPORT=5432 PGUSER=postgres
 read -rsp 'Contraseña de PostgreSQL: ' PGPASSWORD; printf '\n'
 export PGPASSWORD
-
 sh scripts/crear-base-datos.sh revision_hasani
-```
-
-La misma orden carga el ZIP incluido. Cuando termine, iniciar la API:
-
-```bash
 sh scripts/iniciar-api.sh revision_hasani
 ```
 
-El iniciador necesita `java` en PATH. Utiliza `openssl` para generar la clave JWT si no existe `JWT_SECRET`. El JAR y el esquema son los mismos que en Windows. Si no hay JAR, compila mediante `sh gradlew bootJar`. Esperar `Started App`, abrir **http://localhost:8081/swagger-ui.html** y detener con `Ctrl+C`.
+La creación ejecuta el SQL único y carga automáticamente `datos/CPdescargatxt.zip`, incluido en el proyecto. V1–V8 se conservan como historial de migraciones; no se ejecutan manualmente por separado. El catálogo contiene 159,340 asentamientos, 2,478 municipios y 32 estados, con [origen y huella SHA-256](datos/README.md) documentados. Para reiniciar una base ya creada, ejecutar únicamente el iniciador de la API.
 
-La contraseña se solicita sin mostrarla ni escribirla literalmente en el historial de comandos. Las credenciales pertenecen al entorno del revisor.
-
-### Alternativa: PostgreSQL en Docker
-
-Si se utiliza un contenedor existente, sustituir únicamente la orden de creación:
-
-```powershell
-# Windows; nombre del contenedor y puerto según su instalación.
-.\scripts\crear-base-datos.ps1 -Base revision_hasani -Contenedor postgres-dev
-```
-
-```bash
-# Linux.
-export DOCKER_CONTAINER=postgres-dev
-sh scripts/crear-base-datos.sh revision_hasani
-```
-
-La API se ejecuta en el equipo y se conecta al puerto publicado en `PGPORT`. Para un contenedor nuevo, después de configurar `PGPASSWORD`, puede usarse:
-
-```powershell
-docker run -d --name postgres-revision -e "POSTGRES_PASSWORD=$env:PGPASSWORD" -p 5433:5432 postgres:17-alpine
-$env:PGPORT = '5433'
-docker exec postgres-revision pg_isready -U postgres
-# Cuando informe accepting connections:
-.\scripts\crear-base-datos.ps1 -Base revision_hasani -Contenedor postgres-revision
-```
-
-```bash
-docker run -d --name postgres-revision -e "POSTGRES_PASSWORD=$PGPASSWORD" -p 5433:5432 postgres:17-alpine
-export PGPORT=5433 DOCKER_CONTAINER=postgres-revision
-docker exec postgres-revision pg_isready -U postgres
-# Cuando informe accepting connections:
-sh scripts/crear-base-datos.sh revision_hasani
-```
-
-En Docker, la importación Java se conecta desde el equipo al puerto publicado: `PGHOST`, `PGPORT`, `PGUSER` y `PGPASSWORD` deben corresponder a ese contenedor. Si falla sólo la importación, el esquema creado se conserva; corregir la conexión y ejecutar `scripts/importar-catalogo-postal.ps1 -Base revision_hasani` o `sh scripts/importar-catalogo-postal.sh revision_hasani`.
-
-Estas alternativas ejecutan **el mismo SQL**; no son ocho pasos de migración. No ejecutar la creación dos veces sobre el mismo nombre: el script detecta una base existente y se detiene sin modificarla. Para volver a abrir una base creada, ejecutar sólo `iniciar-api`. Para otra instalación desde cero, elegir otro nombre de base.
-
-### Qué comprobar al iniciar
-
-1. Swagger abre en el puerto 8081.
-2. `GET /catalogos/codigos-postales/37907` devuelve asentamientos con el CP solicitado.
-3. `POST /clientes` crea cliente, domicilio, cuenta y usuario; devuelve 201.
-4. `POST /auth/login` entrega un JWT. Usarlo en **Authorize** para consultar `/auth/me` y `/clientes/me`.
-5. Consultar la cuenta y el saldo del mismo cliente; no se exponen contraseñas ni hashes.
-
-El perfil de revisión `qa` usa PostgreSQL y las reglas reales de clientes. Desactiva la caché y dirige GestoPago a una dirección local para que la revisión no consuma el proveedor. No acredita la integración externa. Para esta última se necesitan Redis, credenciales GestoPago y la configuración normal del proyecto.
-
-### Repetir JMeter en ambos sistemas
-
-Preparar perfiles sintéticos mientras la API de revisión está iniciada:
-
-```powershell
-python scripts/preparar-datos-jmeter.py
-.\scripts\ejecutar-jmeter.ps1 -JMeterHome (Join-Path $HOME 'Downloads/apache-jmeter-5.6.3')
-```
-
-```bash
-python3 scripts/preparar-datos-jmeter.py
-export JMETER_HOME="$HOME/Downloads/apache-jmeter-5.6.3" # Ajustar a su ruta.
-sh scripts/ejecutar-jmeter.sh
-```
-
-Se ejecutan 1, 10 y 25 usuarios durante 60 segundos por nivel. Los JTL y dashboards se guardan en una carpeta nueva de `tests/jmeter/resultados/`. Para revisar el `.jmx` en la interfaz: `bin/jmeter.bat` en Windows o `sh "$JMETER_HOME/bin/jmeter"` en Linux, y **Archivo → Abrir → `tests/jmeter/clientes-local.jmx`**.
-
-La preparación Python admite repetir la recuperación de sus propios perfiles QA sin borrar registros. No utiliza los datos personales del proyecto. El CSV queda en `.local-data`, fuera de Git y del paquete. Los [reportes ya entregados](tests/jmeter/resultados/20261009-120812/) se pueden abrir sin repetir la carga.
-
-<a id="diseno"></a>
+Swagger local: `http://localhost:8081/swagger-ui/index.html`. El perfil local de revisión prueba clientes y cuentas; la integración externa se revisa en el entorno desplegado. Las mediciones JMeter entregadas corresponden al entorno local.
 
 ## Diagrama entidad–relación
 
@@ -202,80 +72,122 @@ Las FKs, `NOT NULL`, `UNIQUE` y los CHECK de rol/intentos preservan las restricc
 
 Se usan índices para relaciones, identificadores, CP, estatus y fecha. V3 también conserva índices explícitos sobre algunas columnas con `UNIQUE`; esos índices pueden resultar redundantes y deben revisarse mediante una migración posterior, sin modificar el SQL ya aplicado. Las consultas generales se paginan para limitar filas transferidas; no se afirma una medición de memoria total de la aplicación.
 
-<a id="solucion"></a>
-
 ## Solución Java y reglas de negocio
 
-La solución separa controladores REST, DTO de entrada/salida, servicios de negocio, repositorios y clientes de integración. Spring valida las entradas; los servicios comprueban reglas entre campos y autorizaciones. JPA/JDBC persisten en PostgreSQL y `sfTransactionManager` delimita las transacciones. OpenFeign/JAXB y MapStruct adaptan la integración GestoPago. Los exception handlers producen respuestas HTTP controladas y los logs registran operación, duración y tipo de fallo.
+La aplicación administra el registro de una persona y mantiene relacionados sus datos personales, domicilio, cuenta y usuario de acceso. Java comprueba la información recibida antes de guardarla en PostgreSQL. Los controladores reciben las solicitudes, los servicios aplican las reglas y los repositorios consultan o guardan los registros.
 
-El alta crea **cliente + domicilio + cuenta ACTIVA con saldo 0 + usuario CLIENTE** en una sola transacción. El número de cuenta se genera con 20 dígitos; no se presenta como CLABE. Si falla el alta, se revierte el conjunto. Los DTO de consulta excluyen contraseña y hash.
+### Registro del cliente y creación de cuenta
 
-### Validaciones
+El registro sólo se acepta si la persona es mayor de edad y cumple las validaciones de identidad, contacto, domicilio, ingreso y contraseña. El nombre y los apellidos admiten letras y espacios. La fecha de nacimiento debe ser válida y anterior al día actual. CURP, RFC y correo no pueden estar registrados previamente; el correo se compara sin distinguir mayúsculas y minúsculas.
 
-| Regla | Comprobación |
-|---|---|
-| Nombre | 3–38 caracteres; letras y espacios |
-| Apellidos | 2–50 caracteres; letras y espacios |
-| Nacimiento y edad | Fecha real pasada; al menos 18 años |
-| CURP y RFC | Formato, fecha interna, normalización a mayúsculas y unicidad; RFC de 12 o 13 caracteres |
-| Correo | Formato, longitud máxima 100 y unicidad normalizada |
-| Teléfono | Diez dígitos |
-| Ingreso | Decimal JSON positivo, hasta 13 enteros y 2 decimales |
-| Contraseña | Mínimo 8 caracteres y máximo 72 bytes UTF-8; mayúscula, minúscula, dígito y símbolo; sin espacios/control |
-| IDs de catálogo | Enteros JSON positivos, dentro del rango y correspondientes a opciones habilitadas |
-| Domicilio | CP de cinco dígitos y asentamiento existente que corresponde al CP; etiquetas derivadas del catálogo |
-| Tipos JSON | Se rechazan conversiones de cadenas, booleanos o decimales donde el contrato exige otro tipo |
-| Actualización | CURP/RFC protegidos; correo sincronizado con usuario; cuenta y fecha original conservadas |
+El domicilio debe seleccionar un asentamiento existente que pertenezca al código postal indicado. Las opciones personales y el país deben corresponder a valores habilitados del catálogo. El ingreso mensual debe ser mayor que cero y admitir como máximo dos decimales. Estas comprobaciones se realizan en el servidor, independientemente de la herramienta utilizada para enviar la petición.
 
-Los campos JSON desconocidos actualmente se ignoran; esto no permite asignar un rol, saldo o identidad desde el request porque el servicio los genera o controla. Las validaciones no verifican autenticidad oficial de CURP/RFC.
+Cuando el alta es válida, se crean juntos el cliente, su domicilio, una cuenta activa con saldo inicial de cero y un usuario con rol CLIENTE. La aplicación genera el número de cuenta de veinte dígitos. Si alguno de estos registros no puede guardarse, se cancela toda el alta para evitar información incompleta. El número generado es un identificador interno de cuenta y no una CLABE.
 
-El login compara BCrypt y bloquea tras tres intentos incorrectos consecutivos. JWT utiliza firma HS256, issuer, audience, expiración y validación del usuario activo/rol/versión vigente. El cambio de contraseña invalida los tokens anteriores. La baja lógica conserva las filas, marca cliente/cuentas inactivos, desactiva usuario e invalida el acceso. Las FKs con cascada describen borrado físico SQL; el DELETE de esta API utiliza baja lógica.
+### Acceso y protección de la información
+
+La contraseña se guarda mediante BCrypt; las consultas no devuelven la contraseña ni su hash. Para iniciar sesión, el usuario debe estar activo y proporcionar sus credenciales correctas. Tres intentos incorrectos consecutivos bloquean su acceso. Una sesión correcta entrega un JWT con vigencia limitada, que se utiliza para autorizar las peticiones protegidas.
+
+El rol CLIENTE permite consultar y administrar exclusivamente los datos propios. El rol EJECUTIVO permite las consultas generales y la administración de clientes contemplada por la API. El registro público siempre crea un CLIENTE; la asignación de EJECUTIVO se realiza mediante el [procedimiento administrativo auditado](scripts/asignar-ejecutivo.sql).
+
+En las consultas por ID, la aplicación verifica quién inició sesión y si tiene permiso sobre el registro solicitado. Cambiar el identificador en una URL no concede acceso a información ajena. Para un CLIENTE, un registro ajeno responde igual que uno inexistente, sin revelar su existencia. El cambio de contraseña sólo lo puede realizar el propietario, incluso si otro usuario tiene rol EJECUTIVO.
+
+### Actualización, contraseña y baja
+
+La actualización conserva la CURP, el RFC, la cuenta y la fecha original de registro. Si cambia el correo, se mantiene la correspondencia entre el cliente y su usuario de acceso. El cambio de contraseña exige confirmar la contraseña actual y validar la nueva; después invalida los tokens anteriores y obliga a iniciar sesión nuevamente.
+
+La baja es lógica: conserva el historial, marca al cliente y sus cuentas como inactivos y desactiva el usuario. Los tokens anteriores dejan de dar acceso. La operación se deja al final de la revisión porque modifica la disponibilidad del perfil.
+
+### Validación y manejo de errores
+
+Las respuestas de error usan los campos `timestamp`, `status`, `codigo`, `mensaje`, `path` y `errores`. Cuando una entrada no cumple una regla, se indica el campo afectado y un mensaje descriptivo. Los manejadores globales centralizan los errores de validación, negocio e integración; la seguridad devuelve el mismo formato para rechazos de acceso. Los errores inesperados no muestran trazas ni credenciales.
+
+La contraseña nueva requiere al menos ocho caracteres, mayúscula, minúscula, número y símbolo; no admite espacios ni caracteres de control y está limitada a 72 bytes UTF-8. Los IDs deben ser enteros positivos. El servidor rechaza tipos JSON incompatibles con los campos definidos. Las validaciones de CURP y RFC comprueban formato, coherencia y unicidad, sin certificar su autenticidad ante una autoridad.
+
+### Productos GestoPago
+
+La aplicación obtiene el catálogo del proveedor mediante sus credenciales de integración. La sincronización guarda o actualiza los productos por su identificador externo, conserva su identidad local y evita insertar duplicados al repetir la operación. Redis mantiene la caché del catálogo; una sincronización confirmada invalida esa caché. El JWT del usuario y el token del proveedor son independientes.
 
 ### API REST y consultas
 
-Registro y login reciben JSON. Las rutas protegidas requieren `Authorization: Bearer <JWT local>`.
+Todas las rutas siguientes utilizan la base **https://ambientar-proyecto.onrender.com**. En Swagger, abrir el endpoint, pulsar **Try it out**, completar los campos y ejecutar. Registrar los IDs y el número de cuenta devueltos; utilizar los del entorno que se está revisando.
 
-| Método y ruta | Función | Acceso |
-|---|---|---|
-| `POST /clientes` | Alta completa | Público |
-| `POST /auth/login` | Obtener JWT local | Público |
-| `GET /auth/me` | Perfil de sesión | Autenticado |
-| `GET /catalogos/sexos`, `/nacionalidades`, `/paises`, `/estados-civiles` | Opciones previas al registro, bajo prefijo `/catalogos` | Público |
-| `GET /catalogos/codigos-postales/{cp}` | Asentamientos de un CP | Público |
-| `GET /clientes/me` | Ficha propia | Propietario |
-| `GET /clientes/{id}`, `/clientes/buscar` | Consulta individual/por identificador | CLIENTE propio; EJECUTIVO general |
-| `GET /clientes` | Listado, filtros y paginación | EJECUTIVO |
-| `GET /clientes/{id}/cuentas` | Cuentas del cliente | Propietario o EJECUTIVO |
-| `GET /cuentas/{numeroCuenta}`, `/cuentas/{numeroCuenta}/saldo` | Cuenta y saldo | Propietario o EJECUTIVO |
-| `GET /cuentas` | Listado paginado de cuentas | EJECUTIVO |
-| `PUT /clientes/{id}` | Actualizar datos permitidos | Propietario o EJECUTIVO |
-| `PUT /usuarios/{id}/password` | Cambiar contraseña | Propietario |
-| `DELETE /clientes/{id}` | Baja lógica | Propietario o EJECUTIVO |
-| `GET /usuarios/{id}` | Usuario sin credenciales | Propietario o EJECUTIVO |
-| Rutas `/api/gestopago/productos` | Consulta/sincronización del proveedor | JWT local; configuración externa necesaria |
+#### 1. Consultar catálogos y registrar un cliente
 
-Se filtra por CURP, RFC, correo, número de cuenta, nombre, activo y rango de fechas. Los parámetros `page`, `size`, `ordenarPor` y `direccion` se validan; la paginación usa orden estable. Las fechas históricas sin dato permanecen NULL. La pertenencia se comprueba con la identidad del JWT y la base, no sólo con el ID de la URL. El registro público no concede EJECUTIVO; su asignación utiliza el [procedimiento auditado](scripts/asignar-ejecutivo.sql).
+1. `GET /catalogos/sexos`.
+2. `GET /catalogos/nacionalidades`.
+3. `GET /catalogos/estados-civiles`.
+4. `GET /catalogos/paises`.
+5. `GET /catalogos/codigos-postales/37907`: seleccionar un asentamiento de la respuesta.
+6. `POST /clientes`: completar los datos de registro con los IDs de catálogo válidos. Responde **201** y devuelve `clienteId`, `usuarioId` y `numeroCuenta`. Repetir identificadores únicos ya registrados devuelve **409**.
 
-| HTTP | Significado |
+Estas rutas son públicas. No es necesario iniciar sesión para consultar catálogos o registrar al cliente.
+
+#### 2. Iniciar sesión y consultar los datos propios
+
+1. `POST /auth/login`: enviar `correo` y `password` del usuario registrado. Responde **200** con `accessToken`.
+2. Pulsar **Authorize**, pegar únicamente `accessToken` y confirmar. Swagger agrega el encabezado Bearer.
+3. `GET /auth/me`: comprobar la identidad y el rol de la sesión.
+4. `GET /usuarios/me`: consultar el usuario propio sin introducir un ID.
+5. `GET /clientes/me`: consultar la ficha del cliente propio.
+6. `GET /clientes/{id}/cuentas`: utilizar el `clienteId` obtenido.
+7. `GET /cuentas/{numeroCuenta}` y `GET /cuentas/{numeroCuenta}/saldo`: utilizar la cuenta devuelta por el registro.
+
+Los GET anteriores responden **200** cuando la sesión y el acceso son válidos. Si el token vence, repetir el login y actualizar Authorize.
+
+#### 3. Comprobar permisos y realizar consultas generales
+
+Con el rol CLIENTE, consultar `GET /usuarios/{id}` y `GET /clientes/{id}` sólo permite acceder a registros propios. Un ID ajeno devuelve **404**. Los listados `GET /clientes` y `GET /cuentas` requieren EJECUTIVO y devuelven **403** a un CLIENTE.
+
+Para revisar las consultas generales, iniciar sesión con un usuario EJECUTIVO previamente asignado y reemplazar el token en Authorize. Ejecutar en este orden:
+
+1. `GET /clientes`: `page=0`, `size=20`, `ordenarPor=id`, `direccion=ASC`.
+2. Repetir el listado incrementando `page` para recorrer las páginas.
+3. Aplicar filtros por CURP, RFC, correo, número de cuenta, nombre, estado activo o rango de fechas. Omitir filtros que no se utilicen.
+4. `GET /clientes/buscar`: consultar por el identificador seleccionado.
+5. `GET /clientes/{id}` y `GET /usuarios/{id}`: consultar el registro autorizado.
+6. `GET /cuentas`: revisar el listado paginado de cuentas.
+
+Los parámetros de ordenamiento, paginación y fechas se validan. El orden incluye un criterio estable para evitar variaciones entre páginas. Las respuestas generales devuelven el contenido y los totales de paginación.
+
+#### 4. Consultar y sincronizar productos
+
+Con un JWT vigente, ejecutar:
+
+1. `GET /api/gestopago/productos`: consultar productos activos guardados; una lista vacía indica que no hay productos activos disponibles en la base.
+2. `GET /api/gestopago/productos/consultar-externo`: consultar el catálogo del proveedor.
+3. `POST /api/gestopago/productos/forzar-sincronizacion`: descargar y persistir el catálogo. No requiere body.
+4. `GET /api/gestopago/productos`: comprobar el catálogo guardado.
+5. `POST /api/gestopago/productos/sincronizar`: obtener el catálogo mediante la secuencia caché, base y proveedor. No requiere body.
+
+La renovación del token del proveedor se confirmó en el arranque de Render. Las pruebas funcionales históricas del catálogo tuvieron incidencias; esa renovación no demuestra por sí sola que todas las consultas y sincronizaciones estén aprobadas.
+
+#### 5. Revisar mantenimiento al final
+
+1. `PUT /clientes/{id}`: actualizar únicamente los datos permitidos del cliente propio o de uno autorizado al EJECUTIVO.
+2. `PUT /usuarios/{id}/password`: como propietario, enviar `passwordActual` y `passwordNueva`. Responde **204**; la contraseña actual incorrecta devuelve **401** y una nueva inválida devuelve **400**.
+3. Comprobar que el token anterior ya no permite acceso; iniciar sesión con la contraseña nueva y actualizar Authorize.
+4. `DELETE /clientes/{id}`: ejecutar la baja con un perfil destinado a esta revisión. Responde **204**.
+5. Comprobar que el usuario dado de baja ya no puede iniciar sesión ni utilizar su token anterior.
+
+| HTTP | Interpretación |
 |---|---|
-| 200 / 201 / 204 | Consulta exitosa / alta creada / operación exitosa sin cuerpo |
-| 400 | Validación, tipo JSON, fecha o filtros inválidos |
-| 401 | Sin sesión válida o credenciales incorrectas, según el código del cuerpo |
-| 403 | Operación general sin permiso |
-| 404 | Recurso inexistente o ajeno al ámbito del cliente |
-| 409 | Dato único duplicado |
-| 5xx | Error de servidor o integración; requiere diagnóstico |
-
-La integración de productos guarda el lote por `id_producto` con upsert transaccional, conserva identidad/fecha de creación e invalida caché después del commit. Los JWT locales son independientes del token del proveedor. La ejecución funcional reciente de estos endpoints respondió 500; está pendiente verificar su configuración y comportamiento antes de acreditar esa integración.
-
-<a id="evidencias"></a>
+| 200 / 201 / 204 | Consulta correcta / registro creado / cambio confirmado sin cuerpo |
+| 400 | Entrada, ID, formato o filtros inválidos; revisar `errores` |
+| 401 | Token ausente, inválido o vencido, o credenciales incorrectas |
+| 403 | La sesión es válida, pero no tiene el permiso requerido |
+| 404 | Registro inexistente o fuera del ámbito permitido |
+| 409 | Identificador único o correo ya registrado |
+| 5xx | Error interno o de integración que requiere diagnóstico |
 
 ## Pruebas y resultados
 
-- [Instalación V1–V8](docs/instalacion-ejecucion.md): cero tablas iniciales, ocho migraciones exitosas, 15 tablas, 159,340 asentamientos, 2,478 municipios y 32 estados. Reinicio sin migraciones adicionales ni duplicados.
-- Suite Java: **67 aprobadas, cero fallos y cero omisiones** con PostgreSQL y ZIP nacional configurados. [Resultado](docs/evidencias/suite-java.json).
-- [Colección Bruno](tests/bruno): 105 casos. La ejecución HTTP automatizada del 09/10/2026 evaluó sus aserciones originales con Chai: **96 aprobados, 7 fallidos y 2 bloqueados**. [Resultados](docs/evidencias/bruno-resultados-2026-10-09.json) y [matriz actual](https://docs.google.com/spreadsheets/d/1wuJ65P2yGV9EE4FCUEvcD3ppr8lwz2MxvaRizK-WxH0/edit).
-- [JMeter: plan y resultados](docs/jmeter-plan-resultados.md): 1, 10 y 25 usuarios, 60 segundos por nivel, login y consultas QA locales. [Plan editable](tests/jmeter/clientes-local.jmx).
+La API en Render arrancó desde una base vacía, aplicó las ocho migraciones y cargó 159,340 asentamientos, 2,478 municipios y 32 estados. Se comprobaron respuestas **200** en sexos y código postal `37907`, además del alta **201** y la denegación **403** del listado general a un CLIENTE.
+
+- Suite Java histórica: **67 pruebas aprobadas**, cero fallos y cero omisiones. [Resultado](docs/evidencias/suite-java.json).
+- Revisión de usuarios del 10 de octubre de 2026: **42 pruebas de integración aprobadas**, incluyendo acceso propio, permisos por ID, contraseña y revocación de sesión. Esta ejecución verifica las correcciones localmente; no sustituye una comprobación posterior del despliegue.
+- [Matriz funcional](https://docs.google.com/spreadsheets/d/1wuJ65P2yGV9EE4FCUEvcD3ppr8lwz2MxvaRizK-WxH0/edit): la ejecución histórica del 9 de octubre registró **96 casos aprobados, 7 fallidos y 2 bloqueados**.
+- [Plan y resultados JMeter](docs/jmeter-plan-resultados.md), [muestras y reportes](tests/jmeter/resultados/20261009-120812/): login y consultas QA locales durante 60 segundos por nivel.
 
 | Usuarios JMeter | Muestras | Errores | Media ms | P95 ms | Máximo ms |
 |---:|---:|---:|---:|---:|---:|
@@ -283,48 +195,16 @@ La integración de productos guarda el lote por `id_producto` con upsert transac
 | 10 | 924 | 0 | 73.86 | 170 | 1638 |
 | 25 | 2029 | 0 | 140.24 | 417 | 2845 |
 
-Las 3,043 muestras comprobaron HTTP y contenido. El plan utiliza login por hilo y cuatro consultas con pausa de 500 ms, rampa de 10 segundos y 60 segundos por nivel. JMeter, API y PostgreSQL comparten equipo; incluye arranque/calentamiento y no demuestra capacidad máxima de producción. Los [JTL y dashboards](tests/jmeter/resultados/20261009-120812/) y el [desglose por endpoint](tests/jmeter/resultados/20261009-120812/resumen.json) permiten revisar las cifras.
+Las **3,043 muestras** comprobaron respuesta HTTP y contenido, con pausas entre consultas. Estas cifras corresponden al equipo local documentado; no acreditan la misma capacidad en Render ni una carga máxima de producción.
 
-### Incidencias de la última ejecución funcional
+Las incidencias históricas corresponden a altas repetidas, preparación de datos para duplicados y consultas del catálogo externo. Se mantienen identificadas en la matriz. No se presentan como pruebas aprobadas sin una nueva ejecución.
 
-| Casos | Resultado real | Trabajo pendiente |
-|---|---|---|
-| CP-014 y CP-017: altas válidas | 409 porque los perfiles ya existían; el caso esperaba 201 | Repetir el alta con datos QA nuevos o presentar la evidencia de su primera creación; no borrar personas para forzar el resultado |
-| CP-025 y CP-026: RFC/correo duplicados | 409 por CURP duplicada antes del campo que comprueba el Test | Preparar fixtures con los demás identificadores únicos y repetir |
-| CP-100–CP-102: catálogo GestoPago | 500 | Diagnosticar Redis/configuración/servidor y repetir con las dependencias disponibles |
-| CP-103 y CP-104: sincronización | No enviados por precondición fallida | Ejecutar después de corregir el paso previo |
+## Archivos de entrega
 
-Un 409 de unicidad no acredita una prueba de alta 201. El 500 observado no demuestra por sí solo que el proveedor externo haya fallado. Estas incidencias quedan visibles para evitar presentar funcionalidades pendientes como completas.
-
-### Correspondencia con los criterios de evaluación
-
-| Criterio | Peso | Evidencia disponible |
-|---|---:|---|
-| Diseño de base de datos | 20% | ER, diccionario, tipos/restricciones y creación V1–V8 desde cero |
-| Validaciones | 20% | Reglas Java/SQL, casos inválidos, suite y respuestas por campo; fixtures de dos duplicados pendientes de repetir |
-| Implementación Java | 25% | Capas, DTO, transacciones, BCrypt/JWT y 67 pruebas Java aprobadas |
-| API REST | 15% | Endpoints, Swagger, permisos y respuestas; integración GestoPago pendiente por 500 |
-| Consultas y persistencia | 10% | Filtros, paginación, consultas propias, PostgreSQL y conservación tras baja |
-| Documentación y evidencias | 10% | Este README, diagramas, matriz, resultados funcionales y JMeter |
-
-La tabla identifica evidencia; no asigna una calificación ni afirma el cumplimiento de los casos pendientes.
-
-## Paquete de entrega
-
-El paquete reúne código, SQL único, migraciones originales, colección Bruno, diagramas, documentos y reportes. Puede incluir el JAR para ejecutar la revisión sin compilar. La estructura interna conserva las rutas de este README.
-
-```powershell
-# Windows, con el JAR ya compilado.
-.\scripts\empaquetar-entrega.ps1 -IncluirJar
-```
+El repositorio reúne el código fuente, el script SQL único, las migraciones V1–V8, el ZIP postal, los diagramas y las evidencias. Este README es el documento técnico principal. El paquete opcional se genera en Linux con:
 
 ```bash
-# Linux, con el JAR ya compilado.
 python3 scripts/empaquetar-entrega.py --incluir-jar
 ```
 
-Se genera en `outputs/entrega-<fecha>/`, con un manifiesto SHA-256 por archivo. Se excluyen configuraciones privadas, cachés, archivos IDE. Se incluyen el ZIP postal en `datos/` y su registro de origen. [Índice de entrega](docs/entrega-final.md).
-
-La creación SQL y su iniciador Linux se comprobaron en PostgreSQL 17.11 sobre Linux/Docker. El arranque de la API desde ese esquema, la suite Java y los resultados JMeter se comprobaron en Windows. Los iniciadores Linux de API y carga se revisaron sintácticamente; la ejecución completa en una máquina Linux queda disponible para reproducción.
-
-La [documentación histórica de GestoPago](docs/integracion-gestopago-historica.md) conserva la explicación y las capturas de la etapa anterior del proyecto.
+El paquete conserva las rutas del proyecto y un manifiesto SHA-256. Excluye configuraciones privadas, cachés y archivos del IDE.
