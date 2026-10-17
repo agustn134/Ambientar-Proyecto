@@ -1,6 +1,6 @@
 # Ambientar-Proyecto
 
-> **Rama feature/Validaciones:** la adaptación de contrato y V9 se describen en [Entrega de validaciones](docs/validaciones-entrega.md). Estos cambios locales no están desplegados en Render.
+> El contrato por body, los estados HTTP y V9 se describen en [Entrega de validaciones](docs/validaciones-entrega.md). Swagger corresponde a la versión que esté desplegada en el servidor seleccionado.
 
 API REST para registrar y administrar clientes personas físicas, sus usuarios y cuentas. Incluye catálogos mexicanos, autenticación, permisos por rol e integración con el catálogo de productos GestoPago.
 
@@ -15,6 +15,7 @@ Este README reúne el documento técnico de la solución. La revisión de los en
 - [Diagrama entidad–relación](#diagrama-entidadrelación), [PDF](docs/diagramas/V3%20DIAGRAMA%20E%20R%20Integracion%20de%20clientes.pdf) y [archivo editable](docs/diagramas/modelo-er-v8.drawio.xml).
 - [Script único de creación de base de datos](scripts/crear-base-datos.sql).
 - [Código fuente Java](src/main/java/) y [recursos y migraciones](src/main/resources/).
+- [Respaldo, auditoría y reversión de V9](docs/operacion-validaciones-v9.md).
 - [Reglas de negocio](#solución-java-y-reglas-de-negocio) y [secuencia de endpoints](#api-rest-y-consultas).
 - [Matriz de pruebas funcionales](https://docs.google.com/spreadsheets/d/1wuJ65P2yGV9EE4FCUEvcD3ppr8lwz2MxvaRizK-WxH0/edit).
 - [Resultados de la suite Java](docs/evidencias/suite-java.json) y [plan y resultados de JMeter](docs/jmeter-plan-resultados.md).
@@ -31,7 +32,7 @@ sh scripts/crear-base-datos.sh revision_hasani
 sh scripts/iniciar-api.sh revision_hasani
 ```
 
-La creación ejecuta el SQL único y carga automáticamente `datos/CPdescargatxt.zip`, incluido en el proyecto. V1–V8 se conservan como historial de migraciones; no se ejecutan manualmente por separado. El catálogo contiene 159,340 asentamientos, 2,478 municipios y 32 estados, con [origen y huella SHA-256](datos/README.md) documentados. Para reiniciar una base ya creada, ejecutar únicamente el iniciador de la API.
+La creación ejecuta el SQL único y carga automáticamente `datos/CPdescargatxt.zip`, incluido en el proyecto. V1–V9 se conservan como historial de migraciones; no se ejecutan manualmente por separado. El catálogo contiene 159,340 asentamientos, 2,478 municipios y 32 estados, con [origen y huella SHA-256](datos/README.md) documentados. Para reiniciar una base ya creada, ejecutar únicamente el iniciador de la API.
 
 Swagger local: `http://localhost:8081/swagger-ui/index.html`. El perfil local de revisión prueba clientes y cuentas; la integración externa se revisa en el entorno desplegado. Las mediciones JMeter entregadas corresponden al entorno local.
 
@@ -135,7 +136,7 @@ Las incidencias históricas corresponden a altas repetidas, preparación de dato
 
 ## Archivos de entrega
 
-El repositorio reúne el código fuente, el script SQL único, las migraciones V1–V8, el ZIP postal, los diagramas y las evidencias. Este README es el documento técnico principal. El paquete opcional se genera en Linux con:
+El repositorio reúne el código fuente, el script SQL único, las migraciones V1–V9, el ZIP postal, los diagramas y las evidencias. Este README es el documento técnico principal. El paquete opcional se genera en Linux con:
 
 ```bash
 python3 scripts/empaquetar-entrega.py --incluir-jar

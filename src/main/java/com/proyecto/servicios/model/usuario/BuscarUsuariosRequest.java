@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 
 public record BuscarUsuariosRequest(
     @Positive(message="El ID debe ser mayor que cero") Long id,
-    @Email(message="El correo no tiene un formato válido") @Size(max=100) String correo,
+    @Email(message="El correo no tiene un formato válido") @Size(max=100,message="El correo no debe exceder 100 caracteres") String correo,
     Boolean activo,
     RolUsuario rol,
     @Min(value=0,message="La página no puede ser negativa") int page,

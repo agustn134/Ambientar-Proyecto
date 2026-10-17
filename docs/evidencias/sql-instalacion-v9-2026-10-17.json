@@ -1,0 +1,12 @@
+{
+  "archivo": "scripts/crear-base-datos.sql",
+  "alcance": "Instalación completa probada en una base local nueva de PostgreSQL 17; no Render",
+  "resultado": "OK",
+  "migraciones": 9,
+  "checksums_comparados_con_flyway": 9,
+  "tablas_aplicacion": 15,
+  "restricciones_check_v9": 7,
+  "clientes_usuarios_cuentas_iniciales": 0,
+  "datos_personales_credenciales": "No incluidos",
+  "catalogo_postal_nacional": "Se carga desde datos/CPdescargatxt.zip mediante la aplicación"
+}

@@ -1,6 +1,28 @@
 # Entrega de validaciones
 
-Rama de trabajo: `feature/Validaciones`. Las modificaciones locales posteriores al commit `edf0586` todavía no están publicadas. Render conserva el contrato desplegado anteriormente hasta que se autorice su actualización.
+Rama de trabajo: `feature/Validaciones`. La adaptación principal se integró en `main` mediante el PR #19. Los ajustes posteriores de mensajes y documentación de estados HTTP deben publicarse para aparecer en Render.
+
+## Mensajes y estados HTTP
+
+Swagger declara las respuestas por operación con su esquema uniforme y ejemplos de `status`, `codigo`, `mensaje`, `path` y `errores`. El alta devuelve 201; las consultas y actualizaciones con resultado devuelven 200; el cambio de contraseña y la baja devuelven 204 sin cuerpo. Un listado sin coincidencias devuelve una lista vacía con 200; consultar un registro concreto inexistente o ajeno devuelve 404 sin revelar información de terceros.
+
+| Estado | Motivo y acción |
+|---|---|
+| 400 | Campos inválidos, cuerpo ausente, JSON incorrecto o reglas obligatorias incumplidas. Revisar `errores` y los formatos del DTO. |
+| 401 | Token ausente, vencido, revocado o inválido; iniciar sesión y enviar Bearer vigente. El login o cambio de contraseña también pueden rechazar credenciales. |
+| 403 | El usuario autenticado no tiene permiso para la operación. |
+| 404 | Registro inexistente o no disponible para el usuario; también rutas retiradas. |
+| 405 | Método HTTP incorrecto para la ruta. La seguridad se evalúa primero. |
+| 406 | Formato de respuesta no disponible; utilizar `Accept: application/json`. |
+| 409 | Dato duplicado o conflicto con registros relacionados. |
+| 415 | Formato de entrada no compatible; utilizar `Content-Type: application/json`. |
+| 429 | Límite de peticiones a GestoPago; esperar antes de reintentar. |
+| 500 | Error interno controlado; no se muestran SQL, trazas ni datos privados. |
+| 502 / 503 / 504 | Respuesta inválida, indisponibilidad o tiempo de espera agotado del proveedor. |
+
+Los errores de GestoPago llevan `codigo: SERVICIO_EXTERNO`, incluso si el proveedor devuelve un 401 o 500; los ejemplos de Swagger distinguen estos casos de los errores de la propia API. Otros estados de error del proveedor mantienen su HTTP y utilizan la respuesta `default` documentada, siempre con mensaje controlado. Las rutas públicas no exigen token, pero un Bearer inválido enviado explícitamente puede producir 401. Los errores que impiden identificar un campo concreto devuelven `errores: []`.
+
+Este ajuste se verificó con **79 pruebas aprobadas, sin fallos ni omisiones**, revisión del contrato de las **28 operaciones de Swagger** y **ocho comprobaciones HTTP** en la instancia local aislada. [Evidencia de mensajes y estados](evidencias/mensajes-http-2026-10-17.json). La verificación del proveedor utiliza respuestas simuladas; no acredita disponibilidad del servicio externo real.
 
 ## Cambios implementados
 
@@ -68,7 +90,9 @@ curl -i -X POST http://localhost:8080/usuarios/buscar \
 
 ## Despliegue y reversión
 
-Respaldar la base y comprobar datos históricos en una copia antes de aplicar V9 al entorno compartido. No publicar el código sin actualizar simultáneamente los consumidores del contrato. El SQL único de instalación anterior corresponde a V8; al arrancar la aplicación nueva, Flyway aplica V9 pendiente.
+El [procedimiento operativo de V9](operacion-validaciones-v9.md) detalla respaldo privado, restauración, conciliación de históricos, validación, administración de roles y reversión. El respaldo y auditoría de Render siguen pendientes; los resultados de la copia local no los sustituyen.
+
+Respaldar la base y comprobar datos históricos en una copia antes de aplicar V9 al entorno compartido. No publicar el código sin actualizar simultáneamente los consumidores del contrato. El SQL único `scripts/crear-base-datos.sql` instala ahora V1–V9 en una base nueva. Sobre una base existente, Flyway aplica únicamente las migraciones pendientes; no ejecutar el instalador completo.
 
 No se utiliza `flyway undo` ni se borran filas de `flyway_schema_history`. Ante un fallo, restaurar la copia de respaldo junto con la versión de aplicación correspondiente, o preparar una migración correctiva posterior. No editar una migración ya aplicada.
 
@@ -87,4 +111,4 @@ El 17 de octubre de 2026 se ejecutaron **64 pruebas: cero fallos, cero errores y
 
 La revisión operativa adicional ejecutó **22 comprobaciones HTTP aprobadas** sobre una copia restaurada de la base local en PostgreSQL 17. Se comprobaron registro, duplicados, consultas, permisos por propietario y rol, revocación de token y OpenAPI. Flyway aplicó las nueve migraciones; la auditoría devolvió cero incumplimientos en las ocho reglas y se validaron las siete restricciones CHECK en esa copia. [Evidencia operativa](evidencias/revision-operativa-2026-10-17.json).
 
-El workflow `.github/workflows/validaciones.yml` ejecuta las cinco suites y exige al menos 64 pruebas aprobadas, sin omitir PostgreSQL. Su resultado en GitHub permanece pendiente hasta publicar esta actualización. Estas comprobaciones locales no acreditan el estado de la base de Render: antes de desplegar deben respaldarse y auditarse los datos del destino.
+El workflow `.github/workflows/validaciones.yml` ejecuta seis suites y exige al menos 79 pruebas aprobadas, sin omitir PostgreSQL. La suite adicional verifica estados HTTP, errores de integridad, protección de mensajes del proveedor y esquemas y ejemplos de Swagger. Su resultado en GitHub para este ajuste permanece pendiente hasta publicar la actualización. Estas comprobaciones locales no acreditan el estado de la base de Render: antes de desplegar deben respaldarse y auditarse los datos del destino.

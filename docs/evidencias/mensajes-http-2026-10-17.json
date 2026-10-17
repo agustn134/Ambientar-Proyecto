@@ -1,0 +1,92 @@
+{
+  "alcance": "API local 8083 sobre copia aislada; no Render",
+  "operaciones_swagger_verificadas": 28,
+  "pruebas_http": [
+    {
+      "caso": "Contrato OpenAPI actualizado",
+      "status": 200,
+      "resultado": "OK"
+    },
+    {
+      "caso": "Autenticación requerida",
+      "status": 401,
+      "resultado": "OK"
+    },
+    {
+      "caso": "Validación de código postal",
+      "status": 400,
+      "resultado": "OK"
+    },
+    {
+      "caso": "JSON incorrecto",
+      "status": 400,
+      "resultado": "OK"
+    },
+    {
+      "caso": "Content-Type incorrecto",
+      "status": 415,
+      "resultado": "OK"
+    },
+    {
+      "caso": "Método incorrecto",
+      "status": 405,
+      "resultado": "OK"
+    },
+    {
+      "caso": "Accept incorrecto",
+      "status": 406,
+      "resultado": "OK"
+    },
+    {
+      "caso": "Catálogo público",
+      "status": 200,
+      "resultado": "OK"
+    }
+  ],
+  "suites": [
+    {
+      "suite": "com.proyecto.servicios.ContratoValidacionesTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.ErroresHttpContratoTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.RegistroClienteIntegrationTest",
+      "tests": 46,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.service.GestoPagoCatalogoServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.service.GestoPagoProductServiceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.service.ValidacionesPostgresTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "pruebas_aprobadas": 79,
+  "ci": "Pendiente de publicar estos ajustes y ejecutarlos en GitHub"
+}

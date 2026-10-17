@@ -22,7 +22,7 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException ex) throws IOException {
         response.setHeader("WWW-Authenticate","Bearer");
-        responder(request,response,401,"NO_AUTENTICADO","Token ausente, inválido o acceso no disponible");
+        responder(request,response,401,"NO_AUTENTICADO","Inicia sesión y envía un token Bearer vigente; el token está ausente, vencido, revocado o no es válido");
     }
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex) throws IOException {
