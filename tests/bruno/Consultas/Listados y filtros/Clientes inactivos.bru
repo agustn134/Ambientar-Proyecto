@@ -4,13 +4,14 @@ meta {
   seq: 12
 }
 
-get {
-  url: {{baseUrl}}/clientes?activo=false
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -19,11 +20,17 @@ auth:bearer {
 }
 
 tests {
-  test("Sólo clientes inactivos", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().contenido).to.be.an("array"); expect(res.getBody().contenido.every(c => c.estatus === "INACTIVO")).to.equal(true); expect(res.getBody().totalElementos).to.be.at.least(1); });
+  test("Sólo clientes inactivos", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).contenido).to.be.an("array"); expect((res.getBody().datos ?? res.getBody()).contenido.every(c => c.estatus === "INACTIVO")).to.equal(true); expect((res.getBody().datos ?? res.getBody()).totalElementos).to.be.at.least(1); });
 }
 
 docs {
   HTTP esperado: 200 con al menos un resultado después de la baja QA ya confirmada. Todos los elementos deben estar INACTIVO.
   Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "activo": false
+  }
 }

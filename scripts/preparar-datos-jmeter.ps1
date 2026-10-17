@@ -11,6 +11,7 @@ for($iCarga=1;$iCarga -le $Usuarios;$iCarga++) {
     # CURP: el último par debe ser único y conservar carácter alfanumérico + dígito.
     $datosCarga.curp='CAPP900101HGTBCD'+[char](65+[int][math]::Floor(($iCarga-1)/10))+(($iCarga-1)%10)
     $respuestaCarga=Invoke-RestMethod -Uri "http://localhost:$Port/clientes" -Method Post -ContentType 'application/json' -Body ($datosCarga | ConvertTo-Json -Depth 5)
+    $respuestaCarga=$respuestaCarga.datos
     if (!$respuestaCarga.usuario.usuarioId -or !$respuestaCarga.cuenta.numeroCuenta) { throw 'Registro QA incompleto.' }
     $filasCarga+= [pscustomobject]@{correo=$datosCarga.correoElectronico;password=$datosCarga.password;numeroCuenta=$respuestaCarga.cuenta.numeroCuenta}
 }

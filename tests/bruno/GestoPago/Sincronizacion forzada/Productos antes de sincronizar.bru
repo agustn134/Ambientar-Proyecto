@@ -21,14 +21,14 @@ auth:bearer {
 tests {
   test("Responde 200 con productos guardados", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.getBody()).to.be.an("array");
+    expect((res.getBody().datos ?? res.getBody())).to.be.an("array");
   });
   test("Identificadores sin duplicados", function () {
-    const productos = res.getBody();
+    const productos = (res.getBody().datos ?? res.getBody());
     expect(new Set(productos.map(p => p.idProducto)).size).to.equal(productos.length);
   });
-  if (res.getStatus() === 200 && Array.isArray(res.getBody())) {
-    bru.setVar("catalogoAntes", JSON.stringify(res.getBody()));
+  if (res.getStatus() === 200 && Array.isArray((res.getBody().datos ?? res.getBody()))) {
+    bru.setVar("catalogoAntes", JSON.stringify((res.getBody().datos ?? res.getBody())));
     bru.setVar("catalogoDescargado", "");
   }
 }

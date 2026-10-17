@@ -19,8 +19,8 @@ auth:bearer {
 }
 
 tests {
-  test("Perfil QA correcto", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().correo).to.equal("dulce.mantenimiento@example.com"); expect(res.getBody().rol).to.equal("CLIENTE"); });
-  if (res.getStatus() === 200 && res.getBody().correo === "dulce.mantenimiento@example.com") { bru.setVar("clienteMantId",res.getBody().clienteId); bru.setVar("usuarioMantId",res.getBody().usuarioId); }
+  test("Perfil QA correcto", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).correo).to.equal("dulce.mantenimiento@example.com"); expect((res.getBody().datos ?? res.getBody()).rol).to.equal("CLIENTE"); });
+  if (res.getStatus() === 200 && (res.getBody().datos ?? res.getBody()).correo === "dulce.mantenimiento@example.com") { bru.setVar("clienteMantId",(res.getBody().datos ?? res.getBody()).clienteId); bru.setVar("usuarioMantId",(res.getBody().datos ?? res.getBody()).usuarioId); }
 }
 
 docs {

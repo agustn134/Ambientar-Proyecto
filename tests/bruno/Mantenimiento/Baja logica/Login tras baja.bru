@@ -24,7 +24,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
-  test("Login rechazado", function () { expect(res.getBody().codigo).to.equal("CREDENCIALES_INVALIDAS"); });
+  test("Login rechazado", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("CREDENCIALES_INVALIDAS"); });
 }
 
 docs {

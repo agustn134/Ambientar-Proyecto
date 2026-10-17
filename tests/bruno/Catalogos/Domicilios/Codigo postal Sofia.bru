@@ -4,18 +4,19 @@ meta {
   seq: 2
 }
 
-get {
-  url: {{baseUrl}}/catalogos/codigos-postales/37803
-  body: none
+post {
+  url: {{baseUrl}}/catalogos/codigos-postales/consultar
+  body: json
   auth: none
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
 tests {
-  test("Asentamiento esperado", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().some(a => a.id === 110140023 && a.colonia === "Héroes de San Cristóbal")).to.equal(true); });
+  test("Asentamiento esperado", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).some(a => a.id === 110140023 && a.colonia === "Héroes de San Cristóbal")).to.equal(true); });
 }
 
 docs {
@@ -24,4 +25,10 @@ docs {
   HTTP esperado: 200.
   Autenticación: pública, sin Bearer.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "codigoPostal": "37803"
+  }
 }

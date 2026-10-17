@@ -20,7 +20,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
-  test("Sin sesión activa", function () { expect(res.getBody().codigo).to.equal("NO_AUTENTICADO"); });
+  test("Sin sesión activa", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("NO_AUTENTICADO"); });
 }
 
 docs {

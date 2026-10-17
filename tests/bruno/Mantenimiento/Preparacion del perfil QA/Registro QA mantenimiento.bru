@@ -47,7 +47,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(201); });
-  if (res.getStatus() === 201) { bru.setVar("clienteMantId",res.getBody().clienteId); bru.setVar("usuarioMantId",res.getBody().usuario.usuarioId); bru.setVar("cuentaMant",res.getBody().cuenta.numeroCuenta); }
+  if (res.getStatus() === 201) { bru.setVar("clienteMantId",(res.getBody().datos ?? res.getBody()).clienteId); bru.setVar("usuarioMantId",(res.getBody().datos ?? res.getBody()).usuario.usuarioId); bru.setVar("cuentaMant",(res.getBody().datos ?? res.getBody()).cuenta.numeroCuenta); }
 }
 
 docs {

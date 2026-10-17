@@ -1,0 +1,34 @@
+meta {
+  name: 03 - Buscar usuarios por filtros combinados
+  type: http
+  seq: 3
+}
+post {
+  url: {{baseUrl}}/usuarios/buscar
+  body: json
+  auth: bearer
+}
+headers {
+  Content-Type: application/json
+}
+auth:bearer {
+  token: {{token}}
+}
+body:json {
+  {
+    "activo": true,
+    "rol": "CLIENTE",
+    "page": 0,
+    "size": 20
+  }
+}
+tests {
+  test("Consulta autorizada y paginada", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect((res.getBody().datos ?? res.getBody()).contenido).to.be.an("array");
+    (res.getBody().datos ?? res.getBody()).contenido.forEach(function (u) {
+      expect(u).not.to.have.property("passwordHash");
+      expect(u).not.to.have.property("password");
+    });
+  });
+}

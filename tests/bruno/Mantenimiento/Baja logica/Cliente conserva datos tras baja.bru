@@ -4,13 +4,14 @@ meta {
   seq: 2
 }
 
-get {
-  url: {{baseUrl}}/clientes/{{clienteMantId}}
-  body: none
+post {
+  url: {{baseUrl}}/clientes/consultar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Baja lógica", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.estatus).to.equal("INACTIVO"); expect(res.getBody().cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
+  test("Baja lógica", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).cliente.estatus).to.equal("INACTIVO"); expect((res.getBody().datos ?? res.getBody()).cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 200.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "id": {{clienteMantId}}
+  }
 }

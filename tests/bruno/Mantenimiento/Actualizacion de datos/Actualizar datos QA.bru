@@ -5,7 +5,7 @@ meta {
 }
 
 put {
-  url: {{baseUrl}}/clientes/{{clienteMantId}}
+  url: {{baseUrl}}/clientes
   body: json
   auth: bearer
 }
@@ -19,36 +19,11 @@ auth:bearer {
   token: {{tokenMantenimiento}}
 }
 
-body:json {
-  {
-    "nombre": "Dulce",
-    "apellidoPaterno": "López",
-    "apellidoMaterno": "Parra",
-    "fechaNacimiento": "2005-11-08",
-    "correoElectronico": "dulce.mantenimiento@example.com",
-    "telefonoMovil": "4681046222",
-    "domicilio": {
-      "calle": "Guerrero",
-      "numeroExterior": "844",
-      "codigoPostal": "37907",
-      "asentamientoId": 110333891,
-      "paisId": 1
-    },
-    "informacionLaboral": {
-      "ocupacion": "Gerente de bodega",
-      "empresa": "Bodega Aurrera QA",
-      "ingresoMensual": 18000.5
-    },
-    "segundoNombre": "María",
-    "sexoId": 2,
-    "nacionalidadId": 1,
-    "estadoCivilId": 7
-  }
-}
+
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Datos actualizados", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().telefonoMovil).to.equal("4681046222"); expect(res.getBody().domicilio.numeroExterior).to.equal("844"); expect(res.getBody().cliente.rfc).to.equal("LOPD051108ZZ2"); expect(res.getBody().cuentas[0].numeroCuenta).to.equal(bru.getVar("cuentaMant")); });
+  test("Datos actualizados", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).telefonoMovil).to.equal("4681046222"); expect((res.getBody().datos ?? res.getBody()).domicilio.numeroExterior).to.equal("844"); expect((res.getBody().datos ?? res.getBody()).cliente.rfc).to.equal("LOPD051108ZZ2"); expect((res.getBody().datos ?? res.getBody()).cuentas[0].numeroCuenta).to.equal(bru.getVar("cuentaMant")); });
 }
 
 docs {
@@ -58,4 +33,35 @@ docs {
   HTTP esperado: 200.
   Autenticación: Bearer tokenMantenimiento. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "id": {{clienteMantId}}
+  ,
+    "datos": {
+      "nombre": "Dulce",
+      "apellidoPaterno": "López",
+      "apellidoMaterno": "Parra",
+      "fechaNacimiento": "2005-11-08",
+      "correoElectronico": "dulce.mantenimiento@example.com",
+      "telefonoMovil": "4681046222",
+      "domicilio": {
+        "calle": "Guerrero",
+        "numeroExterior": "844",
+        "codigoPostal": "37907",
+        "asentamientoId": 110333891,
+        "paisId": 1
+      },
+      "informacionLaboral": {
+        "ocupacion": "Gerente de bodega",
+        "empresa": "Bodega Aurrera QA",
+        "ingresoMensual": 18000.5
+      },
+      "segundoNombre": "María",
+      "sexoId": 2,
+      "nacionalidadId": 1,
+      "estadoCivilId": 7
+    }
+  }
 }

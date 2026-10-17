@@ -19,8 +19,8 @@ auth:bearer {
 }
 
 tests {
-  test("Ficha propia con datos confirmados", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("nancy.guadalupe.enriquez.parra.qa@hotmail.com"); expect(res.getBody().telefonoMovil).to.equal("4681205803"); expect(res.getBody().domicilio.asentamientoId).to.equal(110333883); });
-  if (res.getStatus() === 200) { bru.setVar("nancyClienteId",res.getBody().cliente.clienteId); if (res.getBody().cuentas.length) bru.setVar("nancyCuenta",res.getBody().cuentas[0].numeroCuenta); }
+  test("Ficha propia con datos confirmados", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).cliente.correo).to.equal("nancy.guadalupe.enriquez.parra.qa@hotmail.com"); expect((res.getBody().datos ?? res.getBody()).telefonoMovil).to.equal("4681205803"); expect((res.getBody().datos ?? res.getBody()).domicilio.asentamientoId).to.equal(110333883); });
+  if (res.getStatus() === 200) { bru.setVar("nancyClienteId",(res.getBody().datos ?? res.getBody()).cliente.clienteId); if ((res.getBody().datos ?? res.getBody()).cuentas.length) bru.setVar("nancyCuenta",(res.getBody().datos ?? res.getBody()).cuentas[0].numeroCuenta); }
 }
 
 docs {

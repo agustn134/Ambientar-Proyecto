@@ -4,13 +4,14 @@ meta {
   seq: 10
 }
 
-get {
-  url: {{baseUrl}}/cuentas
-  body: none
+post {
+  url: {{baseUrl}}/cuentas/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -19,11 +20,15 @@ auth:bearer {
 }
 
 tests {
-  test("Cliente no consulta cuentas generales", function () { expect(res.getStatus()).to.equal(403); expect(res.getBody().codigo).to.equal("ACCESO_DENEGADO"); });
+  test("Cliente no consulta cuentas generales", function () { expect(res.getStatus()).to.equal(403); expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("ACCESO_DENEGADO"); });
 }
 
 docs {
   HTTP esperado: 403. Usa el JWT del cliente principal, que sí puede consultar sus propias cuentas.
   Autenticación: Bearer token; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {}
 }

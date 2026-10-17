@@ -48,15 +48,15 @@ body:json {
 tests {
   test("Cliente, usuario y cuenta creados", function () {
     expect(res.getStatus()).to.equal(201);
-    expect(res.getBody().usuario.activo).to.equal(true);
-    expect(res.getBody().cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
-    expect(res.getBody().cuenta.saldo).to.equal(0);
-    expect(res.getBody().usuario).not.to.have.property("passwordHash");
+    expect((res.getBody().datos ?? res.getBody()).usuario.activo).to.equal(true);
+    expect((res.getBody().datos ?? res.getBody()).cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
+    expect((res.getBody().datos ?? res.getBody()).cuenta.saldo).to.equal(0);
+    expect((res.getBody().datos ?? res.getBody()).usuario).not.to.have.property("passwordHash");
   });
   if (res.getStatus() === 201) {
-    bru.setVar("sofiaClienteId", res.getBody().clienteId);
-    bru.setVar("sofiaUsuarioId", res.getBody().usuario.usuarioId);
-    bru.setVar("sofiaCuenta", res.getBody().cuenta.numeroCuenta);
+    bru.setVar("sofiaClienteId", (res.getBody().datos ?? res.getBody()).clienteId);
+    bru.setVar("sofiaUsuarioId", (res.getBody().datos ?? res.getBody()).usuario.usuarioId);
+    bru.setVar("sofiaCuenta", (res.getBody().datos ?? res.getBody()).cuenta.numeroCuenta);
   }
 }
 

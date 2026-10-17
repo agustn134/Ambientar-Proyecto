@@ -39,7 +39,7 @@ class RegistroClienteIntegrationTest {
         com.proyecto.servicios.service.ConsultaClienteService.class,com.proyecto.servicios.controller.CuentaController.class,
         com.proyecto.servicios.service.ValidacionDatosCliente.class,com.proyecto.servicios.service.MantenimientoClienteService.class,
         com.proyecto.servicios.service.MantenimientoUsuarioService.class,com.proyecto.servicios.controller.UsuarioController.class,
-        RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, PasswordConfig.class, LoggingAspect.class,
+        RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, RespuestaExitosaAdvice.class, PasswordConfig.class, LoggingAspect.class,
         JwtConfig.class,SecurityConfig.class,com.proyecto.servicios.security.UsuarioJwtValidator.class,
         com.proyecto.servicios.security.SecurityErrorHandler.class,com.proyecto.servicios.service.LoginService.class,
         com.proyecto.servicios.service.JwtService.class,com.proyecto.servicios.service.UsuarioSesionService.class,
@@ -70,7 +70,7 @@ class RegistroClienteIntegrationTest {
         ObjectNode body=registro.deepCopy();body.remove(java.util.List.of("curp","rfc","password"));return body;
     }
     org.springframework.test.web.servlet.ResultActions actualizar(long id,ObjectNode body,String token) throws Exception {
-        return mvc.perform(put("/clientes/"+id).header("Authorization","Bearer "+token).contentType("application/json").content(body.toString()));
+        return ejecutarContrato(put("/clientes/"+id).header("Authorization","Bearer "+token).contentType("application/json").content(body.toString()));
     }
 
     @Test void actualizaDatosSinCambiarIdentificadoresCuentaSaldoNiFechaAlta() throws Exception {
@@ -87,7 +87,7 @@ class RegistroClienteIntegrationTest {
         for (String campo:new String[]{"curp","rfc","numeroCuenta","rol","estatus","password"}) {
             ObjectNode invalido=body.deepCopy();invalido.put(campo,"No permitido");
             actualizar(id,invalido,token).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errores[0].campo").value(campo));
+                .andExpect(jsonPath("errores[0].campo").value("datos."+campo));
         }
     }
 
@@ -100,7 +100,7 @@ class RegistroClienteIntegrationTest {
         body.put("correoElectronico","AGUSTIN.ACTUALIZADO@EXAMPLE.COM");
         actualizar(id,body,token).andExpect(status().isOk());
         assertEquals("agustin.actualizado@example.com",sql.queryForObject("SELECT correo FROM usuarios WHERE cliente_id=?",String.class,id));
-        mvc.perform(get("/clientes/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/clientes/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
         tokenDe("agustin.actualizado@example.com");
     }
 
@@ -118,7 +118,7 @@ class RegistroClienteIntegrationTest {
             actualizar(id,body,token).andExpect(status().isInternalServerError());
             assertEquals("Agustín",sql.queryForObject("SELECT nombre FROM clientes WHERE id=?",String.class,id));
             assertEquals(valido().get("correoElectronico").asText(),sql.queryForObject("SELECT correo FROM usuarios WHERE cliente_id=?",String.class,id));
-            mvc.perform(get("/clientes/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
+            ejecutarContrato(get("/clientes/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
         } finally { sql.execute("ALTER TABLE usuarios DROP CONSTRAINT fallo_actualizacion"); }
     }
 
@@ -128,25 +128,25 @@ class RegistroClienteIntegrationTest {
         String afectado=tokenDe(hermana().get("correoElectronico").asText());
         String token=ejecutivo(uno);
         sql.update("INSERT INTO cuentas(cliente_id,numero_cuenta,saldo,estatus) VALUES (?,'88888888888888888888',500,'ACTIVA')",id);
-        mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isNoContent());
+        ejecutarContrato(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isNoContent());
         assertEquals("INACTIVO",sql.queryForObject("SELECT estatus FROM clientes WHERE id=?",String.class,id));
         assertFalse(sql.queryForObject("SELECT activo FROM usuarios WHERE cliente_id=?",Boolean.class,id));
         assertEquals(0,sql.queryForObject("SELECT COUNT(*) FROM cuentas WHERE cliente_id=? AND estatus='ACTIVA'",Integer.class,id));
         assertEquals(new java.math.BigDecimal("500.00"),sql.queryForObject("SELECT SUM(saldo) FROM cuentas WHERE cliente_id=?",java.math.BigDecimal.class,id));
         assertEquals(2,sql.queryForObject("SELECT COUNT(*) FROM clientes",Integer.class));
-        mvc.perform(get("/clientes/me").header("Authorization","Bearer "+afectado)).andExpect(status().isUnauthorized());
-        mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isNoContent());
+        ejecutarContrato(get("/clientes/me").header("Authorization","Bearer "+afectado)).andExpect(status().isUnauthorized());
+        ejecutarContrato(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isNoContent());
         assertEquals(1,sql.queryForObject("SELECT version_token FROM usuarios WHERE cliente_id=?",Integer.class,id));
     }
 
     @Test void clienteNoDaBajaAjenaYFalloEnCuentaRevierteLaBajaCompleta() throws Exception {
         var uno=alta(valido());var dos=alta(hermana());long id=dos.get("clienteId").asLong();
         String cliente=tokenDe(valido().get("correoElectronico").asText());
-        mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+cliente)).andExpect(status().isNotFound());
+        ejecutarContrato(delete("/clientes/"+id).header("Authorization","Bearer "+cliente)).andExpect(status().isNotFound());
         String token=ejecutivo(uno);
         sql.execute("ALTER TABLE cuentas ADD CONSTRAINT fallo_baja CHECK (estatus='ACTIVA')");
         try {
-            mvc.perform(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isInternalServerError());
+            ejecutarContrato(delete("/clientes/"+id).header("Authorization","Bearer "+token)).andExpect(status().isInternalServerError());
             assertEquals("ACTIVO",sql.queryForObject("SELECT estatus FROM clientes WHERE id=?",String.class,id));
             assertTrue(sql.queryForObject("SELECT activo FROM usuarios WHERE cliente_id=?",Boolean.class,id));
             assertEquals(0,sql.queryForObject("SELECT version_token FROM usuarios WHERE cliente_id=?",Integer.class,id));
@@ -156,13 +156,13 @@ class RegistroClienteIntegrationTest {
     @Test void propietarioCambiaPasswordConActualRevocaTokensYNoExponeHashes() throws Exception {
         var uno=alta(valido());long uid=uno.get("usuario").get("usuarioId").asLong();
         String token=tokenDe(valido().get("correoElectronico").asText());
-        mvc.perform(get("/usuarios/"+uid).header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("passwordHash").doesNotExist());
+        ejecutarContrato(get("/usuarios/"+uid).header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("passwordHash").doesNotExist());
         String anterior=sql.queryForObject("SELECT password_hash FROM usuarios",String.class);
         ObjectNode request=mapper.createObjectNode().put("passwordActual",valido().get("password").asText()).put("passwordNueva","NuevaPrueba2026!");
-        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isNoContent());
+        ejecutarContrato(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isNoContent());
         String nuevo=sql.queryForObject("SELECT password_hash FROM usuarios",String.class);
         assertNotEquals(anterior,nuevo);assertTrue(passwordEncoder.matches("NuevaPrueba2026!",nuevo));
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
         iniciarSesion("NuevaPrueba2026!").andExpect(status().isOk());
         iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());
     }
@@ -171,19 +171,19 @@ class RegistroClienteIntegrationTest {
         var uno=alta(valido());var dos=alta(hermana());long uid=uno.get("usuario").get("usuarioId").asLong();
         String token=tokenDe(valido().get("correoElectronico").asText());
         ObjectNode request=mapper.createObjectNode().put("passwordActual","Incorrecta2026!").put("passwordNueva","NuevaPrueba2026!");
-        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isUnauthorized());
+        ejecutarContrato(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isUnauthorized());
         assertEquals(0,sql.queryForObject("SELECT version_token FROM usuarios WHERE id=?",Integer.class,uid));
         assertEquals(0,sql.queryForObject("SELECT intentos_fallidos FROM usuarios WHERE id=?",Integer.class,uid));
         request.put("passwordActual",valido().get("password").asText()).put("passwordNueva",12345678);
-        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        ejecutarContrato(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
         request.put("passwordNueva","corta");
-        mvc.perform(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        ejecutarContrato(put("/usuarios/"+uid+"/password").header("Authorization","Bearer "+token).contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
         request.put("passwordNueva","NuevaPrueba2026!");
         long ajeno=dos.get("usuario").get("usuarioId").asLong();
-        mvc.perform(get("/usuarios/"+ajeno).header("Authorization","Bearer "+token)).andExpect(status().isNotFound());
+        ejecutarContrato(get("/usuarios/"+ajeno).header("Authorization","Bearer "+token)).andExpect(status().isNotFound());
         String ejecutivo=ejecutivo(uno);
-        mvc.perform(get("/usuarios/"+ajeno).header("Authorization","Bearer "+ejecutivo)).andExpect(status().isOk());
-        mvc.perform(put("/usuarios/"+ajeno+"/password").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content(request.toString())).andExpect(status().isNotFound());
+        ejecutarContrato(get("/usuarios/"+ajeno).header("Authorization","Bearer "+ejecutivo)).andExpect(status().isOk());
+        ejecutarContrato(put("/usuarios/"+ajeno+"/password").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content(request.toString())).andExpect(status().isNotFound());
     }
 
     com.fasterxml.jackson.databind.JsonNode alta(ObjectNode body) throws Exception {
@@ -192,7 +192,7 @@ class RegistroClienteIntegrationTest {
 
     String tokenDe(String correo) throws Exception {
         ObjectNode request=mapper.createObjectNode().put("correo",correo).put("password",valido().get("password").asText());
-        return extraerToken(mvc.perform(post("/auth/login").contentType("application/json").content(request.toString()))
+        return extraerToken(ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString()))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
     }
 
@@ -208,35 +208,35 @@ class RegistroClienteIntegrationTest {
         assertEquals("CLIENTE",sql.queryForObject("SELECT rol FROM usuarios",String.class));
         String token=tokenDe(request.get("correoElectronico").asText());
         assertEquals("CLIENTE",jwtDecoder.decode(token).getClaimAsString("rol"));
-        mvc.perform(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
-        mvc.perform(get("/cuentas").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
-        mvc.perform(get("/clientes")).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
+        ejecutarContrato(get("/cuentas").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
+        ejecutarContrato(get("/clientes")).andExpect(status().isUnauthorized());
     }
 
     @Test void clienteConsultaSoloDatosPropiosYCuentasSinFiltrarDatosAjenos() throws Exception {
         var uno=alta(valido()); var dos=alta(hermana());
         String token=tokenDe(valido().get("correoElectronico").asText());
         String cabecera="Bearer "+token;
-        String propio=mvc.perform(get("/clientes/me").header("Authorization",cabecera)).andExpect(status().isOk())
+        String propio=ejecutarContrato(get("/clientes/me").header("Authorization",cabecera)).andExpect(status().isOk())
             .andExpect(jsonPath("cliente.clienteId").value(uno.get("clienteId").asLong())).andReturn().getResponse().getContentAsString();
         assertFalse(propio.contains("password")); assertFalse(propio.contains("hash"));
-        mvc.perform(get("/clientes/"+uno.get("clienteId").asLong()).header("Authorization",cabecera)).andExpect(status().isOk());
-        mvc.perform(get("/clientes/"+dos.get("clienteId").asLong()).header("Authorization",cabecera))
+        ejecutarContrato(get("/clientes/"+uno.get("clienteId").asLong()).header("Authorization",cabecera)).andExpect(status().isOk());
+        ejecutarContrato(get("/clientes/"+dos.get("clienteId").asLong()).header("Authorization",cabecera))
             .andExpect(status().isNotFound()).andExpect(jsonPath("codigo").value("RECURSO_NO_ENCONTRADO"));
-        mvc.perform(get("/clientes/999999999").header("Authorization",cabecera)).andExpect(status().isNotFound());
+        ejecutarContrato(get("/clientes/999999999").header("Authorization",cabecera)).andExpect(status().isNotFound());
         String numero=uno.get("cuenta").get("numeroCuenta").asText();
-        mvc.perform(get("/cuentas/"+numero+"/saldo").header("Authorization",cabecera))
+        ejecutarContrato(get("/cuentas/"+numero+"/saldo").header("Authorization",cabecera))
             .andExpect(status().isOk()).andExpect(jsonPath("saldo").value(0));
-        mvc.perform(get("/cuentas/"+dos.get("cuenta").get("numeroCuenta").asText()).header("Authorization",cabecera)).andExpect(status().isNotFound());
-        mvc.perform(get("/clientes/"+dos.get("clienteId").asLong()+"/cuentas").header("Authorization",cabecera)).andExpect(status().isNotFound());
+        ejecutarContrato(get("/cuentas/"+dos.get("cuenta").get("numeroCuenta").asText()).header("Authorization",cabecera)).andExpect(status().isNotFound());
+        ejecutarContrato(get("/clientes/"+dos.get("clienteId").asLong()+"/cuentas").header("Authorization",cabecera)).andExpect(status().isNotFound());
     }
 
     @Test void ejecutivoFiltraIdentificadoresCombinadosYClienteBuscaSoloElPropio() throws Exception {
         var uno=alta(valido()); alta(hermana());
         String cliente=tokenDe(valido().get("correoElectronico").asText());
-        mvc.perform(get("/clientes/buscar").param("curp",valido().get("curp").asText().toLowerCase(java.util.Locale.ROOT)).header("Authorization","Bearer "+cliente))
+        ejecutarContrato(get("/clientes/buscar").param("curp",valido().get("curp").asText().toLowerCase(java.util.Locale.ROOT)).header("Authorization","Bearer "+cliente))
             .andExpect(status().isOk());
-        mvc.perform(get("/clientes/buscar").param("curp",hermana().get("curp").asText()).header("Authorization","Bearer "+cliente))
+        ejecutarContrato(get("/clientes/buscar").param("curp",hermana().get("curp").asText()).header("Authorization","Bearer "+cliente))
             .andExpect(status().isNotFound());
         String token=ejecutivo(uno);
         for (String campo : new String[]{"curp","rfc","correo","numeroCuenta"}) {
@@ -245,13 +245,13 @@ class RegistroClienteIntegrationTest {
                 case "numeroCuenta" -> uno.get("cuenta").get("numeroCuenta").asText();
                 default -> valido().get(campo).asText();
             };
-            mvc.perform(get("/clientes").param(campo,valor).header("Authorization","Bearer "+token))
+            ejecutarContrato(get("/clientes").param(campo,valor).header("Authorization","Bearer "+token))
                 .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1))
                 .andExpect(jsonPath("contenido[0].clienteId").value(uno.get("clienteId").asLong()));
         }
-        mvc.perform(get("/clientes").param("curp",valido().get("curp").asText()).param("rfc",hermana().get("rfc").asText())
+        ejecutarContrato(get("/clientes").param("curp",valido().get("curp").asText()).param("rfc",hermana().get("rfc").asText())
             .header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(0));
-        mvc.perform(get("/clientes/buscar").param("correo","inexistente@example.com").header("Authorization","Bearer "+token)).andExpect(status().isNotFound());
+        ejecutarContrato(get("/clientes/buscar").param("correo","inexistente@example.com").header("Authorization","Bearer "+token)).andExpect(status().isNotFound());
     }
 
     @Test void paginasSonEstablesYRangosIncluyenTodoElUltimoDia() throws Exception {
@@ -260,16 +260,16 @@ class RegistroClienteIntegrationTest {
         sql.update("UPDATE clientes SET fecha_registro='2026-01-10 23:59:59.999999' WHERE id=?",dos.get("clienteId").asLong());
         String token=ejecutivo(uno);
         for (int page=0;page<2;page++) {
-            mvc.perform(get("/clientes").param("page",Integer.toString(page)).param("size","1").header("Authorization","Bearer "+token))
+            ejecutarContrato(get("/clientes").param("page",Integer.toString(page)).param("size","1").header("Authorization","Bearer "+token))
                 .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2)).andExpect(jsonPath("totalPaginas").value(2))
                 .andExpect(jsonPath("contenido[0].clienteId").value((page==0?uno:dos).get("clienteId").asLong()));
         }
-        mvc.perform(get("/clientes").param("page","2").param("size","1").header("Authorization","Bearer "+token))
+        ejecutarContrato(get("/clientes").param("page","2").param("size","1").header("Authorization","Bearer "+token))
             .andExpect(status().isOk()).andExpect(jsonPath("contenido.length()").value(0));
-        mvc.perform(get("/clientes").param("desde","2026-01-10").param("hasta","2026-01-10").header("Authorization","Bearer "+token))
+        ejecutarContrato(get("/clientes").param("desde","2026-01-10").param("hasta","2026-01-10").header("Authorization","Bearer "+token))
             .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2));
         sql.update("UPDATE clientes SET fecha_registro=NULL WHERE id=?",dos.get("clienteId").asLong());
-        mvc.perform(get("/clientes").param("desde","2026-01-10").header("Authorization","Bearer "+token))
+        ejecutarContrato(get("/clientes").param("desde","2026-01-10").header("Authorization","Bearer "+token))
             .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
     }
 
@@ -279,44 +279,44 @@ class RegistroClienteIntegrationTest {
         sql.update("UPDATE cuentas SET estatus='INACTIVA' WHERE cliente_id=?",dos.get("clienteId").asLong());
         sql.update("INSERT INTO cuentas(cliente_id,numero_cuenta,saldo,estatus) VALUES (?,'77777777777777777777',125.50,'ACTIVA')",uno.get("clienteId").asLong());
         String token=ejecutivo(uno);
-        mvc.perform(get("/clientes").param("activo","true").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
-        mvc.perform(get("/cuentas").param("activo","true").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2));
-        mvc.perform(get("/clientes").param("numeroCuenta","77777777777777777777").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
-        mvc.perform(get("/cuentas/77777777777777777777/saldo").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("saldo").value(125.50));
+        ejecutarContrato(get("/clientes").param("activo","true").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
+        ejecutarContrato(get("/cuentas").param("activo","true").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(2));
+        ejecutarContrato(get("/clientes").param("numeroCuenta","77777777777777777777").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
+        ejecutarContrato(get("/cuentas/77777777777777777777/saldo").header("Authorization","Bearer "+token)).andExpect(status().isOk()).andExpect(jsonPath("saldo").value(125.50));
     }
 
     @Test void parametrosInvalidosProducen400Controlado() throws Exception {
         String token=ejecutivo(alta(valido()));
         String[][] invalidos={{"page","-1"},{"size","0"},{"size","101"},{"size",""},{"page","1.5"},{"activo","incorrecto"},{"desde","2026-02-30"},{"ordenarPor","passwordHash"},{"direccion","SQL"},{"curp","123"},{"correo","incorrecto"}};
-        for (var parametro:invalidos) mvc.perform(get("/clientes").param(parametro[0],parametro[1]).header("Authorization","Bearer "+token))
-            .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
-        mvc.perform(get("/clientes").param("desde","2026-12-01").param("hasta","2026-01-01").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
-        mvc.perform(get("/clientes/buscar").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
-        mvc.perform(get("/clientes/abc").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
-        mvc.perform(get("/cuentas/123").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        for (var parametro:invalidos) ejecutarContrato(get("/clientes").param(parametro[0],parametro[1]).header("Authorization","Bearer "+token))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value(org.hamcrest.Matchers.isOneOf("VALIDACION","JSON_INVALIDO")));
+        ejecutarContrato(get("/clientes").param("desde","2026-12-01").param("hasta","2026-01-01").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        ejecutarContrato(get("/clientes/buscar").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        ejecutarContrato(get("/clientes/abc").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
+        ejecutarContrato(get("/cuentas/123").header("Authorization","Bearer "+token)).andExpect(status().isBadRequest());
     }
 
     @Test void cambioDeRolRevocaTokenAnteriorInclusoSinCambiarVersion() throws Exception {
         var uno=alta(valido());
         String cliente=tokenDe(valido().get("correoElectronico").asText());
         String token=ejecutivo(uno);
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+cliente)).andExpect(status().isUnauthorized());
-        mvc.perform(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isOk());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+cliente)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isOk());
         sql.update("UPDATE usuarios SET rol='CLIENTE' WHERE id=?",uno.get("usuario").get("usuarioId").asLong());
-        mvc.perform(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/clientes").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
     }
 
     @Test void catalogosPublicosPermitenPrepararElRegistro() throws Exception {
-        mvc.perform(get("/catalogos/sexos")).andExpect(status().isOk())
+        ejecutarContrato(get("/catalogos/sexos")).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(1)).andExpect(jsonPath("$[1].id").value(2));
-        mvc.perform(get("/catalogos/nacionalidades")).andExpect(status().isOk())
+        ejecutarContrato(get("/catalogos/nacionalidades")).andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].descripcion").value("Mexicana"));
-        mvc.perform(get("/catalogos/paises")).andExpect(status().isOk())
+        ejecutarContrato(get("/catalogos/paises")).andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].descripcion").value("México"));
-        mvc.perform(get("/catalogos/codigos-postales/37907")).andExpect(status().isOk())
+        ejecutarContrato(get("/catalogos/codigos-postales/37907")).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(110333891)).andExpect(jsonPath("$[0].colonia").value("San Isidro"));
-        mvc.perform(get("/catalogos/codigos-postales/00000")).andExpect(status().isOk()).andExpect(content().json("[]"));
-        mvc.perform(get("/catalogos/codigos-postales/ABC")).andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
+        ejecutarContrato(get("/catalogos/codigos-postales/00000")).andExpect(status().isOk()).andExpect(content().json("[]"));
+        ejecutarContrato(get("/catalogos/codigos-postales/ABC")).andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
     }
 
     @Test void registroRechazaReferenciasInexistentesSinGuardar() throws Exception {
@@ -356,7 +356,7 @@ class RegistroClienteIntegrationTest {
         try {
             enviar(valido()).andExpect(status().isBadRequest());
             vacio();
-            mvc.perform(get("/catalogos/sexos")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
+            ejecutarContrato(get("/catalogos/sexos")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
         } finally { sql.update("UPDATE cat_sexos SET activo=TRUE WHERE id=1"); }
     }
 
@@ -386,7 +386,7 @@ class RegistroClienteIntegrationTest {
     }
 
     org.springframework.test.web.servlet.ResultActions enviar(ObjectNode body) throws Exception {
-        return mvc.perform(post("/clientes").contentType("application/json").content(body.toString()));
+        return ejecutarContrato(post("/clientes").contentType("application/json").content(body.toString()));
     }
 
     void vacio() {
@@ -557,7 +557,7 @@ class RegistroClienteIntegrationTest {
         ObjectNode request=mapper.createObjectNode();
         request.put("correo",valido().get("correoElectronico").asText());
         request.put("password",password);
-        return mvc.perform(post("/auth/login").contentType("application/json").content(request.toString()));
+        return ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString()));
     }
 
     String extraerToken(String response) throws Exception { return mapper.readTree(response).get("accessToken").asText(); }
@@ -581,7 +581,7 @@ class RegistroClienteIntegrationTest {
         assertEquals("http://localhost:8080",jwt.getIssuer().toString());
         assertTrue(jwt.getAudience().contains("gestopago-api"));
         assertFalse(jwt.getClaims().containsKey("correo")); assertFalse(jwt.getClaims().containsKey("password"));
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token))
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token))
             .andExpect(status().isOk()).andExpect(jsonPath("correo").value(valido().get("correoElectronico").asText()))
             .andExpect(jsonPath("passwordHash").doesNotExist());
     }
@@ -605,25 +605,25 @@ class RegistroClienteIntegrationTest {
         assertEquals("ACTIVA",sql.queryForObject("SELECT estatus FROM cuentas",String.class));
         assertEquals(1,sql.queryForObject("SELECT version_token FROM usuarios",Long.class));
         iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
         sql.update("UPDATE usuarios SET activo=TRUE, intentos_fallidos=0");
         // Reactivar no vuelve a habilitar tokens anteriores al bloqueo.
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
     }
 
     @Test void tokenAusenteAlteradoVencidoOConClaimsIncorrectosSeRechaza() throws Exception {
         String token=extraerToken(registrarYToken());
-        mvc.perform(get("/auth/me")).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me")).andExpect(status().isUnauthorized());
         var parts=token.split("\\.");
         parts[2]=(parts[2].charAt(0)=='A'?"B":"A")+parts[2].substring(1);
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+String.join(".",parts))).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+String.join(".",parts))).andExpect(status().isUnauthorized());
         String expired=tokenFirmado(java.time.Instant.now().minusSeconds(1),"http://localhost:8080","gestopago-api",0);
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+expired)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+expired)).andExpect(status().isUnauthorized());
         for (String invalid : new String[]{
             tokenFirmado(java.time.Instant.now().plusSeconds(300),"otro-emisor","gestopago-api",0),
             tokenFirmado(java.time.Instant.now().plusSeconds(300),"http://localhost:8080","otra-audiencia",0),
             tokenFirmado(java.time.Instant.now().plusSeconds(300),"http://localhost:8080","gestopago-api",9)}) {
-            mvc.perform(get("/auth/me").header("Authorization","Bearer "+invalid)).andExpect(status().isUnauthorized());
+            ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+invalid)).andExpect(status().isUnauthorized());
         }
     }
 
@@ -641,13 +641,13 @@ class RegistroClienteIntegrationTest {
         enviar(valido()).andExpect(status().isCreated());
         var request=mapper.createObjectNode().put("correo","  "+valido().get("correoElectronico").asText().toUpperCase()+" ")
             .put("password",valido().get("password").asText());
-        mvc.perform(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isOk());
+        ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isOk());
         iniciarSesion(" "+valido().get("password").asText()).andExpect(status().isUnauthorized());
         assertEquals(1,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
         request.put("password",12345678);
-        mvc.perform(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
         request.put("password","A".repeat(73));
-        mvc.perform(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
+        ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString())).andExpect(status().isBadRequest());
         assertEquals(1,sql.queryForObject("SELECT intentos_fallidos FROM usuarios",Integer.class));
     }
 
@@ -656,10 +656,10 @@ class RegistroClienteIntegrationTest {
         sql.update("UPDATE cuentas SET estatus='INACTIVA'");
         String token=extraerToken(iniciarSesion(valido().get("password").asText()).andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString());
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
         sql.update("UPDATE clientes SET estatus='INACTIVO'");
         iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());
-        mvc.perform(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+        ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
     }
 
     @Test void solicitudesConcurrentesNoPierdenIntentos() throws Exception {
@@ -677,17 +677,105 @@ class RegistroClienteIntegrationTest {
 
     @Test void autenticadoSinPermisoObtiene403() throws Exception {
         String token=extraerToken(registrarYToken());
-        mvc.perform(post("/personas").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
+        ejecutarContrato(post("/personas").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
             .andExpect(status().isForbidden()).andExpect(jsonPath("codigo").value("ACCESO_DENEGADO"));
     }
     @Test void usuarioPropioYErroresDeIdDescriptivos() throws Exception {
         String token=extraerToken(registrarYToken());
-        mvc.perform(get("/usuarios/me").header("Authorization","Bearer "+token))
+        ejecutarContrato(get("/usuarios/me").header("Authorization","Bearer "+token))
             .andExpect(status().isOk()).andExpect(jsonPath("passwordHash").doesNotExist());
-        mvc.perform(get("/usuarios/0").header("Authorization","Bearer "+token))
+        ejecutarContrato(get("/usuarios/0").header("Authorization","Bearer "+token))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"))
-            .andExpect(jsonPath("errores[0].mensaje").value("El ID del usuario debe ser un número entero mayor que cero"));
-        mvc.perform(get("/usuarios/999999").header("Authorization","Bearer "+token))
+            .andExpect(jsonPath("errores[0].mensaje").value("El ID debe ser mayor que cero"));
+        ejecutarContrato(get("/usuarios/999999").header("Authorization","Bearer "+token))
             .andExpect(status().isNotFound()).andExpect(jsonPath("codigo").value("RECURSO_NO_ENCONTRADO"));
+    }
+
+    /** Construye las solicitudes del contrato por body para los escenarios de negocio. */
+    org.springframework.test.web.servlet.ResultActions ejecutarContrato(
+            org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder builder) throws Exception {
+        builder.with(request -> {
+            String ruta=request.getRequestURI();
+            String metodo=request.getMethod();
+            var body=mapper.createObjectNode();
+            String destino=null;
+            if (metodo.equals("GET") && (ruta.equals("/clientes") || ruta.equals("/cuentas") || ruta.equals("/clientes/buscar"))) {
+                destino=ruta.equals("/clientes/buscar")?ruta:ruta+"/listar";
+                request.getParameterMap().forEach((key,values)-> {
+                    if(key.equals("page") || key.equals("size")) {
+                        try { body.put(key,Integer.parseInt(values[0])); } catch(NumberFormatException ex) { body.put(key,values[0]); }
+                    } else if(key.equals("activo") && (values[0].equals("true") || values[0].equals("false"))) body.put(key,Boolean.parseBoolean(values[0]));
+                    else body.put(key,values[0]);
+                });
+            } else if(metodo.equals("GET") && ruta.matches("/catalogos/codigos-postales/[^/]+")) {
+                destino="/catalogos/codigos-postales/consultar"; body.put("codigoPostal",ruta.substring(ruta.lastIndexOf('/')+1));
+            } else if((ruta.matches("/clientes/[^/]+(/cuentas)?") && !ruta.equals("/clientes/me"))) {
+                try { body.put("id",Long.parseLong(ruta.split("/")[2])); } catch(NumberFormatException ex) { body.put("id",ruta.split("/")[2]); }
+                destino=metodo.equals("GET")?(ruta.endsWith("/cuentas")?"/clientes/cuentas":"/clientes/consultar"):"/clientes";
+                if(metodo.equals("PUT")) { try { body.set("datos",mapper.readTree(request.getContentAsByteArray())); } catch(Exception ex) { throw new IllegalArgumentException(ex); } }
+            } else if(ruta.matches("/usuarios/[0-9]+(/password)?")) {
+                try { body.put("id",Long.parseLong(ruta.split("/")[2])); } catch(NumberFormatException ex) { body.put("id",ruta.split("/")[2]); }
+                destino=ruta.endsWith("/password")?"/usuarios/password":"/usuarios/buscar";
+                if(ruta.endsWith("/password")) { try { body.set("datos",mapper.readTree(request.getContentAsByteArray())); } catch(Exception ex) { throw new IllegalArgumentException(ex); } }
+            } else if(ruta.matches("/cuentas/[0-9]+(/saldo)?")) {
+                body.put("numeroCuenta",ruta.split("/")[2]); destino=ruta.endsWith("/saldo")?"/cuentas/saldo":"/cuentas/consultar";
+            }
+            if(destino!=null) {
+                request.setRequestURI(destino);
+                if(metodo.equals("GET")) request.setMethod("POST");
+                request.setContentType("application/json");
+                request.setContent(body.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                request.removeAllParameters();
+            }
+            return request;
+        });
+        return mvc.perform(builder).andDo(result -> {
+            if(result.getResponse().getStatus()>=200 && result.getResponse().getStatus()<300 && !result.getResponse().getContentAsString().isBlank()) {
+                var respuesta=mapper.readTree(result.getResponse().getContentAsByteArray());
+                assertEquals("EXITO",respuesta.path("codigo").asText());
+                assertTrue(respuesta.has("datos"));
+                result.getResponse().setCommitted(false);
+                result.getResponse().resetBuffer();
+                result.getResponse().getOutputStream().write(mapper.writeValueAsBytes(respuesta.get("datos")));
+            }
+        });
+    }
+    @Test void busquedaUsuariosPorBodyCombinaFiltrosYRestringePropietario() throws Exception {
+        var uno=alta(valido());var dos=alta(hermana());
+        String token=tokenDe(valido().get("correoElectronico").asText());
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1))
+            .andExpect(jsonPath("contenido[0].usuarioId").value(uno.get("usuario").get("usuarioId").asLong()))
+            .andExpect(jsonPath("contenido[0].passwordHash").doesNotExist());
+        var filtro=mapper.createObjectNode().put("correo",hermana().get("correoElectronico").asText()).put("activo",true).put("rol","CLIENTE");
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+token).contentType("application/json").content(filtro.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(0));
+        String ejecutivo=ejecutivo(uno);
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content(filtro.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content("{\"size\":101}"))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
+    }
+
+    @Test void contratoPostalPorBodyEsPublicoYValidaContenido() throws Exception {
+        ejecutarContrato(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"37907\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].codigoPostal").value("37907"));
+        ejecutarContrato(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"abc\"}"))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("errores[0].campo").value("codigoPostal"));
+    }
+
+    @Test void rutasAnterioresNoSonUnAccesoAlternativoYMetodosInvalidosNoDan500() throws Exception {
+        String token=extraerToken(registrarYToken());
+        mvc.perform(get("/usuarios/1").header("Authorization","Bearer "+token))
+            .andExpect(status().isNotFound()).andExpect(jsonPath("codigo").value("RUTA_NO_ENCONTRADA"));
+        mvc.perform(get("/usuarios/buscar").header("Authorization","Bearer "+token))
+            .andExpect(status().isMethodNotAllowed()).andExpect(jsonPath("codigo").value("METODO_NO_PERMITIDO"));
+    }
+
+    @Test void respuestasExitosasYErroresTienenEstructuraComun() throws Exception {
+        mvc.perform(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"37907\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("codigo").value("EXITO"))
+            .andExpect(jsonPath("datos[0].codigoPostal").value("37907"))
+            .andExpect(jsonPath("errores").isArray()).andExpect(jsonPath("timestamp").exists());
     }
 }

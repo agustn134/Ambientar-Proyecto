@@ -48,8 +48,8 @@ body:json {
 tests {
   test("Rechaza catálogo inválido", function () {
     expect(res.getStatus()).to.equal(400);
-    expect(res.getBody().codigo).to.equal("VALIDACION");
-    expect(res.getBody().errores.some(e => e.campo === "estadoCivilId")).to.equal(true);
+    expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("VALIDACION");
+    expect((res.getBody().datos ?? res.getBody()).errores.some(e => e.campo === "estadoCivilId")).to.equal(true);
   });
 }
 

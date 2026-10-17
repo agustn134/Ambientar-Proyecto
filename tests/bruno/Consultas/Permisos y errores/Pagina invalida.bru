@@ -4,13 +4,14 @@ meta {
   seq: 7
 }
 
-get {
-  url: {{baseUrl}}/clientes?size=101
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
-  test("Validación controlada", function () { expect(res.getBody().codigo).to.equal("VALIDACION"); });
+  test("Validación controlada", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("VALIDACION"); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 400.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "size": 101
+  }
 }

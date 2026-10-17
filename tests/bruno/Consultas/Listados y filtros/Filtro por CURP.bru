@@ -4,13 +4,14 @@ meta {
   seq: 4
 }
 
-get {
-  url: {{baseUrl}}/clientes?curp=LOPA040905HGTPRGA7
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Un cliente encontrado", function () { expect(res.getBody().totalElementos).to.equal(1); expect(res.getBody().contenido[0].clienteId).to.equal(Number(bru.getVar("clienteId"))); });
+  test("Un cliente encontrado", function () { expect((res.getBody().datos ?? res.getBody()).totalElementos).to.equal(1); expect((res.getBody().datos ?? res.getBody()).contenido[0].clienteId).to.equal(Number(bru.getVar("clienteId"))); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 200.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "curp": "LOPA040905HGTPRGA7"
+  }
 }

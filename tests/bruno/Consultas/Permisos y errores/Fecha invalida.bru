@@ -4,13 +4,14 @@ meta {
   seq: 8
 }
 
-get {
-  url: {{baseUrl}}/clientes?desde=2026-02-30
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
-  test("Fecha rechazada", function () { expect(res.getBody().codigo).to.equal("VALIDACION"); });
+  test("Fecha rechazada", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("VALIDACION"); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 400.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "desde": "2026-02-30"
+  }
 }
