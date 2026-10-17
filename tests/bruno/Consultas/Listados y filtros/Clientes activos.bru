@@ -4,13 +4,14 @@ meta {
   seq: 11
 }
 
-get {
-  url: {{baseUrl}}/clientes?activo=true
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -26,4 +27,10 @@ docs {
   HTTP esperado: 200. Todos los clientes de la página deben estar ACTIVO. No exigir una cantidad fija.
   Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "activo": true
+  }
 }

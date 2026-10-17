@@ -4,13 +4,14 @@ meta {
   seq: 2
 }
 
-get {
-  url: {{baseUrl}}/clientes?page=1&size=2&ordenarPor=id&direccion=ASC
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -40,4 +41,13 @@ docs {
   HTTP esperado: 200, page 1, size 2, mismos totales y otros IDs. Ejecutar inmediatamente después de Listado paginado ejecutivo, sin registrar o modificar clientes entre ambas peticiones. Puede estar vacía si hay menos de tres clientes.
   Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "page": 1,
+    "size": 2,
+    "ordenarPor": "id",
+    "direccion": "ASC"
+  }
 }

@@ -21,8 +21,8 @@ public class ClienteController {
         return ResponseEntity.status(201).body(registro.registrar(request));
     }
 
-    @GetMapping
-    public ConsultasResponse.Pagina<ConsultasResponse.ResumenCliente> listar(@Valid @ModelAttribute FiltroClientes filtro,
+    @PostMapping("/listar")
+    public ConsultasResponse.Pagina<ConsultasResponse.ResumenCliente> listar(@Valid @RequestBody FiltroClientes filtro,
             @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
         return consultas.listar(filtro,Long.parseLong(jwt.getSubject()));
     }
@@ -32,35 +32,34 @@ public class ClienteController {
         return consultas.propio(Long.parseLong(jwt.getSubject()));
     }
 
-    @GetMapping("/buscar")
-    public ConsultasResponse.DetalleCliente buscar(@Valid @ModelAttribute FiltroClientes filtro,
+    @PostMapping("/buscar")
+    public ConsultasResponse.DetalleCliente buscar(@Valid @RequestBody FiltroClientes filtro,
             @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
         return consultas.buscar(filtro,Long.parseLong(jwt.getSubject()));
     }
 
-    @GetMapping("/{id}")
-    public ConsultasResponse.DetalleCliente consultar(@PathVariable @jakarta.validation.constraints.Positive long id,
+    @PostMapping("/consultar")
+    public ConsultasResponse.DetalleCliente consultar(@Valid @RequestBody OperacionRequest.Id request,
             @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
-        return consultas.porId(id,Long.parseLong(jwt.getSubject()));
+        return consultas.porId(request.id(),Long.parseLong(jwt.getSubject()));
     }
 
-    @GetMapping("/{id}/cuentas")
-    public java.util.List<ConsultasResponse.Cuenta> cuentas(@PathVariable @jakarta.validation.constraints.Positive long id,
+    @PostMapping("/cuentas")
+    public java.util.List<ConsultasResponse.Cuenta> cuentas(@Valid @RequestBody OperacionRequest.Id request,
             @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
-        return consultas.cuentasDeCliente(id,Long.parseLong(jwt.getSubject()));
+        return consultas.cuentasDeCliente(request.id(),Long.parseLong(jwt.getSubject()));
     }
 
-    @PutMapping("/{id}")
-    public ConsultasResponse.DetalleCliente actualizar(@PathVariable @jakarta.validation.constraints.Positive long id,
-            @Valid @RequestBody ActualizarClienteRequest request,
+    @PutMapping
+    public ConsultasResponse.DetalleCliente actualizar(@Valid @RequestBody OperacionRequest.Actualizar request,
             @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
-        return mantenimiento.actualizar(id,request,Long.parseLong(jwt.getSubject()));
+        return mantenimiento.actualizar(request.id(),request.datos(),Long.parseLong(jwt.getSubject()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desactivar(@PathVariable @jakarta.validation.constraints.Positive long id,
+    @DeleteMapping
+    public ResponseEntity<Void> desactivar(@Valid @RequestBody OperacionRequest.Id request,
             @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
-        mantenimiento.desactivar(id,Long.parseLong(jwt.getSubject()));
+        mantenimiento.desactivar(request.id(),Long.parseLong(jwt.getSubject()));
         return ResponseEntity.noContent().build();
     }
 }

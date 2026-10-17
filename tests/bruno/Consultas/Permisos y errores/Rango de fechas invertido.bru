@@ -4,13 +4,14 @@ meta {
   seq: 9
 }
 
-get {
-  url: {{baseUrl}}/clientes?desde=2026-10-09&hasta=2026-10-08
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -26,4 +27,11 @@ docs {
   HTTP esperado: 400 VALIDACION. Ambas fechas existen, pero desde es posterior a hasta.
   Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "desde": "2026-10-09",
+    "hasta": "2026-10-08"
+  }
 }

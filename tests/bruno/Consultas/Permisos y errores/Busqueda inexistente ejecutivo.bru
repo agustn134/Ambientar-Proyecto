@@ -4,13 +4,14 @@ meta {
   seq: 4
 }
 
-get {
-  url: {{baseUrl}}/clientes/buscar?correo=no.existe.consulta%40example.com
-  body: none
+post {
+  url: {{baseUrl}}/clientes/buscar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 404.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "correo": "no.existe.consulta@example.com"
+  }
 }

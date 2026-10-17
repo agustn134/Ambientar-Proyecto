@@ -4,13 +4,14 @@ meta {
   seq: 5
 }
 
-get {
-  url: {{baseUrl}}/clientes/{{clienteId}}/cuentas
-  body: none
+post {
+  url: {{baseUrl}}/clientes/cuentas
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 200, array de cuentas propias. Ejecutar después de Mi cliente para capturar clienteId y numeroCuenta.
   Autenticación: Bearer token; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "id": {{clienteId}}
+  }
 }

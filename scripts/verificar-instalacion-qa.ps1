@@ -25,7 +25,7 @@ $resultadoVerificacion | Add-Member -NotePropertyName tablas_antes_del_arranque 
 $resultadoVerificacion | Add-Member -NotePropertyName comprobado_en -NotePropertyValue (Get-Date).ToString('o')
 $resultadoVerificacion | Add-Member -NotePropertyName postal_archivo_sha256 -NotePropertyValue (Get-FileHash -LiteralPath $configVerificacion.postalPath -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($resultadoVerificacion.postal_version.sha256 -ne $resultadoVerificacion.postal_archivo_sha256) { throw 'La versión postal no corresponde al ZIP local.' }
-$catalogoVerificacion=Invoke-RestMethod -Uri "http://localhost:$($configVerificacion.port)/catalogos/codigos-postales/37907"
+$catalogoVerificacion=Invoke-RestMethod -Uri "http://localhost:$($configVerificacion.port)/catalogos/codigos-postales/consultar" -Method Post -ContentType 'application/json' -Body '{"codigoPostal":"37907"}'
 if (!($catalogoVerificacion | Where-Object {$_.id -eq 110333891 -and $_.codigoPostal -eq '37907'})) { throw 'La consulta HTTP no contiene el asentamiento QA esperado.' }
 $resultadoVerificacion | Add-Member -NotePropertyName consulta_postal_http -NotePropertyValue 200
 $rutaSalidaVerificacion=Join-Path $raizVerificacion $Salida

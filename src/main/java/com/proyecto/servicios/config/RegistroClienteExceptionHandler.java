@@ -24,6 +24,18 @@ public class RegistroClienteExceptionHandler {
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
                                 String path, List<ErrorCampo> errores) {}
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorRegistro> rutaNoDisponible(org.springframework.web.servlet.resource.NoResourceFoundException ex,HttpServletRequest request) {
+        return respuesta(404,"RUTA_NO_ENCONTRADA","La ruta solicitada no está disponible; consulta el contrato en Swagger",List.of(),request);
+    }
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorRegistro> metodoNoPermitido(org.springframework.web.HttpRequestMethodNotSupportedException ex,HttpServletRequest request) {
+        return respuesta(405,"METODO_NO_PERMITIDO","El método HTTP no está permitido para esta ruta; consulta Swagger",List.of(),request);
+    }
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorRegistro> formatoNoPermitido(org.springframework.web.HttpMediaTypeNotSupportedException ex,HttpServletRequest request) {
+        return respuesta(415,"FORMATO_NO_PERMITIDO","Envía el cuerpo con Content-Type application/json",List.of(),request);
+    }
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ResponseEntity<ErrorRegistro> login(CredencialesInvalidasException ex, HttpServletRequest request) {
         return respuesta(401,"CREDENCIALES_INVALIDAS",ex.getMessage(),List.of(),request);
