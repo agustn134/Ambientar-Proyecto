@@ -1,0 +1,11 @@
+{
+  "fecha": "2026-10-17T13:34:01.8367691-06:00",
+  "alcance": "Prueba del script de respaldo y restauración sobre copia local, no Render",
+  "sha256": "1EF163285CBA1CA9A7A6300C9FE6B6138EA57A8FF4A29171C04AC205003F7590",
+  "restauracion": "OK",
+  "migraciones": 9,
+  "reglas_sin_incumplimientos": 8,
+  "restricciones_validadas": 7,
+  "respaldo_render": "Pendiente: el propietario aún no dispone de respaldo",
+  "datos_personales": "Omitidos"
+}

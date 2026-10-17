@@ -37,6 +37,7 @@ jobs:
           sh gradlew test --no-daemon
           --tests com.proyecto.servicios.RegistroClienteIntegrationTest
           --tests com.proyecto.servicios.ContratoValidacionesTest
+          --tests com.proyecto.servicios.ErroresHttpContratoTest
           --tests com.proyecto.servicios.service.ValidacionesPostgresTest
           --tests com.proyecto.servicios.service.GestoPagoCatalogoServiceTest
           --tests com.proyecto.servicios.service.GestoPagoProductServiceTest
@@ -51,7 +52,10 @@ jobs:
               suite=ET.parse(file).getroot()
               assert all(int(suite.get(k,'0'))==0 for k in ('failures','errors','skipped')), file
               total+=int(suite.get('tests','0'))
-          assert total>=64, f'Se esperaban al menos 64 pruebas; se ejecutaron {total}'
-          assert any('ValidacionesPostgresTest' in f.name for f in files)
+          assert total>=79, f'Se esperaban al menos 79 pruebas; se ejecutaron {total}'
+          expected={'RegistroClienteIntegrationTest','ContratoValidacionesTest','ErroresHttpContratoTest','ValidacionesPostgresTest','GestoPagoCatalogoServiceTest','GestoPagoProductServiceTest'}
+          suites={ET.parse(f).getroot().get('name').rsplit('.',1)[-1]:ET.parse(f).getroot() for f in files}
+          assert expected <= suites.keys(), 'Falta una suite requerida'
+          assert int(suites['ValidacionesPostgresTest'].get('tests','0'))>=4, 'Faltan pruebas PostgreSQL'
           print(f'{total} pruebas aprobadas sin omisiones')
           PY

@@ -60,16 +60,16 @@ Copiar el resultado directamente al campo `JWT_SECRET` de Render y mantener el m
 
 ## Primer arranque
 
-Render ya crea la base PostgreSQL. No ejecutar `crear-base-datos.sql` sobre el servicio administrado: Flyway aplica automáticamente V1–V8 en su base nueva. Después, el importador carga el ZIP incluido: 32 entidades, 2,478 municipios y 159,340 asentamientos. En reinicios con el mismo archivo, reconoce el hash guardado y conserva el catálogo.
+Render ya crea la base PostgreSQL. No ejecutar `crear-base-datos.sql` sobre el servicio administrado: Flyway aplica automáticamente V1–V9 en su base nueva. Para una base existente, seguir primero el [procedimiento de respaldo y auditoría de V9](operacion-validaciones-v9.md). Después, el importador carga el ZIP incluido: 32 entidades, 2,478 municipios y 159,340 asentamientos. En reinicios con el mismo archivo, reconoce el hash guardado y conserva el catálogo.
 
 La primera carga puede tardar más en una instancia Free. Consultar Logs y esperar los mensajes de migraciones, catálogo listo y `Started App`. El health check consulta un catálogo público y no requiere JWT.
 
 Una vez desplegado:
 
 1. Abrir `https://<servicio>.onrender.com/swagger-ui.html`.
-2. Consultar `/catalogos/sexos` y `/catalogos/codigos-postales/37907`.
+2. Consultar `GET /catalogos/sexos` y `POST /catalogos/codigos-postales/consultar` con `{"codigoPostal":"37907"}`.
 3. Registrar un cliente sintético con datos únicos; comprobar HTTP 201, cuenta y usuario.
-4. Iniciar sesión y consultar el perfil y saldo utilizando el JWT obtenido.
+4. Iniciar sesión, obtener `datos.accessToken` y consultar el perfil y saldo utilizando el JWT obtenido y las rutas por body documentadas en Swagger.
 5. Comprobar GestoPago con Redis disponible y sus credenciales vigentes; registrar el resultado real.
 
 Los resultados locales previos no acreditan por sí solos un despliegue remoto. La URL pública y su comprobación se añadirán cuando Render termine el despliegue.
