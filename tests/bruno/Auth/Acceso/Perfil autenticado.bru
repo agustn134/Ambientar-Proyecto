@@ -20,7 +20,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Perfil propio sin hash", function () { expect(res.getBody().correo).to.equal("agustinlopezparra13@gmail.com"); expect(res.getBody()).not.to.have.property("passwordHash"); });
+  test("Perfil propio sin hash", function () { expect((res.getBody().datos ?? res.getBody()).correo).to.equal("agustinlopezparra13@gmail.com"); expect((res.getBody().datos ?? res.getBody())).not.to.have.property("passwordHash"); });
 }
 
 docs {

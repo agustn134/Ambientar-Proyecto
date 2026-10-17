@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
-  test("Fecha rechazada", function () { expect(res.getBody().codigo).to.equal("VALIDACION"); });
+  test("Fecha rechazada", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("VALIDACION"); });
 }
 
 docs {

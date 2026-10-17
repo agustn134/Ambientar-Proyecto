@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Un cliente encontrado", function () { expect(res.getBody().totalElementos).to.equal(1); expect(res.getBody().contenido[0].clienteId).to.equal(Number(bru.getVar("clienteId"))); });
+  test("Un cliente encontrado", function () { expect((res.getBody().datos ?? res.getBody()).totalElementos).to.equal(1); expect((res.getBody().datos ?? res.getBody()).contenido[0].clienteId).to.equal(Number(bru.getVar("clienteId"))); });
 }
 
 docs {

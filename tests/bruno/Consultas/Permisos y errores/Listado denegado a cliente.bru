@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(403); });
-  test("Permiso denegado", function () { expect(res.getBody().codigo).to.equal("ACCESO_DENEGADO"); });
+  test("Permiso denegado", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("ACCESO_DENEGADO"); });
 }
 
 docs {

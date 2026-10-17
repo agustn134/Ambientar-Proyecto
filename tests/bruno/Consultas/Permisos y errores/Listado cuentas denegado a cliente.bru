@@ -20,7 +20,7 @@ auth:bearer {
 }
 
 tests {
-  test("Cliente no consulta cuentas generales", function () { expect(res.getStatus()).to.equal(403); expect(res.getBody().codigo).to.equal("ACCESO_DENEGADO"); });
+  test("Cliente no consulta cuentas generales", function () { expect(res.getStatus()).to.equal(403); expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("ACCESO_DENEGADO"); });
 }
 
 docs {

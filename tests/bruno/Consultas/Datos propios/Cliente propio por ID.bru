@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Identidad propia", function () { expect(res.getBody().cliente.clienteId).to.equal(Number(bru.getVar("clienteId"))); });
+  test("Identidad propia", function () { expect((res.getBody().datos ?? res.getBody()).cliente.clienteId).to.equal(Number(bru.getVar("clienteId"))); });
 }
 
 docs {

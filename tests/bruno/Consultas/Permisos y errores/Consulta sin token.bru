@@ -17,7 +17,7 @@ headers {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
-  test("Autenticación requerida", function () { expect(res.getBody().codigo).to.equal("NO_AUTENTICADO"); });
+  test("Autenticación requerida", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("NO_AUTENTICADO"); });
 }
 
 docs {

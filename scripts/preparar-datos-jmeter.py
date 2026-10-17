@@ -15,7 +15,9 @@ def request(path,data=None,token=None):
     if token:headers['Authorization']='Bearer '+token
     req=urllib.request.Request(args.url.rstrip('/')+path,data=json.dumps(data).encode() if data is not None else None,headers=headers)
     try:
-        with urllib.request.urlopen(req,timeout=30) as response:return response.status,json.load(response)
+        with urllib.request.urlopen(req,timeout=30) as response:
+            body=json.load(response)
+            return response.status,body.get("datos",body)
     except urllib.error.HTTPError as error:
         return error.code,json.load(error)
 

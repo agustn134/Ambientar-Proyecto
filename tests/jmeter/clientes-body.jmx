@@ -87,7 +87,7 @@
               <stringProp name="parameters" />
               <stringProp name="filename" />
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">if (prev.getResponseCode() == '200') { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()); vars.put('jwt',b.accessToken as String); vars.put('correoSesion',vars.get('correo')); vars.put('cuentaSesion',vars.get('numeroCuenta')); }</stringProp>
+              <stringProp name="script">if (prev.getResponseCode() == '200') { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()).datos; vars.put('jwt',b.accessToken as String); vars.put('correoSesion',vars.get('correo')); vars.put('cuentaSesion',vars.get('numeroCuenta')); }</stringProp>
             </JSR223PostProcessor>
             <hashTree />
             <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="HTTP 200 y JWT" enabled="true">
@@ -138,7 +138,7 @@
               <stringProp name="parameters" />
               <stringProp name="filename" />
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()); if (prev.getResponseCode() != '200' || !(b.correo == vars.get('correoSesion') &amp;&amp; b.rol == 'CLIENTE')) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
+              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()).datos; if (prev.getResponseCode() != '200' || !(b.correo == vars.get('correoSesion') &amp;&amp; b.rol == 'CLIENTE')) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
             </JSR223Assertion>
             <hashTree />
           </hashTree>
@@ -165,7 +165,7 @@
               <stringProp name="parameters" />
               <stringProp name="filename" />
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()); if (prev.getResponseCode() != '200' || !(b.cliente.correo == vars.get('correoSesion') &amp;&amp; b.cuentas.any { it.numeroCuenta == vars.get('cuentaSesion') })) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
+              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()).datos; if (prev.getResponseCode() != '200' || !(b.cliente.correo == vars.get('correoSesion') &amp;&amp; b.cuentas.any { it.numeroCuenta == vars.get('cuentaSesion') })) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
             </JSR223Assertion>
             <hashTree />
           </hashTree>
@@ -199,7 +199,7 @@
               <stringProp name="parameters" />
               <stringProp name="filename" />
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()); if (prev.getResponseCode() != '200' || !(b.numeroCuenta == vars.get('cuentaSesion') &amp;&amp; b.saldo &gt;= 0)) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
+              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()).datos; if (prev.getResponseCode() != '200' || !(b.numeroCuenta == vars.get('cuentaSesion') &amp;&amp; b.saldo &gt;= 0)) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
             </JSR223Assertion>
             <hashTree />
           </hashTree>
@@ -233,7 +233,7 @@
               <stringProp name="parameters" />
               <stringProp name="filename" />
               <stringProp name="cacheKey">true</stringProp>
-              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()); if (prev.getResponseCode() != '200' || !(b instanceof List &amp;&amp; !b.isEmpty() &amp;&amp; b.every { it.codigoPostal == '37907' })) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
+              <stringProp name="script">try { def b = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()).datos; if (prev.getResponseCode() != '200' || !(b instanceof List &amp;&amp; !b.isEmpty() &amp;&amp; b.every { it.codigoPostal == '37907' })) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('HTTP o contenido inesperado'); } } catch (Exception e) { AssertionResult.setFailure(true); AssertionResult.setFailureMessage('Respuesta JSON inválida'); }</stringProp>
             </JSR223Assertion>
             <hashTree />
           </hashTree>

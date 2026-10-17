@@ -39,7 +39,7 @@ class RegistroClienteIntegrationTest {
         com.proyecto.servicios.service.ConsultaClienteService.class,com.proyecto.servicios.controller.CuentaController.class,
         com.proyecto.servicios.service.ValidacionDatosCliente.class,com.proyecto.servicios.service.MantenimientoClienteService.class,
         com.proyecto.servicios.service.MantenimientoUsuarioService.class,com.proyecto.servicios.controller.UsuarioController.class,
-        RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, PasswordConfig.class, LoggingAspect.class,
+        RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, RespuestaExitosaAdvice.class, PasswordConfig.class, LoggingAspect.class,
         JwtConfig.class,SecurityConfig.class,com.proyecto.servicios.security.UsuarioJwtValidator.class,
         com.proyecto.servicios.security.SecurityErrorHandler.class,com.proyecto.servicios.service.LoginService.class,
         com.proyecto.servicios.service.JwtService.class,com.proyecto.servicios.service.UsuarioSesionService.class,
@@ -707,7 +707,7 @@ class RegistroClienteIntegrationTest {
                     } else if(key.equals("activo") && (values[0].equals("true") || values[0].equals("false"))) body.put(key,Boolean.parseBoolean(values[0]));
                     else body.put(key,values[0]);
                 });
-            } else if(ruta.matches("/catalogos/codigos-postales/[^/]+")) {
+            } else if(metodo.equals("GET") && ruta.matches("/catalogos/codigos-postales/[^/]+")) {
                 destino="/catalogos/codigos-postales/consultar"; body.put("codigoPostal",ruta.substring(ruta.lastIndexOf('/')+1));
             } else if((ruta.matches("/clientes/[^/]+(/cuentas)?") && !ruta.equals("/clientes/me"))) {
                 try { body.put("id",Long.parseLong(ruta.split("/")[2])); } catch(NumberFormatException ex) { body.put("id",ruta.split("/")[2]); }
@@ -729,29 +729,38 @@ class RegistroClienteIntegrationTest {
             }
             return request;
         });
-        return mvc.perform(builder);
+        return mvc.perform(builder).andDo(result -> {
+            if(result.getResponse().getStatus()>=200 && result.getResponse().getStatus()<300 && !result.getResponse().getContentAsString().isBlank()) {
+                var respuesta=mapper.readTree(result.getResponse().getContentAsByteArray());
+                assertEquals("EXITO",respuesta.path("codigo").asText());
+                assertTrue(respuesta.has("datos"));
+                result.getResponse().setCommitted(false);
+                result.getResponse().resetBuffer();
+                result.getResponse().getOutputStream().write(mapper.writeValueAsBytes(respuesta.get("datos")));
+            }
+        });
     }
     @Test void busquedaUsuariosPorBodyCombinaFiltrosYRestringePropietario() throws Exception {
         var uno=alta(valido());var dos=alta(hermana());
         String token=tokenDe(valido().get("correoElectronico").asText());
-        mvc.perform(post("/usuarios/buscar").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+token).contentType("application/json").content("{}"))
             .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1))
             .andExpect(jsonPath("contenido[0].usuarioId").value(uno.get("usuario").get("usuarioId").asLong()))
             .andExpect(jsonPath("contenido[0].passwordHash").doesNotExist());
         var filtro=mapper.createObjectNode().put("correo",hermana().get("correoElectronico").asText()).put("activo",true).put("rol","CLIENTE");
-        mvc.perform(post("/usuarios/buscar").header("Authorization","Bearer "+token).contentType("application/json").content(filtro.toString()))
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+token).contentType("application/json").content(filtro.toString()))
             .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(0));
         String ejecutivo=ejecutivo(uno);
-        mvc.perform(post("/usuarios/buscar").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content(filtro.toString()))
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content(filtro.toString()))
             .andExpect(status().isOk()).andExpect(jsonPath("totalElementos").value(1));
-        mvc.perform(post("/usuarios/buscar").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content("{\"size\":101}"))
+        ejecutarContrato(post("/usuarios/buscar").header("Authorization","Bearer "+ejecutivo).contentType("application/json").content("{\"size\":101}"))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("codigo").value("VALIDACION"));
     }
 
     @Test void contratoPostalPorBodyEsPublicoYValidaContenido() throws Exception {
-        mvc.perform(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"37907\"}"))
+        ejecutarContrato(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"37907\"}"))
             .andExpect(status().isOk()).andExpect(jsonPath("$[0].codigoPostal").value("37907"));
-        mvc.perform(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"abc\"}"))
+        ejecutarContrato(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"abc\"}"))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("errores[0].campo").value("codigoPostal"));
     }
 
@@ -761,5 +770,12 @@ class RegistroClienteIntegrationTest {
             .andExpect(status().isNotFound()).andExpect(jsonPath("codigo").value("RUTA_NO_ENCONTRADA"));
         mvc.perform(get("/usuarios/buscar").header("Authorization","Bearer "+token))
             .andExpect(status().isMethodNotAllowed()).andExpect(jsonPath("codigo").value("METODO_NO_PERMITIDO"));
+    }
+
+    @Test void respuestasExitosasYErroresTienenEstructuraComun() throws Exception {
+        mvc.perform(post("/catalogos/codigos-postales/consultar").contentType("application/json").content("{\"codigoPostal\":\"37907\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("codigo").value("EXITO"))
+            .andExpect(jsonPath("datos[0].codigoPostal").value("37907"))
+            .andExpect(jsonPath("errores").isArray()).andExpect(jsonPath("timestamp").exists());
     }
 }

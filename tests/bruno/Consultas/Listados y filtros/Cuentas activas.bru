@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Sólo activas", function () { expect(res.getBody().contenido.every(c => c.estatus === "ACTIVA")).to.equal(true); });
+  test("Sólo activas", function () { expect((res.getBody().datos ?? res.getBody()).contenido.every(c => c.estatus === "ACTIVA")).to.equal(true); });
 }
 
 docs {

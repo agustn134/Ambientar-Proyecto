@@ -20,7 +20,7 @@ auth:bearer {
 }
 
 tests {
-  test("Ejecutivo consulta el registro dado de baja", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("dulce.mantenimiento@example.com"); expect(res.getBody().cliente.estatus).to.equal("INACTIVO"); expect(res.getBody().cuentas.length).to.be.greaterThan(0); expect(res.getBody().cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
+  test("Ejecutivo consulta el registro dado de baja", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).cliente.correo).to.equal("dulce.mantenimiento@example.com"); expect((res.getBody().datos ?? res.getBody()).cliente.estatus).to.equal("INACTIVO"); expect((res.getBody().datos ?? res.getBody()).cuentas.length).to.be.greaterThan(0); expect((res.getBody().datos ?? res.getBody()).cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
 }
 
 docs {

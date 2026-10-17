@@ -20,7 +20,7 @@ auth:bearer {
 }
 
 tests {
-  test("Sólo clientes activos", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().contenido).to.be.an("array"); expect(res.getBody().contenido.every(c => c.estatus === "ACTIVO")).to.equal(true); expect(res.getBody().totalElementos).to.be.at.least(1); });
+  test("Sólo clientes activos", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).contenido).to.be.an("array"); expect((res.getBody().datos ?? res.getBody()).contenido.every(c => c.estatus === "ACTIVO")).to.equal(true); expect((res.getBody().datos ?? res.getBody()).totalElementos).to.be.at.least(1); });
 }
 
 docs {

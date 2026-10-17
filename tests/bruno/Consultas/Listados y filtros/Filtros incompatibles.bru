@@ -24,7 +24,7 @@ script:pre-request {
 }
 
 tests {
-  test("AND de identificadores distintos no devuelve clientes", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().contenido).to.have.lengthOf(0); expect(res.getBody().totalElementos).to.equal(0); expect(res.getBody().totalPaginas).to.equal(0); });
+  test("AND de identificadores distintos no devuelve clientes", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).contenido).to.have.lengthOf(0); expect((res.getBody().datos ?? res.getBody()).totalElementos).to.equal(0); expect((res.getBody().datos ?? res.getBody()).totalPaginas).to.equal(0); });
 }
 
 docs {

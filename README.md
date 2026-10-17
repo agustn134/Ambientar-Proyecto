@@ -1,5 +1,7 @@
 # Ambientar-Proyecto
 
+> **Rama feature/Validaciones:** la adaptación de contrato y V9 se describen en [Entrega de validaciones](docs/validaciones-entrega.md). Estos cambios locales no están desplegados en Render.
+
 API REST para registrar y administrar clientes personas físicas, sus usuarios y cuentas. Incluye catálogos mexicanos, autenticación, permisos por rol e integración con el catálogo de productos GestoPago.
 
 **API desplegada:** https://ambientar-proyecto.onrender.com
@@ -110,75 +112,7 @@ La aplicación obtiene el catálogo del proveedor mediante sus credenciales de i
 
 ### API REST y consultas
 
-Todas las rutas siguientes utilizan la base **https://ambientar-proyecto.onrender.com**. En Swagger, abrir el endpoint, pulsar **Try it out**, completar los campos y ejecutar. Registrar los IDs y el número de cuenta devueltos; utilizar los del entorno que se está revisando.
-
-#### 1. Consultar catálogos y registrar un cliente
-
-1. `GET /catalogos/sexos`.
-2. `GET /catalogos/nacionalidades`.
-3. `GET /catalogos/estados-civiles`.
-4. `GET /catalogos/paises`.
-5. `GET /catalogos/codigos-postales/37907`: seleccionar un asentamiento de la respuesta.
-6. `POST /clientes`: completar los datos de registro con los IDs de catálogo válidos. Responde **201** y devuelve `clienteId`, `usuarioId` y `numeroCuenta`. Repetir identificadores únicos ya registrados devuelve **409**.
-
-Estas rutas son públicas. No es necesario iniciar sesión para consultar catálogos o registrar al cliente.
-
-#### 2. Iniciar sesión y consultar los datos propios
-
-1. `POST /auth/login`: enviar `correo` y `password` del usuario registrado. Responde **200** con `accessToken`.
-2. Pulsar **Authorize**, pegar únicamente `accessToken` y confirmar. Swagger agrega el encabezado Bearer.
-3. `GET /auth/me`: comprobar la identidad y el rol de la sesión.
-4. `GET /usuarios/me`: consultar el usuario propio sin introducir un ID.
-5. `GET /clientes/me`: consultar la ficha del cliente propio.
-6. `GET /clientes/{id}/cuentas`: utilizar el `clienteId` obtenido.
-7. `GET /cuentas/{numeroCuenta}` y `GET /cuentas/{numeroCuenta}/saldo`: utilizar la cuenta devuelta por el registro.
-
-Los GET anteriores responden **200** cuando la sesión y el acceso son válidos. Si el token vence, repetir el login y actualizar Authorize.
-
-#### 3. Comprobar permisos y realizar consultas generales
-
-Con el rol CLIENTE, consultar `GET /usuarios/{id}` y `GET /clientes/{id}` sólo permite acceder a registros propios. Un ID ajeno devuelve **404**. Los listados `GET /clientes` y `GET /cuentas` requieren EJECUTIVO y devuelven **403** a un CLIENTE.
-
-Para revisar las consultas generales, iniciar sesión con un usuario EJECUTIVO previamente asignado y reemplazar el token en Authorize. Ejecutar en este orden:
-
-1. `GET /clientes`: `page=0`, `size=20`, `ordenarPor=id`, `direccion=ASC`.
-2. Repetir el listado incrementando `page` para recorrer las páginas.
-3. Aplicar filtros por CURP, RFC, correo, número de cuenta, nombre, estado activo o rango de fechas. Omitir filtros que no se utilicen.
-4. `GET /clientes/buscar`: consultar por el identificador seleccionado.
-5. `GET /clientes/{id}` y `GET /usuarios/{id}`: consultar el registro autorizado.
-6. `GET /cuentas`: revisar el listado paginado de cuentas.
-
-Los parámetros de ordenamiento, paginación y fechas se validan. El orden incluye un criterio estable para evitar variaciones entre páginas. Las respuestas generales devuelven el contenido y los totales de paginación.
-
-#### 4. Consultar y sincronizar productos
-
-Con un JWT vigente, ejecutar:
-
-1. `GET /api/gestopago/productos`: consultar productos activos guardados; una lista vacía indica que no hay productos activos disponibles en la base.
-2. `GET /api/gestopago/productos/consultar-externo`: consultar el catálogo del proveedor.
-3. `POST /api/gestopago/productos/forzar-sincronizacion`: descargar y persistir el catálogo. No requiere body.
-4. `GET /api/gestopago/productos`: comprobar el catálogo guardado.
-5. `POST /api/gestopago/productos/sincronizar`: obtener el catálogo mediante la secuencia caché, base y proveedor. No requiere body.
-
-La renovación del token del proveedor se confirmó en el arranque de Render. Las pruebas funcionales históricas del catálogo tuvieron incidencias; esa renovación no demuestra por sí sola que todas las consultas y sincronizaciones estén aprobadas.
-
-#### 5. Revisar mantenimiento al final
-
-1. `PUT /clientes/{id}`: actualizar únicamente los datos permitidos del cliente propio o de uno autorizado al EJECUTIVO.
-2. `PUT /usuarios/{id}/password`: como propietario, enviar `passwordActual` y `passwordNueva`. Responde **204**; la contraseña actual incorrecta devuelve **401** y una nueva inválida devuelve **400**.
-3. Comprobar que el token anterior ya no permite acceso; iniciar sesión con la contraseña nueva y actualizar Authorize.
-4. `DELETE /clientes/{id}`: ejecutar la baja con un perfil destinado a esta revisión. Responde **204**.
-5. Comprobar que el usuario dado de baja ya no puede iniciar sesión ni utilizar su token anterior.
-
-| HTTP | Interpretación |
-|---|---|
-| 200 / 201 / 204 | Consulta correcta / registro creado / cambio confirmado sin cuerpo |
-| 400 | Entrada, ID, formato o filtros inválidos; revisar `errores` |
-| 401 | Token ausente, inválido o vencido, o credenciales incorrectas |
-| 403 | La sesión es válida, pero no tiene el permiso requerido |
-| 404 | Registro inexistente o fuera del ámbito permitido |
-| 409 | Identificador único o correo ya registrado |
-| 5xx | Error interno o de integración que requiere diagnóstico |
+El contrato de esta rama recibe IDs y filtros por body. Consulta la [tabla de rutas, secuencia y comandos de comprobación](docs/validaciones-entrega.md#contrato-por-body). Inicia sesión con POST /auth/login y autoriza el JWT en Swagger antes de las consultas protegidas. Las rutas antiguas con IDs en la URL ya no están disponibles en esta rama.
 
 ## Pruebas y resultados
 

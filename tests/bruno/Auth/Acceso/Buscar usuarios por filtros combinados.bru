@@ -25,8 +25,8 @@ body:json {
 tests {
   test("Consulta autorizada y paginada", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.getBody().contenido).to.be.an("array");
-    res.getBody().contenido.forEach(function (u) {
+    expect((res.getBody().datos ?? res.getBody()).contenido).to.be.an("array");
+    (res.getBody().datos ?? res.getBody()).contenido.forEach(function (u) {
       expect(u).not.to.have.property("passwordHash");
       expect(u).not.to.have.property("password");
     });

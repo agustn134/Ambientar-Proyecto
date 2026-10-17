@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Saldo numérico no negativo", function () { expect(res.getBody().saldo).to.be.a("number").that.is.at.least(0); });
+  test("Saldo numérico no negativo", function () { expect((res.getBody().datos ?? res.getBody()).saldo).to.be.a("number").that.is.at.least(0); });
 }
 
 docs {

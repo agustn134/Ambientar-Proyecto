@@ -19,8 +19,8 @@ auth:bearer {
 }
 
 tests {
-  test("Perfil CLIENTE propio", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().correo).to.equal("sofia.jimena.salazar.godinez.qa@gmail.com"); expect(res.getBody().rol).to.equal("CLIENTE"); expect(res.getBody()).not.to.have.property("passwordHash"); });
-  if (res.getStatus() === 200) { bru.setVar("sofiaClienteId",res.getBody().clienteId); bru.setVar("sofiaUsuarioId",res.getBody().usuarioId); }
+  test("Perfil CLIENTE propio", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).correo).to.equal("sofia.jimena.salazar.godinez.qa@gmail.com"); expect((res.getBody().datos ?? res.getBody()).rol).to.equal("CLIENTE"); expect((res.getBody().datos ?? res.getBody())).not.to.have.property("passwordHash"); });
+  if (res.getStatus() === 200) { bru.setVar("sofiaClienteId",(res.getBody().datos ?? res.getBody()).clienteId); bru.setVar("sofiaUsuarioId",(res.getBody().datos ?? res.getBody()).usuarioId); }
 }
 
 docs {
