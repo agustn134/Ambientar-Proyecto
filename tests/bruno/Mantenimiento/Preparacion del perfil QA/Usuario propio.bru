@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Sin credenciales", function () { expect(res.getBody().contenido[0]).not.to.have.property("passwordHash"); expect(res.getBody().contenido[0]).not.to.have.property("password"); });
+  test("Sin credenciales", function () { expect((res.getBody().datos ?? res.getBody()).contenido[0]).not.to.have.property("passwordHash"); expect((res.getBody().datos ?? res.getBody()).contenido[0]).not.to.have.property("password"); });
 }
 
 docs {

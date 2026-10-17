@@ -85,4 +85,6 @@ No se utiliza `flyway undo` ni se borran filas de `flyway_schema_history`. Ante 
 
 El 17 de octubre de 2026 se ejecutaron **64 pruebas: cero fallos, cero errores y cero omisiones**, incluidas cuatro pruebas de integridad y migraciones en PostgreSQL real. [Resumen de evidencia](evidencias/validaciones-2026-10-17.json). También se verificaron 77 bodies JSON, el XML del plan JMeter y la sintaxis del script Python. No se ejecutó una nueva prueba de carga ni se desplegó en Render.
 
-Antes de publicar: revisar el diff y la auditoría de datos históricos del destino. La publicación permanece pendiente de autorización del propietario.
+La revisión operativa adicional ejecutó **22 comprobaciones HTTP aprobadas** sobre una copia restaurada de la base local en PostgreSQL 17. Se comprobaron registro, duplicados, consultas, permisos por propietario y rol, revocación de token y OpenAPI. Flyway aplicó las nueve migraciones; la auditoría devolvió cero incumplimientos en las ocho reglas y se validaron las siete restricciones CHECK en esa copia. [Evidencia operativa](evidencias/revision-operativa-2026-10-17.json).
+
+El workflow `.github/workflows/validaciones.yml` ejecuta las cinco suites y exige al menos 64 pruebas aprobadas, sin omitir PostgreSQL. Su resultado en GitHub permanece pendiente hasta publicar esta actualización. Estas comprobaciones locales no acreditan el estado de la base de Render: antes de desplegar deben respaldarse y auditarse los datos del destino.

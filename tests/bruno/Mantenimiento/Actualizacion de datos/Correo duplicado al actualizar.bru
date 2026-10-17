@@ -23,7 +23,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(409); });
-  test("Unicidad", function () { expect(res.getBody().codigo).to.equal("DATO_DUPLICADO"); });
+  test("Unicidad", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("DATO_DUPLICADO"); });
 }
 
 docs {

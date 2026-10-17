@@ -24,7 +24,7 @@ tests {
   });
 
   test("Devuelve una lista de productos", function () {
-    expect(res.getBody()).to.be.an("array");
+    expect((res.getBody().datos ?? res.getBody())).to.be.an("array");
   });
 }
 

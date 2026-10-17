@@ -23,7 +23,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
-  test("Campo protegido", function () { expect(res.getBody().errores.some(e => e.campo === "curp")).to.equal(true); });
+  test("Campo protegido", function () { expect((res.getBody().datos ?? res.getBody()).errores.some(e => e.campo === "curp")).to.equal(true); });
 }
 
 docs {

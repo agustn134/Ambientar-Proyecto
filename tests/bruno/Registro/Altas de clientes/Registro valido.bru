@@ -47,7 +47,7 @@ body:json {
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(201); });
   test("Cliente y cuenta generados", function () {
-    const body = res.getBody();
+    const body = (res.getBody().datos ?? res.getBody());
     expect(body.clienteId).to.be.a("number");
     expect(body.cuenta.numeroCuenta).to.match(/^[0-9]{20}$/);
     expect(body.cuenta.saldo).to.equal(0);

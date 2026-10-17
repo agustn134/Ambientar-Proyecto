@@ -23,7 +23,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Datos actualizados", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().telefonoMovil).to.equal("4681046222"); expect(res.getBody().domicilio.numeroExterior).to.equal("844"); expect(res.getBody().cliente.rfc).to.equal("LOPD051108ZZ2"); expect(res.getBody().cuentas[0].numeroCuenta).to.equal(bru.getVar("cuentaMant")); });
+  test("Datos actualizados", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).telefonoMovil).to.equal("4681046222"); expect((res.getBody().datos ?? res.getBody()).domicilio.numeroExterior).to.equal("844"); expect((res.getBody().datos ?? res.getBody()).cliente.rfc).to.equal("LOPD051108ZZ2"); expect((res.getBody().datos ?? res.getBody()).cuentas[0].numeroCuenta).to.equal(bru.getVar("cuentaMant")); });
 }
 
 docs {

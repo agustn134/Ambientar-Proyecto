@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Baja lógica", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.estatus).to.equal("INACTIVO"); expect(res.getBody().cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
+  test("Baja lógica", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).cliente.estatus).to.equal("INACTIVO"); expect((res.getBody().datos ?? res.getBody()).cuentas.every(c => c.estatus === "INACTIVA")).to.equal(true); });
 }
 
 docs {

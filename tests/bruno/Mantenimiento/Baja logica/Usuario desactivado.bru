@@ -21,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Sin acceso de usuario", function () { expect(res.getBody().contenido[0].activo).to.equal(false); });
+  test("Sin acceso de usuario", function () { expect((res.getBody().datos ?? res.getBody()).contenido[0].activo).to.equal(false); });
 }
 
 docs {

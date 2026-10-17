@@ -27,7 +27,7 @@ script:pre-request {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(404); });
-  test("Sin acceso ajeno", function () { expect(res.getBody().codigo).to.equal("RECURSO_NO_ENCONTRADO"); });
+  test("Sin acceso ajeno", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("RECURSO_NO_ENCONTRADO"); });
 }
 
 docs {
