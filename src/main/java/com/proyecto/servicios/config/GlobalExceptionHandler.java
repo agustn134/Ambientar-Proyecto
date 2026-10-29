@@ -18,6 +18,13 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.proyecto.servicios.exception.SimulacionException.class)
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleSimulacion(
+            com.proyecto.servicios.exception.SimulacionException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.valueOf(ex.getStatus()),
+                "Revisa los datos, el estado de la cuenta y el saldo ficticio. No se envió un pago real.",
+                request.getRequestURI(), ex.getCodigo());
+    }
     @ExceptionHandler(com.proyecto.servicios.exception.CuotaCatalogoException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleCuotaCatalogo(
             com.proyecto.servicios.exception.CuotaCatalogoException ex, HttpServletRequest request) {
