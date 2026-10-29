@@ -35,8 +35,6 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     @Value("${gestopago.service.codigo-dispositivo:${gestopago.auth.codigo-dispositivo}}")
     private String codigoDispositivo;
 
-    @Value("${gestopago.service.token:${gestopago.auth.token:}}")
-    private String tokenConfigurado;
 
 
 
@@ -47,7 +45,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
 
         // 2. Invocar al endpoint GET /sistema/service/getProductList.do
         log.info("Consultando endpoint GET /sistema/service/getProductList.do con Bearer Token...");
-        return gestoPagoProductClient.getProductList(authHeader);
+        return consultarProveedor(authHeader);
     }
 
     @Override
@@ -108,7 +106,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
 
         // Feign llama a la API. GestoPagoErrorDecoder maneja status != 200 automaticamente.
         // JAXB parsea el XML de respuesta (@XmlRootElement en GestoPagoProductResponse).
-        GestoPagoProductResponse response = gestoPagoProductClient.getProductList(authHeader);
+        GestoPagoProductResponse response = consultarProveedor(authHeader);
 
         if (response == null || response.getProductos() == null || response.getProductos().isEmpty()) {
             log.warn("La API de GestoPago no retornó productos.");
@@ -128,17 +126,9 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     }
 
     /**
-     * Obtiene el Bearer Token para la petición. Prioriza el token configurado en properties (no hardcodeado).
-     * Si no está presente en la configuración, recurre al token activo o renovado en la base de datos.
+     * Obtiene el Bearer desde el administrador central, que valida vigencia y caché cifrada.
      */
     private String obtenerBearerToken() {
-        if (tokenConfigurado != null && !tokenConfigurado.trim().isEmpty()) {
-            String tokenLimpio = tokenConfigurado.trim();
-            log.info("Utilizando Bearer Token obtenido desde la configuración de la aplicación");
-            return tokenLimpio.startsWith("Bearer ") ? tokenLimpio : "Bearer " + tokenLimpio;
-        }
-
-        log.info("Token no configurado explícitamente en properties; obteniendo token activo desde BD...");
         GestoPagoToken tokenEntity = obtenerOAsegurarToken();
         return "Bearer " + tokenEntity.getToken();
     }
@@ -156,5 +146,12 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
                             .orElseThrow(() -> new IllegalStateException(
                                      "No se pudo generar ni obtener un token activo de GestoPago para distribuidor " + idDistribuidor));
                 });
+    }
+    private GestoPagoProductResponse consultarProveedor(String authHeader) {
+        try { return gestoPagoProductClient.getProductList(authHeader); }
+        catch(com.proyecto.servicios.exception.GestoPagoExpiredTokenException error) {
+            gestoPagoTokenService.invalidarToken(idDistribuidor,codigoDispositivo,authHeader.substring(7));
+            throw error; // Renovación en la próxima petición; sin reenvío automático.
+        }
     }
 }

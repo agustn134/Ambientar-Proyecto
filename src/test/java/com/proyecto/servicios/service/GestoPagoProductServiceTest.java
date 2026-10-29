@@ -59,12 +59,13 @@ class GestoPagoProductServiceTest {
     void setUp() {
         ReflectionTestUtils.setField(productService, "idDistribuidor", 83);
         ReflectionTestUtils.setField(productService, "codigoDispositivo", "GPS83-TPV-17");
-        ReflectionTestUtils.setField(productService, "tokenConfigurado", TEST_TOKEN);
+        var token = new GestoPagoToken(); token.setToken(TEST_TOKEN);
+        lenient().when(gestoPagoTokenService.obtenerTokenActivo(anyInt(), anyString())).thenReturn(Optional.of(token));
     }
 
     @Test
-    @DisplayName("Debe consultar getProductList con Bearer token obtenido de la configuración")
-    void debeConsultarCatalogoConBearerTokenConfigurado() {
+    @DisplayName("Debe consultar getProductList con el administrador central del token")
+    void debeConsultarCatalogoConBearerTokenCentralizado() {
         GestoPagoProductResponse mockResponse = new GestoPagoProductResponse();
         when(gestoPagoProductClient.getProductList(anyString())).thenReturn(mockResponse);
 
@@ -78,7 +79,7 @@ class GestoPagoProductServiceTest {
         assertTrue(capturedAuth.startsWith("Bearer "));
         assertEquals("Bearer " + TEST_TOKEN, capturedAuth);
 
-        verify(gestoPagoTokenService, never()).obtenerTokenActivo(anyInt(), anyString());
+        verify(gestoPagoTokenService).obtenerTokenActivo(anyInt(), anyString());
     }
 
     @Test
@@ -157,10 +158,8 @@ class GestoPagoProductServiceTest {
     }
 
     @Test
-    @DisplayName("Debe obtener token de BD si no hay token configurado")
-    void debeObtenerTokenDesdeBDCuandoPropertiesEsVacio() {
-        // Configuramos el token vacío
-        ReflectionTestUtils.setField(productService, "tokenConfigurado", "");
+    @DisplayName("Debe usar el token vigente devuelto por el administrador")
+    void debeUsarTokenVigenteDelAdministrador() {
 
         GestoPagoToken mockTokenEntity = new GestoPagoToken();
         mockTokenEntity.setToken("token-from-db-123");

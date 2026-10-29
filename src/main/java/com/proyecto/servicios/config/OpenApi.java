@@ -92,7 +92,7 @@ public class OpenApi {
                 agregar(respuestas,ruta,502,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","Respuesta inválida del proveedor.");
                 agregar(respuestas,ruta,503,"SERVICIO_EXTERNO","GestoPago no está disponible temporalmente; intenta más tarde","Proveedor temporalmente no disponible.");
                 agregar(respuestas,ruta,504,"SERVICIO_EXTERNO","GestoPago no respondió dentro del tiempo permitido; intenta nuevamente","Tiempo de comunicación agotado.");
-                respuestas.get("401").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,401,"SERVICIO_EXTERNO","No fue posible autenticar la conexión con GestoPago; contacta al administrador"));
+                respuestas.get("503").getContent().get("application/json").addExamples("SESION_PROVEEDOR",ejemplo(ruta,503,"SERVICIO_EXTERNO","La conexión con el proveedor no está disponible temporalmente."));
                 respuestas.get("404").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,404,"SERVICIO_EXTERNO","El recurso solicitado no está disponible en GestoPago"));
                 respuestas.get("500").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,500,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador"));
                 respuestas.addApiResponse("default",new ApiResponse().description("Otro error HTTP 4xx/5xx del proveedor con mensaje controlado y codigo SERVICIO_EXTERNO.")

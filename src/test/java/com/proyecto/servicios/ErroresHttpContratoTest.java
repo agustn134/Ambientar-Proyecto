@@ -55,7 +55,7 @@ class ErroresHttpContratoTest {
             .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("SELECT secreto"))));
     }
     @ParameterizedTest
-    @CsvSource({"401,401","429,429","500,500","502,502","503,503","504,504","200,502","999,502"})
+    @CsvSource({"401,503","429,429","500,500","502,502","503,503","504,504","200,502","999,502"})
     void proveedorNoFiltraDetallesNiProduceExitoAnteUnaExcepcion(int providerStatus,int expected) throws Exception {
         mvc().perform(post("/externo").contentType("application/json").content("{\"status\":"+providerStatus+"}"))
             .andExpect(status().is(expected)).andExpect(jsonPath("status").value(expected))

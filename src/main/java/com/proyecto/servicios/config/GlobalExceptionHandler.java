@@ -30,8 +30,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GestoPagoAuthException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoAuthException(GestoPagoAuthException ex, HttpServletRequest request) {
-        log.warn("Error de autenticación GestoPago; status=401");
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "No fue posible autenticar la conexión con GestoPago; contacta al administrador", request.getRequestURI());
+        log.warn("Sesión del proveedor no disponible; status=503");
+        return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE, "La conexión con el proveedor no está disponible temporalmente.", request.getRequestURI());
     }
 
     @ExceptionHandler(GestoPagoException.class)
