@@ -32,12 +32,19 @@ class GestoPagoLiveConnectionTest {
     @Test
     @EnabledIfEnvironmentVariable(named="GESTOPAGO_LIVE_CATALOG", matches="true")
     void consultaCatalogoUnaVez() {
+        // Esta comprobación no debe emitir otro token ni renovar el existente.
+        assertTrue(Boolean.TRUE.equals(sql.queryForObject(
+                "SELECT expira > now() + interval '5 minutes' FROM gestopago_token_cache WHERE distribuidor=? AND dispositivo=?",
+                Boolean.class,distributor,device)), "Se requiere una sesión guardada con vigencia suficiente");
+        String stored=tokenGuardado();
         var catalogo=productos.consultarCatalogoGestoPago();
         assertNotNull(catalogo);
         assertNotNull(catalogo.getMensaje());
         assertEquals("01",catalogo.getMensaje().getCodigo());
         assertNotNull(catalogo.getProductos());
         assertFalse(catalogo.getProductos().isEmpty());
+        assertTrue(stored.equals(tokenGuardado()), "Consultar catálogo debe reutilizar el token guardado");
+        System.out.printf("GESTOPAGO_CATALOGO_VALIDADO codigo=01 productos=%d tokenReutilizado=true%n",catalogo.getProductos().size());
     }
     private String tokenGuardado() {
         return sql.queryForObject("SELECT token_cifrado FROM gestopago_token_cache WHERE distribuidor=? AND dispositivo=?",
