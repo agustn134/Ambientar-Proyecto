@@ -28,6 +28,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
     private final GestoPagoProductoRepository productoRepository;
     private final GestoPagoProductoMapper productoMapper;
     private final GestoPagoCatalogoService catalogoService;
+    private final com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota cuotaCatalogo;
 
     @Value("${gestopago.service.id-distribuidor:${gestopago.auth.id-distribuidor}}")
     private Integer idDistribuidor;
@@ -148,6 +149,7 @@ public class GestoPagoProductServiceImpl implements GestoPagoProductService {
                 });
     }
     private GestoPagoProductResponse consultarProveedor(String authHeader) {
+        cuotaCatalogo.reservarIntento(); // Confirmado en transacción propia; un timeout también consume intento.
         try { return gestoPagoProductClient.getProductList(authHeader); }
         catch(com.proyecto.servicios.exception.GestoPagoExpiredTokenException error) {
             gestoPagoTokenService.invalidarToken(idDistribuidor,codigoDispositivo,authHeader.substring(7));

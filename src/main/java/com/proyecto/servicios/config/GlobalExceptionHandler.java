@@ -18,6 +18,14 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.proyecto.servicios.exception.CuotaCatalogoException.class)
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleCuotaCatalogo(
+            com.proyecto.servicios.exception.CuotaCatalogoException ex, HttpServletRequest request) {
+        var response=buildErrorResponse(HttpStatus.TOO_MANY_REQUESTS,
+                "Límite de catálogo alcanzado. Consulta los productos guardados localmente.",
+                request.getRequestURI(),"CUOTA_CATALOGO_AGOTADA");
+        return ResponseEntity.status(response.getStatusCode()).header("Retry-After",Long.toString(ex.getRetryAfterSeconds())).body(response.getBody());
+    }
 
     @ExceptionHandler(com.proyecto.servicios.exception.ContratoPagoException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleContratoPago(

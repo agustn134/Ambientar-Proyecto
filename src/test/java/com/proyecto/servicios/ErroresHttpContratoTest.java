@@ -17,6 +17,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class ErroresHttpContratoTest {
+    @Test void cuotaLocalDevuelve429YTiempoDeEspera() throws Exception {
+        var quota=org.mockito.Mockito.mock(com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota.class);
+        org.mockito.Mockito.doThrow(new CuotaCatalogoException(120)).when(quota).reservarIntento();
+        var http=MockMvcBuilders.standaloneSetup(new CuotaController(quota)).setControllerAdvice(new GlobalExceptionHandler()).build();
+        http.perform(get("/cuota"))
+            .andExpect(status().isTooManyRequests()).andExpect(header().string("Retry-After","120"))
+            .andExpect(jsonPath("codigo").value("CUOTA_CATALOGO_AGOTADA"));
+    }
+    @RestController static class CuotaController {
+        private final com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota quota;
+        CuotaController(com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota quota){this.quota=quota;}
+        @GetMapping("/cuota") Object consultar(){quota.reservarIntento();return java.util.Map.of("ok",true);}
+    }
     @Test void ejemploDeValidacionLocalNuncaIndicaPagoEnviado() {
         var op = new Operation().responses(new ApiResponses().addApiResponse("200", new ApiResponse()
                 .content(new Content().addMediaType("application/json", new MediaType().schema(new ObjectSchema())))));

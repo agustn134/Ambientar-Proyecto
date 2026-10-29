@@ -34,6 +34,17 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class GestoPagoProductServiceTest {
+    @Test void cuotaAgotadaNoLlamaProveedor() {
+        doThrow(new com.proyecto.servicios.exception.CuotaCatalogoException(120)).when(cuotaCatalogo).reservarIntento();
+        assertThrows(com.proyecto.servicios.exception.CuotaCatalogoException.class,productService::consultarCatalogoGestoPago);
+        verifyNoInteractions(gestoPagoProductClient);
+    }
+    @Test void falloProveedorConsumeUnSoloIntentoSinReenvio() {
+        when(gestoPagoProductClient.getProductList(anyString())).thenThrow(new GestoPagoException(503,"fallo sintético"));
+        assertThrows(GestoPagoException.class,productService::consultarCatalogoGestoPago);
+        verify(cuotaCatalogo,times(1)).reservarIntento();
+        verify(gestoPagoProductClient,times(1)).getProductList(anyString());
+    }
 
     @Mock
     private GestoPagoProductClient gestoPagoProductClient;
@@ -49,6 +60,7 @@ class GestoPagoProductServiceTest {
 
     @Mock
     private GestoPagoCatalogoService catalogoService;
+    @Mock private com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota cuotaCatalogo;
 
     @InjectMocks
     private GestoPagoProductServiceImpl productService;

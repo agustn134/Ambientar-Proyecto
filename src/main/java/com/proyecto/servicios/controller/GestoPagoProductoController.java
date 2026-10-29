@@ -35,7 +35,7 @@ public class GestoPagoProductoController {
     }
 
     @GetMapping("/consultar-externo")
-    @Operation(summary = "Consultar catálogo externo", description = "Consume directamente el endpoint GET /sistema/service/getProductList.do de GestoPago con Bearer Token desde configuración.")
+    @Operation(summary = "Consultar catálogo externo", description = "Consulta GestoPago con la sesión administrada por el backend. Comparte una cuota de tres intentos en 24 horas con sincronizaciones y tareas. Los fallos consumen intento. Para consultar productos habitualmente usa GET /api/gestopago/productos, que lee la base local.")
     public ResponseEntity<GestoPagoProductResponse> consultarCatalogoExterno() {
         return ResponseEntity.ok(productService.consultarCatalogoGestoPago());
     }

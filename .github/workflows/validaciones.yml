@@ -52,6 +52,8 @@ jobs:
           --tests com.proyecto.servicios.integration.gestopago.GestoPagoOutcomeParserTest
           --tests com.proyecto.servicios.integration.gestopago.GestoPagoPaymentClientTest
           --tests com.proyecto.servicios.integration.gestopago.TokenCacheCipherTest
+          --tests com.proyecto.servicios.service.GestoPagoCatalogoQuotaPostgresTest
+          --tests com.proyecto.servicios.integration.gestopago.GestoPagoReferenceClientTest
       - name: Guardar reportes incluso si falla una prueba
         if: always()
         uses: actions/upload-artifact@v4
@@ -76,6 +78,7 @@ jobs:
           assert total>=79, f'Se esperaban al menos 79 pruebas; se ejecutaron {total}'
           expected={'RegistroClienteIntegrationTest','ContratoValidacionesTest','ErroresHttpContratoTest','ValidacionesPostgresTest','GestoPagoCatalogoServiceTest','GestoPagoProductServiceTest'}
           expected.update({'GestoPagoValidacionHttpTest','LoggingSecurityTest','GestoPagoContratoServiceTest','GestoPagoPayloadCipherTest','GestoPagoTokenManagerTest','GestoPagoTokenCachePostgresTest','GestoPagoCatalogoPostgresTest','GestoPagoTransportTest','GestoPagoOutcomeParserTest','GestoPagoPaymentClientTest','TokenCacheCipherTest'})
+          expected.update({'GestoPagoCatalogoQuotaPostgresTest','GestoPagoReferenceClientTest'})
           suites={ET.parse(f).getroot().get('name').rsplit('.',1)[-1]:ET.parse(f).getroot() for f in files}
           assert expected <= suites.keys(), 'Falta una suite requerida'
           assert int(suites['ValidacionesPostgresTest'].get('tests','0'))>=4, 'Faltan pruebas PostgreSQL'

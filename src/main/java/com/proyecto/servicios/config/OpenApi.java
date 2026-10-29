@@ -89,6 +89,15 @@ public class OpenApi {
             if(externo) {
                 agregar(respuestas,ruta,400,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","El proveedor rechazó la solicitud enviada.");
                 agregar(respuestas,ruta,429,"SERVICIO_EXTERNO","Se alcanzó el límite de solicitudes a GestoPago; espera antes de reintentar","Límite de peticiones del proveedor alcanzado.");
+                if(ruta.startsWith("/api/gestopago/productos/")) {
+                    var limitada=respuestas.get("429");
+                    limitada.setDescription("Cuota compartida: máximo tres intentos externos en una ventana móvil de 24 horas. Los fallos también consumen intento.");
+                    limitada.addHeaderObject("Retry-After",new io.swagger.v3.oas.models.headers.Header()
+                            .description("Segundos hasta que venza el intento más antiguo; no dispara un reintento automático.")
+                            .schema(new IntegerSchema().example(86400)));
+                    limitada.getContent().get("application/json").addExamples("CUOTA_CATALOGO_AGOTADA",
+                            ejemplo(ruta,429,"CUOTA_CATALOGO_AGOTADA","Límite de catálogo alcanzado. Consulta los productos guardados localmente."));
+                }
                 agregar(respuestas,ruta,502,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","Respuesta inválida del proveedor.");
                 agregar(respuestas,ruta,503,"SERVICIO_EXTERNO","GestoPago no está disponible temporalmente; intenta más tarde","Proveedor temporalmente no disponible.");
                 agregar(respuestas,ruta,504,"SERVICIO_EXTERNO","GestoPago no respondió dentro del tiempo permitido; intenta nuevamente","Tiempo de comunicación agotado.");
