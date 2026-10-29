@@ -47,4 +47,17 @@ class GestoPagoTokenManagerTest {
         assertFalse(error.getMessage().contains("privado"));assertNull(error.getCause());
         assertTrue(service.obtenerTokenActivo(83,"otro").isEmpty());
     }
+    @SuppressWarnings("unchecked")
+    @Test void basicNoEsObligatorioYApiKeySoloSeEnviaSiFueAsignada(){
+        ReflectionTestUtils.setField(service,"basic","");
+        ReflectionTestUtils.setField(service,"apiKey","api-key-sintetica");
+        when(cache.get(eq(83),eq("test-device"),any(),any())).thenAnswer(call -> ((Supplier<Token>)call.getArgument(3)).get());
+        when(transport.post(any(),anyMap(),anyMap())).thenAnswer(call -> {
+            java.util.Map<?,?> headers=call.getArgument(1);
+            assertFalse(headers.containsKey("Authorization"));
+            assertEquals("api-key-sintetica",headers.get("X-API-Key"));
+            return new GestoPagoTransport.Reply(200,"{\"token\":\"sintetico\",\"success\":true}");
+        });
+        assertTrue(service.obtenerTokenActivo(83,"test-device").isPresent());
+    }
 }

@@ -28,6 +28,7 @@ public class GestoPagoTokenServiceImpl implements GestoPagoTokenService {
     @Value("${gestopago.auth.codigo-dispositivo}") private String codigoDispositivo;
     @Value("${gestopago.auth.password:}") private String password;
     @Value("${gestopago.auth.basic-authorization:}") private String basic;
+    @Value("${gestopago.api-key:}") private String apiKey = "";
     @Value("${gestopago.auth.url}") private String url;
     @Value("${gestopago.auth.endpoint:/sistema/app/jwt-gp/authenticate/}") private String endpoint;
     @Value("${gestopago.auth.background-enabled:false}") private boolean background;
@@ -54,10 +55,17 @@ public class GestoPagoTokenServiceImpl implements GestoPagoTokenService {
         }
     }
     private Token authenticate() {
-        if (basic == null || !basic.startsWith("Basic ") || basic.contains("\r") || basic.contains("\n")
-                || password == null || password.isBlank()) throw new IllegalStateException("Credenciales del proveedor no configuradas.");
+        if (password == null || password.isBlank()) throw new IllegalStateException("Credenciales del proveedor no configuradas.");
+        var headers = new java.util.HashMap<String,String>();
+        // La documentación no exige Basic en authenticate. Solo enviarlo si fue asignado/configurado.
+        if (basic != null && !basic.isBlank()) {
+            if (!basic.startsWith("Basic ") || basic.contains("\r") || basic.contains("\n"))
+                throw new IllegalStateException("Configuración de autenticación inválida.");
+            headers.put("Authorization", basic);
+        }
+        if (!apiKey.isBlank()) headers.put("X-API-Key", apiKey);
         Instant started = Instant.now();
-        var response = transport.post(URI.create(url + endpoint), Map.of("Authorization", basic),
+        var response = transport.post(URI.create(url + endpoint), headers,
                 Map.of("idDistribuidor", idDistribuidor.toString(), "codigoDispositivo", codigoDispositivo, "password", password));
         try {
             if (response.status() != 200) throw new IllegalStateException();
