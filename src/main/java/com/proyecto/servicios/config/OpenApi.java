@@ -28,7 +28,8 @@ public class OpenApi {
             respuestas.keySet().removeIf(code -> !code.startsWith("2"));
             boolean registro=ruta.equals("/clientes") && metodo==PathItem.HttpMethod.POST;
             boolean login=ruta.equals("/auth/login");
-            boolean externo=ruta.startsWith("/api/gestopago/");
+            boolean validacionLocal=ruta.equals("/api/gestopago/pagos/validar");
+            boolean externo=ruta.startsWith("/api/gestopago/") && !validacionLocal;
             boolean protegido=!registro && !login && !ruta.startsWith("/catalogos/");
             boolean sinCuerpo=ruta.equals("/usuarios/password") || ruta.equals("/clientes") && metodo==PathItem.HttpMethod.DELETE;
             if(sinCuerpo) {
@@ -71,6 +72,20 @@ public class OpenApi {
             agregar(respuestas,ruta,405,"METODO_NO_PERMITIDO","El método HTTP no está permitido para esta ruta; consulta Swagger","Se utilizó un método HTTP distinto sobre esta ruta; primero se evalúa la seguridad.");
             agregar(respuestas,ruta,406,"RESPUESTA_NO_ACEPTABLE","Solicita una respuesta JSON con Accept: application/json","Formato de respuesta no disponible.");
             agregar(respuestas,ruta,500,"ERROR_INTERNO","Ha ocurrido un error inesperado en el servidor.","Error interno controlado, sin trazas ni detalles técnicos.");
+            if(validacionLocal) {
+                agregar(respuestas,ruta,422,"MONTO_NO_PERMITIDO","La solicitud no cumple las reglas del producto habilitado.",
+                    "El catálogo o la política local rechazan el producto, servicio, monto o destino. No se envía un pago.");
+                if(respuestas.get("200") != null) {
+                    respuestas.get("200").setDescription("Contrato local válido; no se ejecuta un pago ni se verifica saldo.");
+                    respuestas.get("200").getContent().get("application/json").addExamples("VALIDACION_LOCAL",
+                        new io.swagger.v3.oas.models.examples.Example().value(Map.of(
+                            "timestamp", "2026-10-29T03:05:42", "status", 200, "codigo", "EXITO",
+                            "mensaje", "Contrato local válido. No se ha enviado ningún pago.", "path", ruta,
+                            "datos", Map.of("contratoLocalValido", true, "idServicio", 78, "idProducto", 219,
+                                "montoPago", 40, "requiereVerificacionReferencia", false, "pagoEnviado", false),
+                            "errores", List.of())));
+                }
+            }
             if(externo) {
                 agregar(respuestas,ruta,400,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","El proveedor rechazó la solicitud enviada.");
                 agregar(respuestas,ruta,429,"SERVICIO_EXTERNO","Se alcanzó el límite de solicitudes a GestoPago; espera antes de reintentar","Límite de peticiones del proveedor alcanzado.");
