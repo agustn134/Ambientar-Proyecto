@@ -24,6 +24,11 @@ public class RegistroClienteExceptionHandler {
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
                                 String path, List<ErrorCampo> errores) {}
 
+    @ExceptionHandler(org.springframework.web.bind.MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorRegistro> encabezadoAusente(org.springframework.web.bind.MissingRequestHeaderException ex,HttpServletRequest request) {
+        return respuesta(400,"ENCABEZADO_REQUERIDO","Falta un encabezado obligatorio; consulta Swagger",List.of(),request);
+    }
+
     @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
     public ResponseEntity<ErrorRegistro> rutaNoDisponible(org.springframework.web.servlet.resource.NoResourceFoundException ex,HttpServletRequest request) {
         return respuesta(404,"RUTA_NO_ENCONTRADA","La ruta solicitada no está disponible; consulta el contrato en Swagger",List.of(),request);

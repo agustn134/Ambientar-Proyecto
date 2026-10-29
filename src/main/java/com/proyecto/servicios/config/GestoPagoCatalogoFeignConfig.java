@@ -13,8 +13,9 @@ import java.util.*;
 /** Configuración exclusiva del cliente catálogo, no se registra en el contexto global. */
 public class GestoPagoCatalogoFeignConfig {
     @Bean public Retryer catalogoRetryer() { return Retryer.NEVER_RETRY; }
-    @Bean public Client catalogoClient() {
+    @Bean public Client catalogoClient(org.springframework.core.env.Environment env) {
         return (request,options) -> {
+            if(env.matchesProfiles("simulacion"))throw new IOException("Catálogo externo bloqueado durante la simulación.");
             URI uri=URI.create(request.url());
             if(!"https".equals(uri.getScheme()) || uri.getUserInfo()!=null || !request.httpMethod().equals(Request.HttpMethod.GET))
                 throw new IOException("Contrato de transporte del catálogo inválido.");

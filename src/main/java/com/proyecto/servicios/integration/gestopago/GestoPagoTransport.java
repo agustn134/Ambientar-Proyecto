@@ -14,6 +14,11 @@ import java.util.Map;
 /** Transporte acotado: sin redirecciones, retries ni mensajes crudos del cliente HTTP. */
 @Component
 public class GestoPagoTransport {
+    private boolean simulacion;
+    @org.springframework.beans.factory.annotation.Autowired
+    void configurarEntorno(org.springframework.core.env.Environment env) {
+        simulacion=env.matchesProfiles("simulacion");
+    }
     private final int responseTimeoutSeconds;
     public GestoPagoTransport() { this(70); }
     GestoPagoTransport(int responseTimeoutSeconds) { this.responseTimeoutSeconds = responseTimeoutSeconds; }
@@ -21,6 +26,7 @@ public class GestoPagoTransport {
         @Override public String toString() { return "Reply[status=" + status + ", body protegido]"; }
     }
     public Reply post(URI uri, Map<String, String> headers, Map<String, String> form) {
+        if(simulacion)throw new IllegalStateException("Transporte real bloqueado durante la simulación.");
         if (!"https".equals(uri.getScheme()) || uri.getHost() == null || uri.getUserInfo() != null) {
             throw new IllegalStateException("La integración requiere HTTPS.");
         }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@org.springframework.context.annotation.Profile("!simulacion")
 @RequestMapping("/api/gestopago/productos")
 @RequiredArgsConstructor
 @Tag(name = "GestoPago Productos", description = "Endpoints para consulta y sincronización del catálogo GestoPago")
