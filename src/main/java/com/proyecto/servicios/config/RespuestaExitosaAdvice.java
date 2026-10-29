@@ -21,7 +21,10 @@ public class RespuestaExitosaAdvice implements ResponseBodyAdvice<Object> {
             Class<? extends HttpMessageConverter<?>> converter,ServerHttpRequest request,ServerHttpResponse response) {
         int status=response instanceof ServletServerHttpResponse servlet ? servlet.getServletResponse().getStatus():200;
         if(body==null || status<200 || status>=300 || body instanceof Respuesta) return body;
-        return new Respuesta(LocalDateTime.now(),status,"EXITO",status==201?"Registro creado correctamente":"Operación realizada correctamente",
+        String mensaje = body instanceof com.proyecto.servicios.model.gestopago.pago.ValidacionLocalResponse
+                ? "Contrato local válido. No se ha enviado ningún pago."
+                : status==201?"Registro creado correctamente":"Operación realizada correctamente";
+        return new Respuesta(LocalDateTime.now(),status,"EXITO",mensaje,
                 request.getURI().getPath(),body,List.of());
     }
 }

@@ -19,6 +19,15 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(com.proyecto.servicios.exception.ContratoPagoException.class)
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleContratoPago(
+            com.proyecto.servicios.exception.ContratoPagoException ex, HttpServletRequest request) {
+        HttpStatus status = "DATOS_INVALIDOS".equals(ex.getCodigo())
+                ? HttpStatus.BAD_REQUEST : HttpStatus.UNPROCESSABLE_ENTITY;
+        return buildErrorResponse(status, "La solicitud no cumple las reglas del producto habilitado.",
+                request.getRequestURI(), ex.getCodigo());
+    }
+
     @ExceptionHandler(GestoPagoAuthException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoAuthException(GestoPagoAuthException ex, HttpServletRequest request) {
         log.warn("Error de autenticación GestoPago; status=401");

@@ -17,6 +17,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class ErroresHttpContratoTest {
+    @Test void ejemploDeValidacionLocalNuncaIndicaPagoEnviado() {
+        var op = new Operation().responses(new ApiResponses().addApiResponse("200", new ApiResponse()
+                .content(new Content().addMediaType("application/json", new MediaType().schema(new ObjectSchema())))));
+        var api = new OpenApi().openAPI().paths(new Paths().addPathItem("/api/gestopago/pagos/validar", new PathItem().post(op)));
+        new OpenApi().respuestasUniformes().customise(api);
+        var ejemplo = (java.util.Map<?, ?>) op.getResponses().get("200").getContent().get("application/json")
+                .getExamples().get("VALIDACION_LOCAL").getValue();
+        assertEquals(200, ejemplo.get("status"));
+        assertEquals(false, ((java.util.Map<?, ?>) ejemplo.get("datos")).get("pagoEnviado"));
+        assertTrue(op.getResponses().containsKey("422"));
+        assertFalse(op.getResponses().containsKey("502"));
+    }
     @RestController
     static class ErroresControlados {
         @GetMapping(value="/json",produces="application/json") Object json() { return java.util.Map.of("dato",1); }
