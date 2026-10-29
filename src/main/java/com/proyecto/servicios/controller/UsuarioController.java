@@ -15,13 +15,19 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UsuarioController {
     private final MantenimientoUsuarioService usuarios;
-    @GetMapping("/{id}")
-    public MantenimientoUsuarioService.UsuarioResponse consultar(@PathVariable @Positive long id,@AuthenticationPrincipal Jwt jwt) {
-        return usuarios.consultar(id,Long.parseLong(jwt.getSubject()));
+    @GetMapping("/me")
+    public com.proyecto.servicios.model.usuario.UsuarioResponse propio(@AuthenticationPrincipal Jwt jwt) {
+        long id=Long.parseLong(jwt.getSubject());
+        return usuarios.consultar(id,id);
     }
-    @PutMapping("/{id}/password")
-    public ResponseEntity<Void> password(@PathVariable @Positive long id,@Valid @RequestBody CambiarPasswordRequest request,@AuthenticationPrincipal Jwt jwt) {
-        usuarios.cambiarPassword(id,request,Long.parseLong(jwt.getSubject()));
+    @PostMapping("/buscar")
+    public com.proyecto.servicios.model.cliente.ConsultasResponse.Pagina<com.proyecto.servicios.model.usuario.UsuarioResponse> buscar(
+        @Valid @RequestBody com.proyecto.servicios.model.usuario.BuscarUsuariosRequest request,@AuthenticationPrincipal Jwt jwt) {
+        return usuarios.buscar(request,Long.parseLong(jwt.getSubject()));
+    }
+    @PutMapping("/password")
+    public ResponseEntity<Void> password(@Valid @RequestBody com.proyecto.servicios.model.usuario.CambiarPasswordUsuarioRequest request,@AuthenticationPrincipal Jwt jwt) {
+        usuarios.cambiarPassword(request.id(),request.datos(),Long.parseLong(jwt.getSubject()));
         return ResponseEntity.noContent().build();
     }
 }

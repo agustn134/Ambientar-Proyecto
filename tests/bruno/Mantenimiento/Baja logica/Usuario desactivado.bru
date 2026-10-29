@@ -1,16 +1,17 @@
 meta {
-  name: Usuario desactivado
+  name: 03 - Usuario desactivado
   type: http
   seq: 3
 }
 
-get {
-  url: {{baseUrl}}/usuarios/{{usuarioMantId}}
-  body: none
+post {
+  url: {{baseUrl}}/usuarios/buscar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Sin acceso de usuario", function () { expect(res.getBody().activo).to.equal(false); });
+  test("Sin acceso de usuario", function () { expect((res.getBody().datos ?? res.getBody()).contenido[0].activo).to.equal(false); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 200.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "id": {{usuarioMantId}}
+  }
 }

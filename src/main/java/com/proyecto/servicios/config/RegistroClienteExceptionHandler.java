@@ -18,12 +18,24 @@ import lombok.extern.slf4j.Slf4j;
 
 @Order(-100)
 @Slf4j
-@RestControllerAdvice(assignableTypes={ClienteController.class,AuthController.class,com.proyecto.servicios.controller.CatalogoController.class,com.proyecto.servicios.controller.CuentaController.class,com.proyecto.servicios.controller.UsuarioController.class})
+@RestControllerAdvice
 public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
                                 String path, List<ErrorCampo> errores) {}
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorRegistro> rutaNoDisponible(org.springframework.web.servlet.resource.NoResourceFoundException ex,HttpServletRequest request) {
+        return respuesta(404,"RUTA_NO_ENCONTRADA","La ruta solicitada no está disponible; consulta el contrato en Swagger",List.of(),request);
+    }
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorRegistro> metodoNoPermitido(org.springframework.web.HttpRequestMethodNotSupportedException ex,HttpServletRequest request) {
+        return respuesta(405,"METODO_NO_PERMITIDO","El método HTTP no está permitido para esta ruta; consulta Swagger",List.of(),request);
+    }
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorRegistro> formatoNoPermitido(org.springframework.web.HttpMediaTypeNotSupportedException ex,HttpServletRequest request) {
+        return respuesta(415,"FORMATO_NO_PERMITIDO","Envía el cuerpo con Content-Type application/json",List.of(),request);
+    }
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ResponseEntity<ErrorRegistro> login(CredencialesInvalidasException ex, HttpServletRequest request) {
         return respuesta(401,"CREDENCIALES_INVALIDAS",ex.getMessage(),List.of(),request);
@@ -36,12 +48,12 @@ public class RegistroClienteExceptionHandler {
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ResponseEntity<ErrorRegistro> permiso(org.springframework.security.access.AccessDeniedException ex,HttpServletRequest request) {
-        return respuesta(403,"ACCESO_DENEGADO","Acceso no disponible",List.of(),request);
+        return respuesta(403,"ACCESO_DENEGADO","No tienes permiso para esta operación",List.of(),request);
     }
 
     @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorRegistro> tipoParametro(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,HttpServletRequest request) {
-        return respuesta(400,"VALIDACION","Parámetro inválido",List.of(new ErrorCampo(ex.getName(),"Verifica el tipo del parámetro")),request);
+        return respuesta(400,"VALIDACION","Parámetro inválido",List.of(new ErrorCampo(ex.getName(),"El valor debe tener el tipo indicado en Swagger")),request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -77,8 +89,8 @@ public class RegistroClienteExceptionHandler {
             }
             cause = cause.getCause();
         }
-        return respuesta(400, "JSON_INVALIDO", "JSON, tipo de dato o fecha inválidos",
-            List.of(new ErrorCampo(campo, "Verifica el tipo y formato; fechas YYYY-MM-DD, texto entre comillas e ingreso numérico")), request);
+        return respuesta(400, "JSON_INVALIDO", "El cuerpo está ausente o contiene JSON, tipos o fechas inválidos",
+            List.of(new ErrorCampo(campo, "Respeta el tipo indicado en Swagger: textos entre comillas, fechas YYYY-MM-DD, números sin comillas y valores de catálogo permitidos")), request);
     }
 
     @ExceptionHandler(RegistroClienteException.class)
@@ -93,7 +105,18 @@ public class RegistroClienteExceptionHandler {
         if (contieneEstado(ex, "23505")) {
             return respuesta(409, "DATO_DUPLICADO", "Un identificador o correo ya está registrado", List.of(), request);
         }
-        return respuesta(500, "ERROR_INTERNO", "No fue posible completar el registro", List.of(), request);
+        if (contieneEstado(ex, "23514") || contieneEstado(ex, "23502")) {
+            return respuesta(400,"VALIDACION","Los datos incumplen una regla obligatoria; revisa los campos y formatos de la solicitud",List.of(),request);
+        }
+        if (contieneEstado(ex, "23503")) {
+            return respuesta(409,"CONFLICTO_DATOS","La operación entra en conflicto con registros relacionados; verifica las referencias enviadas",List.of(),request);
+        }
+        return respuesta(500, "ERROR_INTERNO", "No fue posible completar la operación; intenta nuevamente y, si persiste, contacta al administrador", List.of(), request);
+    }
+
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<ErrorRegistro> respuestaNoAceptada(org.springframework.web.HttpMediaTypeNotAcceptableException ex,HttpServletRequest request) {
+        return respuesta(406,"RESPUESTA_NO_ACEPTABLE","Solicita una respuesta JSON con Accept: application/json",List.of(),request);
     }
 
     private boolean contieneEstado(Throwable ex, String estado) {
@@ -110,7 +133,7 @@ public class RegistroClienteExceptionHandler {
         } else {
             log.warn("Petición rechazada; status={}; codigo={}; camposInvalidos={}", status, codigo, errores.size());
         }
-        return ResponseEntity.status(status).body(new ErrorRegistro(LocalDateTime.now(), status, codigo,
+        return ResponseEntity.status(status).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(new ErrorRegistro(LocalDateTime.now(), status, codigo,
             mensaje, request.getRequestURI(), errores));
     }
 }

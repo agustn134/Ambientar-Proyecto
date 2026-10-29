@@ -1,5 +1,5 @@
 meta {
-  name: Productos despues de sincronizar
+  name: 03 - Productos despues de sincronizar
   type: http
   seq: 3
 }
@@ -40,12 +40,12 @@ tests {
 
   test("Responde 200 con catálogo actualizado", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.getBody()).to.be.an("array");
+    expect((res.getBody().datos ?? res.getBody())).to.be.an("array");
   });
   test("Sin duplicados y conserva registros anteriores", function () {
     const antes = JSON.parse(bru.getVar("catalogoAntes"));
     const descargados = JSON.parse(bru.getVar("catalogoDescargado"));
-    const actuales = res.getBody();
+    const actuales = (res.getBody().datos ?? res.getBody());
     const porId = new Map(actuales.map(p => [p.idProducto, p]));
     expect(porId.size).to.equal(actuales.length);
     antes.forEach(p => {
@@ -57,7 +57,7 @@ tests {
   });
   test("La consulta refleja los campos descargados", function () {
     const descargados = JSON.parse(bru.getVar("catalogoDescargado"));
-    const porId = new Map(res.getBody().map(p => [p.idProducto, p]));
+    const porId = new Map((res.getBody().datos ?? res.getBody()).map(p => [p.idProducto, p]));
     descargados.forEach(p => {
       const actual = porId.get(p.idProducto);
       ["idServicio", "servicio", "producto", "idCatTipoServicio", "tipoFront", "hasDigitoVerificador", "showAyuda", "tipoReferencia", "legend"].forEach(campo => {

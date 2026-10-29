@@ -1,5 +1,5 @@
 meta {
-  name: Token anterior revocado
+  name: 04 - Token anterior revocado
   type: http
   seq: 4
 }
@@ -24,7 +24,7 @@ script:pre-request {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
-  test("JWT revocado", function () { expect(res.getBody().codigo).to.equal("NO_AUTENTICADO"); });
+  test("JWT revocado", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("NO_AUTENTICADO"); });
 }
 
 docs {

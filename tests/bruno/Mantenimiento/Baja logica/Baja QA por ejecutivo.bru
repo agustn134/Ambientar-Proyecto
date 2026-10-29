@@ -1,16 +1,17 @@
 meta {
-  name: Baja QA por ejecutivo
+  name: 01 - Baja QA por ejecutivo
   type: http
   seq: 1
 }
 
 delete {
-  url: {{baseUrl}}/clientes/{{clienteMantId}}
-  body: none
+  url: {{baseUrl}}/clientes
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -36,4 +37,10 @@ docs {
   HTTP esperado: 204.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "id": {{clienteMantId}}
+  }
 }

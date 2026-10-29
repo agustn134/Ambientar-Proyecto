@@ -1,16 +1,17 @@
 meta {
-  name: Buscar por cuenta
+  name: 06 - Buscar por cuenta
   type: http
   seq: 6
 }
 
-get {
-  url: {{baseUrl}}/clientes/buscar?numeroCuenta={{numeroCuenta}}
-  body: none
+post {
+  url: {{baseUrl}}/clientes/buscar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Cliente de la cuenta", function () { expect(res.getBody().cliente.clienteId).to.equal(Number(bru.getVar("clienteId"))); });
+  test("Cliente de la cuenta", function () { expect((res.getBody().datos ?? res.getBody()).cliente.clienteId).to.equal(Number(bru.getVar("clienteId"))); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 200.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "numeroCuenta": "{{numeroCuenta}}"
+  }
 }

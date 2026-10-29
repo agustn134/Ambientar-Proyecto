@@ -21,6 +21,6 @@ public class CatalogoController {
     @GetMapping("/nacionalidades") public List<Opcion> nacionalidades() { return catalogos.opciones(NACIONALIDAD); }
     @GetMapping("/paises") public List<Opcion> paises() { return catalogos.opciones(PAIS); }
     @GetMapping("/estados-civiles") public List<Opcion> estadosCiviles() { return catalogos.opciones(ESTADO_CIVIL); }
-    @GetMapping("/codigos-postales/{codigoPostal}")
-    public List<Asentamiento> postal(@PathVariable @jakarta.validation.constraints.Pattern(regexp="[0-9]{5}",message="El código postal debe contener cinco dígitos") String codigoPostal) { return catalogos.porCodigoPostal(codigoPostal); }
+    @PostMapping("/codigos-postales/consultar")
+    public List<Asentamiento> postal(@jakarta.validation.Valid @RequestBody com.proyecto.servicios.model.cliente.OperacionRequest.Postal request) { return catalogos.porCodigoPostal(request.codigoPostal()); }
 }

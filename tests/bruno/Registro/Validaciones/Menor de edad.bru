@@ -1,5 +1,5 @@
 meta {
-  name: Menor de edad
+  name: 02 - Menor de edad
   type: http
   seq: 2
 }
@@ -47,7 +47,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
-  test("Campo rechazado", function () { expect(res.getBody().errores.map(e => e.campo)).to.include("fechaNacimiento"); });
+  test("Campo rechazado", function () { expect((res.getBody().datos ?? res.getBody()).errores.map(e => e.campo)).to.include("fechaNacimiento"); });
 }
 
 docs {

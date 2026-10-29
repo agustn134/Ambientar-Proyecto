@@ -1,5 +1,5 @@
 meta {
-  name: Mi cliente
+  name: 01 - Mi cliente
   type: http
   seq: 1
 }
@@ -20,8 +20,8 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Detalle propio sin credenciales", function () { expect(res.getBody().cliente.correo).to.equal("agustinlopezparra13@gmail.com"); expect(JSON.stringify(res.getBody())).not.to.include("passwordHash"); });
-  if (res.getStatus() === 200) { bru.setVar("clienteId", res.getBody().cliente.clienteId); bru.setVar("numeroCuenta", res.getBody().cuentas[0].numeroCuenta); }
+  test("Detalle propio sin credenciales", function () { expect((res.getBody().datos ?? res.getBody()).cliente.correo).to.equal("agustinlopezparra13@gmail.com"); expect(JSON.stringify((res.getBody().datos ?? res.getBody()))).not.to.include("passwordHash"); });
+  if (res.getStatus() === 200) { bru.setVar("clienteId", (res.getBody().datos ?? res.getBody()).cliente.clienteId); bru.setVar("numeroCuenta", (res.getBody().datos ?? res.getBody()).cuentas[0].numeroCuenta); }
 }
 
 docs {

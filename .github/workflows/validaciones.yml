@@ -1,0 +1,61 @@
+name: Validaciones Java y PostgreSQL
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [feature/Validaciones]
+permissions:
+  contents: read
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: validaciones_ci
+          POSTGRES_USER: qa
+          POSTGRES_PASSWORD: qa_ci_efimero
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U qa -d validaciones_ci"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      POSTGRES_TEST_URL: jdbc:postgresql://localhost:5432/validaciones_ci
+      POSTGRES_TEST_USER: qa
+      POSTGRES_TEST_PASSWORD: qa_ci_efimero
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Ejecutar suites de contrato, negocio, productos e integridad
+        run: >-
+          sh gradlew test --no-daemon
+          --tests com.proyecto.servicios.RegistroClienteIntegrationTest
+          --tests com.proyecto.servicios.ContratoValidacionesTest
+          --tests com.proyecto.servicios.ErroresHttpContratoTest
+          --tests com.proyecto.servicios.service.ValidacionesPostgresTest
+          --tests com.proyecto.servicios.service.GestoPagoCatalogoServiceTest
+          --tests com.proyecto.servicios.service.GestoPagoProductServiceTest
+      - name: Verificar que PostgreSQL no fue omitido
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          files=list(Path('build/test-results/test').glob('TEST-*.xml'))
+          total=0
+          for file in files:
+              suite=ET.parse(file).getroot()
+              assert all(int(suite.get(k,'0'))==0 for k in ('failures','errors','skipped')), file
+              total+=int(suite.get('tests','0'))
+          assert total>=79, f'Se esperaban al menos 79 pruebas; se ejecutaron {total}'
+          expected={'RegistroClienteIntegrationTest','ContratoValidacionesTest','ErroresHttpContratoTest','ValidacionesPostgresTest','GestoPagoCatalogoServiceTest','GestoPagoProductServiceTest'}
+          suites={ET.parse(f).getroot().get('name').rsplit('.',1)[-1]:ET.parse(f).getroot() for f in files}
+          assert expected <= suites.keys(), 'Falta una suite requerida'
+          assert int(suites['ValidacionesPostgresTest'].get('tests','0'))>=4, 'Faltan pruebas PostgreSQL'
+          print(f'{total} pruebas aprobadas sin omisiones')
+          PY

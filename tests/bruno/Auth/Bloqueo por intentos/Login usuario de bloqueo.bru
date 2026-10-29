@@ -1,5 +1,5 @@
 meta {
-  name: Login usuario de bloqueo
+  name: 02 - Login usuario de bloqueo
   type: http
   seq: 2
 }
@@ -24,7 +24,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("JWT recibido", function () { expect(res.getBody().tokenType).to.equal("Bearer"); expect(res.getBody().accessToken.split(".")).to.have.lengthOf(3); bru.setVar("tokenBloqueo", res.getBody().accessToken); });
+  test("JWT recibido", function () { expect((res.getBody().datos ?? res.getBody()).tokenType).to.equal("Bearer"); expect((res.getBody().datos ?? res.getBody()).accessToken.split(".")).to.have.lengthOf(3); bru.setVar("tokenBloqueo", (res.getBody().datos ?? res.getBody()).accessToken); });
 }
 
 docs {

@@ -1,16 +1,17 @@
 meta {
-  name: Listado denegado a cliente
+  name: 05 - Listado denegado a cliente
   type: http
   seq: 5
 }
 
-get {
-  url: {{baseUrl}}/clientes
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(403); });
-  test("Permiso denegado", function () { expect(res.getBody().codigo).to.equal("ACCESO_DENEGADO"); });
+  test("Permiso denegado", function () { expect((res.getBody().datos ?? res.getBody()).codigo).to.equal("ACCESO_DENEGADO"); });
 }
 
 docs {
@@ -30,4 +31,8 @@ docs {
   HTTP esperado: 403.
   Autenticación: Bearer token. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {}
 }

@@ -1,0 +1,29 @@
+{
+  "fecha": "2026-10-09T14:26:56.699104-06:00",
+  "entorno": "Docker Linux local, Java 21, perfil render, memoria limitada a 512 MiB",
+  "remoto": false,
+  "health_check": 200,
+  "catalogo_postal": 200,
+  "opciones_cp_37907": 14,
+  "registro": 201,
+  "login": 200,
+  "perfil": 200,
+  "ficha": 200,
+  "saldo": 200,
+  "jwt_issuer_correcto": true,
+  "proveedor_gestopago": "No ejecutado; URLs sustituidas por loopback local durante esta comprobación",
+  "migraciones_flyway": 8,
+  "asentamientos": 159340,
+  "municipios": 2478,
+  "estados": 32,
+  "memoria_limite_bytes": 536870912,
+  "usuario_contenedor": "app, uid=999",
+  "redis_local_ping": "PONG",
+  "limitaciones": "Comprobación local en Docker Linux; no valida aún la infraestructura remota, el límite de CPU de Render ni la integración externa GestoPago.",
+  "sha256": {
+    "Dockerfile": "f5ca866c3db3a691bf7dd3415175f30ab19fdff4973bb65f37b6a8ed347a15db",
+    ".dockerignore": "5bb32233035f86ba98130e23e9ccaf761f88bab827e5dcb0fde6b8299026c979",
+    "src/main/resources/application-render.properties": "b9cc316b434182805a958a74c1c269d63e2dd1668e0d5c56c8da53316d747f28",
+    "datos/CPdescargatxt.zip": "7c4c61f673998ee1f261df87aa6e49353541d643f53acfae4c85026c87b2696d"
+  }
+}

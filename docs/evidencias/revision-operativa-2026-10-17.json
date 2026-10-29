@@ -1,0 +1,131 @@
+{
+  "fecha": "2026-10-17T18:59:16.966419+00:00",
+  "alcance": "HTTP real y PostgreSQL 17 en copia aislada de la base local; no Render ni producción",
+  "respaldo_creado_y_restaurado": true,
+  "migraciones_aplicadas": 9,
+  "pruebas_http": [
+    {
+      "prueba": "Catálogo de sexos",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Consulta postal por body",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Registro transaccional",
+      "http": 201,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Duplicado controlado",
+      "http": 409,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Login y token dentro de datos",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Perfil autenticado",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Usuario propio sin hash",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Cliente propio",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Búsqueda de usuario por body",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Usuario ajeno protegido",
+      "http": 404,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "ID inválido descriptivo",
+      "http": 400,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Listado protegido por rol",
+      "http": 403,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Cliente propio por body",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Cuenta propia por body",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Saldo por body",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Sin token",
+      "http": 401,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Ruta antigua retirada",
+      "http": 404,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "OpenAPI disponible",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Token revocado al cambiar rol",
+      "http": 401,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Login de ejecutivo",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Listado autorizado a ejecutivo",
+      "http": 200,
+      "resultado": "OK"
+    },
+    {
+      "prueba": "Cuentas autorizadas a ejecutivo",
+      "http": 200,
+      "resultado": "OK"
+    }
+  ],
+  "auditoria_historicos": {
+    "clientes_contacto": 0,
+    "clientes_datos": 0,
+    "clientes_identidad": 0,
+    "clientes_edad": 0,
+    "usuarios_contacto": 0,
+    "usuarios_hash": 0,
+    "cuentas_datos": 0,
+    "domicilios_datos": 0
+  },
+  "restricciones_validadas_en_copia": true,
+  "ci": "Pendiente de publicar y ejecutar el workflow en GitHub",
+  "datos_personales_y_credenciales": "Omitidos"
+}

@@ -1,5 +1,5 @@
 meta {
-  name: Perfil ejecutivo
+  name: 03 - Perfil ejecutivo
   type: http
   seq: 3
 }
@@ -20,7 +20,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Rol ejecutivo confirmado", function () { expect(res.getBody().rol).to.equal("EJECUTIVO"); bru.setVar("ejecutivoClienteId",res.getBody().clienteId); });
+  test("Rol ejecutivo confirmado", function () { expect((res.getBody().datos ?? res.getBody()).rol).to.equal("EJECUTIVO"); bru.setVar("ejecutivoClienteId",(res.getBody().datos ?? res.getBody()).clienteId); });
 }
 
 docs {

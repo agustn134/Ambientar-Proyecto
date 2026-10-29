@@ -1,0 +1,56 @@
+{
+  "fecha": "2026-10-17",
+  "zona": "America/Mexico_City",
+  "rama": "feature/Validaciones",
+  "publicado": false,
+  "total_pruebas": 64.0,
+  "suites": [
+    {
+      "suite": "com.proyecto.servicios.ContratoValidacionesTest",
+      "pruebas": 2,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.RegistroClienteIntegrationTest",
+      "pruebas": 46,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.service.GestoPagoCatalogoServiceTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.service.GestoPagoProductServiceTest",
+      "pruebas": 9,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "suite": "com.proyecto.servicios.service.ValidacionesPostgresTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    }
+  ],
+  "v9_sha256": "7c7745ef484af3bdf13fcf54cb32e279b22265fbb2bfd9a14140ffccfb44727b",
+  "alcance": [
+    "HTTP y reglas de negocio en H2",
+    "Integridad y migraciones V1-V9 en PostgreSQL real con esquema aislado",
+    "Productos con dependencias simuladas",
+    "Comprobación de contrato por body y DTO"
+  ],
+  "no_ejecutado": [
+    "Despliegue en Render",
+    "Nueva prueba de carga JMeter",
+    "Aplicación de V9 a la base del usuario o producción"
+  ]
+}

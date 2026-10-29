@@ -1,5 +1,5 @@
 meta {
-  name: Login mantenimiento
+  name: 02 - Login mantenimiento
   type: http
   seq: 2
 }
@@ -24,7 +24,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  if (res.getStatus() === 200) bru.setVar("tokenMantenimiento",res.getBody().accessToken);
+  if (res.getStatus() === 200) bru.setVar("tokenMantenimiento",(res.getBody().datos ?? res.getBody()).accessToken);
 }
 
 docs {

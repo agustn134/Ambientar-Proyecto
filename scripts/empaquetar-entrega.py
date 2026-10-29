@@ -10,6 +10,7 @@ for folder in ['src','tests','scripts','docs','gradle','datos']:
     files.extend(p for p in (root/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
 files.extend(root/p for p in ['README.md','build.gradle','settings.gradle','gradlew','gradlew.bat','.gitignore'])
 if (root/'.gitattributes').exists():files.append(root/'.gitattributes')
+files.extend(root/p for p in ['Dockerfile','.dockerignore'] if (root/p).exists())
 if args.incluir_jar:
     binary=root/'build/libs/prueba-1.0.jar'
     if not binary.exists():raise SystemExit('Compila bootJar antes de incluir el binario.')

@@ -21,8 +21,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST,"/clientes","/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET,"/catalogos/**").permitAll()
+                .requestMatchers(HttpMethod.POST,"/catalogos/codigos-postales/consultar").permitAll()
                 .requestMatchers(HttpMethod.GET,"/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()
-                .requestMatchers(HttpMethod.GET,"/clientes","/cuentas").hasRole("EJECUTIVO")
+                .requestMatchers(HttpMethod.POST,"/clientes/listar","/cuentas/listar").hasRole("EJECUTIVO")
                 // APIs antiguas de personas no se exponen a clientes sin una política de permisos.
                 .requestMatchers("/personas","/personasActualiza","/personasElimina").denyAll()
                 .anyRequest().authenticated())

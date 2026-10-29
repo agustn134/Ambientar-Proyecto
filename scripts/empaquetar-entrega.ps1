@@ -8,7 +8,7 @@ New-Item -ItemType Directory -Force -Path $contenidoEntrega | Out-Null
 foreach($carpetaEntrega in @('src','tests','scripts','docs','gradle','datos')) {
     Copy-Item -LiteralPath (Join-Path $raizEntrega $carpetaEntrega) -Destination $contenidoEntrega -Recurse
 }
-foreach($archivoEntrega in @('README.md','build.gradle','settings.gradle','gradlew','gradlew.bat','.gitignore','.gitattributes')) {
+foreach($archivoEntrega in @('README.md','build.gradle','settings.gradle','gradlew','gradlew.bat','.gitignore','.gitattributes','Dockerfile','.dockerignore')) {
     Copy-Item -LiteralPath (Join-Path $raizEntrega $archivoEntrega) -Destination $contenidoEntrega
 }
 if($IncluirJar) {

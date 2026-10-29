@@ -1,16 +1,17 @@
 meta {
-  name: Siguiente pagina ejecutivo
+  name: 02 - Siguiente pagina ejecutivo
   type: http
   seq: 2
 }
 
-get {
-  url: {{baseUrl}}/clientes?page=1&size=2&ordenarPor=id&direccion=ASC
-  body: none
+post {
+  url: {{baseUrl}}/clientes/listar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -25,7 +26,7 @@ script:pre-request {
 tests {
   test("Página siguiente sin repetir clientes", function () {
     expect(res.getStatus()).to.equal(200);
-    const b=res.getBody();
+    const b=(res.getBody().datos ?? res.getBody());
     const inicial=JSON.parse(bru.getVar("paginaInicialIds"));
     const total=Number(bru.getVar("paginacionTotalElementos"));
     expect(b.page).to.equal(1); expect(b.size).to.equal(2);
@@ -40,4 +41,13 @@ docs {
   HTTP esperado: 200, page 1, size 2, mismos totales y otros IDs. Ejecutar inmediatamente después de Listado paginado ejecutivo, sin registrar o modificar clientes entre ambas peticiones. Puede estar vacía si hay menos de tres clientes.
   Autenticación: Bearer tokenEjecutivo; renovar el login correspondiente si vence.
   Guía: docs/consultas-permisos.md y docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "page": 1,
+    "size": 2,
+    "ordenarPor": "id",
+    "direccion": "ASC"
+  }
 }

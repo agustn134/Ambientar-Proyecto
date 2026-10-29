@@ -1,5 +1,5 @@
 meta {
-  name: Registro ejecutivo de prueba
+  name: 01 - Registro ejecutivo de prueba
   type: http
   seq: 1
 }
@@ -46,7 +46,7 @@ body:json {
 
 tests {
   test("Registro de preparación o duplicado conocido", function () { expect([201, 409]).to.include(res.getStatus()); });
-  if (res.getStatus() === 201) { bru.setVar("ejecutivoUsuarioId",res.getBody().usuario.usuarioId); bru.setVar("ejecutivoClienteId",res.getBody().clienteId); bru.setVar("ejecutivoNumeroCuenta",res.getBody().cuenta.numeroCuenta); }
+  if (res.getStatus() === 201) { bru.setVar("ejecutivoUsuarioId",(res.getBody().datos ?? res.getBody()).usuario.usuarioId); bru.setVar("ejecutivoClienteId",(res.getBody().datos ?? res.getBody()).clienteId); bru.setVar("ejecutivoNumeroCuenta",(res.getBody().datos ?? res.getBody()).cuenta.numeroCuenta); }
 }
 
 docs {

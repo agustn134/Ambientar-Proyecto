@@ -1,5 +1,5 @@
 meta {
-  name: Sexos
+  name: 01 - Sexos
   type: http
   seq: 1
 }
@@ -17,7 +17,7 @@ headers {
 tests {
   test("Catálogo disponible", function () {
     expect(res.getStatus()).to.equal(200);
-    const body = res.getBody();
+    const body = (res.getBody().datos ?? res.getBody());
     expect(body).to.be.an("array");
     expect(body.map(p => p.id)).to.deep.equal([1, 2]);
   });

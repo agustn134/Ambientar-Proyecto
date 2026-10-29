@@ -1,5 +1,5 @@
 meta {
-  name: Intento incorrecto usuario de bloqueo
+  name: 03 - Intento incorrecto usuario de bloqueo
   type: http
   seq: 3
 }
@@ -24,7 +24,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(401); });
-  test("Error controlado", function () { expect(res.getBody()).to.have.property("codigo"); expect(res.getBody()).not.to.have.property("accessToken"); });
+  test("Error controlado", function () { expect((res.getBody().datos ?? res.getBody())).to.have.property("codigo"); expect((res.getBody().datos ?? res.getBody())).not.to.have.property("accessToken"); });
 }
 
 docs {

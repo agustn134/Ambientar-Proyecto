@@ -1,6 +1,6 @@
 package com.proyecto.servicios.controller;
 
-import com.proyecto.servicios.entity.gestopago.GestoPagoProducto;
+import com.proyecto.servicios.model.gestopago.ProductoResponse;
 import com.proyecto.servicios.model.gestopago.GestoPagoProductResponse;
 import com.proyecto.servicios.service.GestoPagoProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,8 +24,8 @@ public class GestoPagoProductoController {
 
     @PostMapping("/sincronizar")
     @Operation(summary = "Obtener o sincronizar catálogo", description = "Jerarquía de caché: Redis -> PostgreSQL -> API GestoPago. Si no está en Redis busca en BD, y si no está en BD sincroniza desde la API.")
-    public ResponseEntity<List<GestoPagoProducto>> sincronizarCatalogo() {
-        return ResponseEntity.ok(productService.obtenerOSincronizarProductos());
+    public ResponseEntity<List<ProductoResponse>> sincronizarCatalogo() {
+        return ResponseEntity.ok(productService.obtenerOSincronizarProductos().stream().map(ProductoResponse::desde).toList());
     }
 
     @PostMapping("/forzar-sincronizacion")
@@ -42,7 +42,7 @@ public class GestoPagoProductoController {
 
     @GetMapping
     @Operation(summary = "Listar productos", description = "Obtiene los productos activos guardados en la base de datos local.")
-    public ResponseEntity<List<GestoPagoProducto>> listarProductos() {
-        return ResponseEntity.ok(productService.obtenerProductosGuardados());
+    public ResponseEntity<List<ProductoResponse>> listarProductos() {
+        return ResponseEntity.ok(productService.obtenerProductosGuardados().stream().map(ProductoResponse::desde).toList());
     }
 }

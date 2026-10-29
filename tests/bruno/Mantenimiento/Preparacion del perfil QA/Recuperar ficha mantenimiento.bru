@@ -1,5 +1,5 @@
 meta {
-  name: Recuperar ficha mantenimiento
+  name: 05 - Recuperar ficha mantenimiento
   type: http
   seq: 5
 }
@@ -19,8 +19,8 @@ auth:bearer {
 }
 
 tests {
-  test("Ficha QA correcta", function () { expect(res.getStatus()).to.equal(200); expect(res.getBody().cliente.correo).to.equal("dulce.mantenimiento@example.com"); expect(res.getBody().cuentas.length).to.be.greaterThan(0); });
-  if (res.getStatus() === 200 && res.getBody().cliente.correo === "dulce.mantenimiento@example.com") { bru.setVar("clienteMantId",res.getBody().cliente.clienteId); bru.setVar("cuentaMant",res.getBody().cuentas[0].numeroCuenta); }
+  test("Ficha QA correcta", function () { expect(res.getStatus()).to.equal(200); expect((res.getBody().datos ?? res.getBody()).cliente.correo).to.equal("dulce.mantenimiento@example.com"); expect((res.getBody().datos ?? res.getBody()).cuentas.length).to.be.greaterThan(0); });
+  if (res.getStatus() === 200 && (res.getBody().datos ?? res.getBody()).cliente.correo === "dulce.mantenimiento@example.com") { bru.setVar("clienteMantId",(res.getBody().datos ?? res.getBody()).cliente.clienteId); bru.setVar("cuentaMant",(res.getBody().datos ?? res.getBody()).cuentas[0].numeroCuenta); }
 }
 
 docs {

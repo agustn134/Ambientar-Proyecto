@@ -1,5 +1,5 @@
 meta {
-  name: Forzar sincronizacion
+  name: 02 - Forzar sincronizacion
   type: http
   seq: 2
 }
@@ -27,14 +27,14 @@ script:pre-request {
 tests {
   test("Sincroniza sin conflicto de duplicados", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.getBody().productos).to.be.an("array").that.is.not.empty;
+    expect((res.getBody().datos ?? res.getBody()).productos).to.be.an("array").that.is.not.empty;
   });
   test("Catálogo externo con identificadores únicos", function () {
-    const productos = res.getBody().productos;
+    const productos = (res.getBody().datos ?? res.getBody()).productos;
     expect(new Set(productos.map(p => p.idProducto)).size).to.equal(productos.length);
   });
-  if (res.getStatus() === 200 && Array.isArray(res.getBody().productos)) {
-    bru.setVar("catalogoDescargado", JSON.stringify(res.getBody().productos));
+  if (res.getStatus() === 200 && Array.isArray((res.getBody().datos ?? res.getBody()).productos)) {
+    bru.setVar("catalogoDescargado", JSON.stringify((res.getBody().datos ?? res.getBody()).productos));
   }
 }
 

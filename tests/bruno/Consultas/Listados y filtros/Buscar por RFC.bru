@@ -1,16 +1,17 @@
 meta {
-  name: Buscar por RFC
+  name: 05 - Buscar por RFC
   type: http
   seq: 5
 }
 
-get {
-  url: {{baseUrl}}/clientes/buscar?rfc=LOPA040905MQ3
-  body: none
+post {
+  url: {{baseUrl}}/clientes/buscar
+  body: json
   auth: bearer
 }
 
 headers {
+  Content-Type: application/json
   Accept: application/json
 }
 
@@ -20,7 +21,7 @@ auth:bearer {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Cliente identificado", function () { expect(res.getBody().cliente.clienteId).to.equal(Number(bru.getVar("clienteId"))); });
+  test("Cliente identificado", function () { expect((res.getBody().datos ?? res.getBody()).cliente.clienteId).to.equal(Number(bru.getVar("clienteId"))); });
 }
 
 docs {
@@ -30,4 +31,10 @@ docs {
   HTTP esperado: 200.
   Autenticación: Bearer tokenEjecutivo. Renovar el login correspondiente si vence.
   Guía de ejecución: docs/bruno-guia-manual.md.
+}
+
+body:json {
+  {
+    "rfc": "LOPA040905MQ3"
+  }
 }

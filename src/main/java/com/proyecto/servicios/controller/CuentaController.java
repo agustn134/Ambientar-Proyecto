@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CuentaController {
     private final ConsultaClienteService consultas;
-    @GetMapping
-    public ConsultasResponse.Pagina<ConsultasResponse.Cuenta> listar(@Valid @ModelAttribute FiltroCuentas filtro,@AuthenticationPrincipal Jwt jwt) {
+    @PostMapping("/listar")
+    public ConsultasResponse.Pagina<ConsultasResponse.Cuenta> listar(@Valid @RequestBody FiltroCuentas filtro,@AuthenticationPrincipal Jwt jwt) {
         return consultas.listarCuentas(filtro,Long.parseLong(jwt.getSubject()));
     }
-    @GetMapping("/{numeroCuenta}")
-    public ConsultasResponse.Cuenta consultar(@PathVariable @Pattern(regexp="[0-9]{20}") String numeroCuenta,@AuthenticationPrincipal Jwt jwt) {
-        return consultas.porNumeroCuenta(numeroCuenta,Long.parseLong(jwt.getSubject()));
+    @PostMapping("/consultar")
+    public ConsultasResponse.Cuenta consultar(@Valid @RequestBody OperacionRequest.Cuenta request,@AuthenticationPrincipal Jwt jwt) {
+        return consultas.porNumeroCuenta(request.numeroCuenta(),Long.parseLong(jwt.getSubject()));
     }
-    @GetMapping("/{numeroCuenta}/saldo")
-    public ConsultasResponse.Saldo saldo(@PathVariable @Pattern(regexp="[0-9]{20}") String numeroCuenta,@AuthenticationPrincipal Jwt jwt) {
-        var cuenta=consultas.porNumeroCuenta(numeroCuenta,Long.parseLong(jwt.getSubject()));
+    @PostMapping("/saldo")
+    public ConsultasResponse.Saldo saldo(@Valid @RequestBody OperacionRequest.Cuenta request,@AuthenticationPrincipal Jwt jwt) {
+        var cuenta=consultas.porNumeroCuenta(request.numeroCuenta(),Long.parseLong(jwt.getSubject()));
         return new ConsultasResponse.Saldo(cuenta.numeroCuenta(),cuenta.saldo());
     }
 }

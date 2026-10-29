@@ -1,5 +1,5 @@
 meta {
-  name: Ingreso con tipo incorrecto
+  name: 03 - Ingreso con tipo incorrecto
   type: http
   seq: 3
 }
@@ -47,7 +47,7 @@ body:json {
 
 tests {
   test("HTTP esperado", function () { expect(res.getStatus()).to.equal(400); });
-  test("Campo rechazado", function () { expect(res.getBody().errores.map(e => e.campo)).to.include("informacionLaboral.ingresoMensual"); });
+  test("Campo rechazado", function () { expect((res.getBody().datos ?? res.getBody()).errores.map(e => e.campo)).to.include("informacionLaboral.ingresoMensual"); });
 }
 
 docs {
