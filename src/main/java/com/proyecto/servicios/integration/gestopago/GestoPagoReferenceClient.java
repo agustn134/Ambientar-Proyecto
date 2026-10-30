@@ -38,12 +38,12 @@ public class GestoPagoReferenceClient implements GestoPagoReferenceVerifier {
                 || !referencia.matches("[A-Za-z0-9]{1,100}")) throw new IllegalArgumentException("Solicitud de referencia inválida.");
         var item=productos.findByIdProducto(producto).orElseThrow(()->new IllegalArgumentException("Producto no disponible."));
         var rule=policies.getProductos().get(producto);
-        // tipoFront define el destino, no prueba por sí solo que verifyReference esté autorizado.
+        // El contrato GENERAL documentado exige tipoFront=4 y aprobación explícita por producto.
         if(!Boolean.TRUE.equals(item.getActivo()) || !servicio.equals(item.getIdServicio()) || rule==null
                 || !rule.isHabilitado() || !rule.isRequiereReferencia() || !rule.isVerificacionReferenciaAprobada()
                 || !Objects.equals(rule.getIdServicio(),servicio) || !Objects.equals(rule.getTipoFront(),item.getTipoFront())
                 || rule.getIdCatTipoServicio()==null || !Objects.equals(rule.getIdCatTipoServicio(),item.getIdCatTipoServicio())
-                || item.getTipoFront()==null || !Set.of("1","2","4").contains(item.getTipoFront())
+                || !"4".equals(item.getTipoFront())
                 || rule.getReferenciaMinima()==null || rule.getReferenciaMaxima()==null
                 || rule.getReferenciaMinima()<1 || rule.getReferenciaMaxima()>100
                 || rule.getReferenciaMinima()>rule.getReferenciaMaxima()
@@ -57,7 +57,7 @@ public class GestoPagoReferenceClient implements GestoPagoReferenceVerifier {
         if(!apiKey.isBlank())headers.put("X-API-Key",apiKey);
         try {
             var response=transport.post(URI.create(url+"/sistema/service/verifyReference.do"),headers,
-                    Map.of("body",Long.toString(Instant.now().toEpochMilli()),"signed",signed));
+                    Map.of("random",Long.toString(Instant.now().toEpochMilli()),"signed",signed));
             if(response.status()==403 && parser.tokenExpired(response.body()))
                 tokens.invalidarToken(distributor,device,token.getToken());
             return parser.parse(response);

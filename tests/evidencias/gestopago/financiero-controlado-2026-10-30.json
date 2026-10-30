@@ -1,9 +1,9 @@
 {
-  "fechaUtc": "2026-10-30T20:34:33.0551911Z",
+  "fechaUtc": "2026-10-30T21:12:38.5397999Z",
   "rama": "feature/conciliacion-estados-gestopago",
   "baseCommit": "77410d89546fffd1ba75e2c0071f57f9de02c422",
   "entorno": "JDK 21, PostgreSQL 17 temporal, App y HTTP loopback controlado",
-  "totalPruebas": 189.0,
+  "totalPruebas": 189,
   "totalSuites": 27,
   "pagosExternosEjecutados": false,
   "interoperabilidadFinancieraExternaAcreditada": false,

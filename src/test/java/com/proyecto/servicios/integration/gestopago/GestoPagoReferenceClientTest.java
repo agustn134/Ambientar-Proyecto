@@ -42,7 +42,7 @@ class GestoPagoReferenceClientTest {
         when(transport.post(any(),anyMap(),anyMap())).thenAnswer(call->{
             assertEquals("https://proveedor.example/sistema/service/verifyReference.do",call.getArgument(0).toString());
             assertEquals("cifrado",((Map<?,?>)call.getArgument(2)).get("signed"));
-            assertEquals(Set.of("body","signed"),((Map<?,?>)call.getArgument(2)).keySet());
+            assertEquals(Set.of("random","signed"),((Map<?,?>)call.getArgument(2)).keySet());
             return new GestoPagoTransport.Reply(200,"<RESPONSE><MENSAJE><CODIGO>01</CODIGO><SALDO>-150.00</SALDO></MENSAJE></RESPONSE>");});
         var result=client.verificarDetalle(108,272,"REF123");assertEquals(VALIDA,result.resultado());assertEquals(new BigDecimal("-150.00"),result.saldoReferencia());
         verify(transport,times(1)).post(any(),anyMap(),anyMap());
@@ -66,10 +66,9 @@ class GestoPagoReferenceClientTest {
         ReflectionTestUtils.setField(client,"enabled",false);assertThrows(RuntimeException.class,()->client.verificar(108,272,"REF123"));
         verifyNoInteractions(transport,productos,tokens,cipher);
     }
-    @Test void tipo2SoloSeAdmiteConPoliticaDeReferenciaAprobada(){
+    @Test void tipo2NoSeAdmiteAunqueTengaPoliticaDeReferenciaAprobada(){
         item.setTipoFront("2");policies.getProductos().get(272).setTipoFront("2");
-        when(transport.post(any(),anyMap(),anyMap())).thenReturn(new GestoPagoTransport.Reply(200,"<RESPONSE><MENSAJE><CODIGO>02</CODIGO></MENSAJE></RESPONSE>"));
-        assertEquals(INVALIDA,client.verificar(108,272,"REF123"));verify(transport,times(1)).post(any(),anyMap(),anyMap());
+        assertThrows(IllegalArgumentException.class,()->client.verificar(108,272,"REF123"));verifyNoInteractions(transport,tokens,cipher);
     }
     @Test void flagGlobalNoAutorizaProductosSinPolitica(){
         policies.getProductos().get(272).setVerificacionReferenciaAprobada(false);

@@ -85,7 +85,7 @@ public class PagoService {
                 || !Objects.equals(item.getTipoFront(),regla.getTipoFront()) || !Objects.equals(item.getIdCatTipoServicio(),regla.getIdCatTipoServicio())
                 || (regla.getMontoFijo()!=null && (item.getPrecio()==null || item.getPrecio().compareTo(regla.getMontoFijo())!=0)))
             throw new PagoException(422,"CATALOGO_CAMBIO");
-        if(regla.isRequiereReferencia() && (!regla.isVerificacionReferenciaAprobada() || !regla.isBloqueoServicioMonto24h()))
+        if(regla.isRequiereReferencia() && (!regla.isVerificacionReferenciaAprobada() || !"4".equals(item.getTipoFront()) || !regla.isBloqueoServicioMonto24h()))
             throw new PagoException(422,"CONTRATO_REFERENCIA_NO_SOPORTADO");
     }
     public Pago consultar(long usuario,UUID id){return repo.consultar(usuario,id);}

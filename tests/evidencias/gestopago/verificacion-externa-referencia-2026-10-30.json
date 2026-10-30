@@ -1,33 +1,60 @@
 {
-  "fechaUtc": "2026-10-30T20:20:53.9971645Z",
+  "fechaUtc": "2026-10-30T21:06:15.7470668Z",
   "fuenteContrato": "https://documenter.getpostman.com/view/19876210/Uz5MFtdn",
   "hostProveedor": "gestopago.portalventas.net",
   "endpoint": "/sistema/service/verifyReference.do",
-  "caso": "verifyReference_Fail_Invalid_Reference publicado por el proveedor",
-  "idServicio": 107,
-  "idProducto": 271,
+  "idServicio": 108,
+  "idProducto": 272,
   "tipoFrontCatalogoLocal": "2",
-  "idCatTipoServicioCatalogoLocal": 5,
+  "tipoFrontExigidoPorContratoGeneral": "4",
+  "contradiccionCatalogoDocumentacion": true,
+  "habilitadoParaPago": false,
   "formulario": [
-    "body",
+    "random",
     "signed"
   ],
-  "cifrado": "AES-256-CBC con el par público de pruebas; no acredita claves asignadas para producción",
-  "http": 200,
-  "codigoNegocio": "02",
-  "resultado": "INVALIDA",
-  "adaptadorAplicacionReal": true,
+  "cifrado": "AES-256-CBC con par público de pruebas, solo diagnóstico sin pagos",
+  "casos": [
+    {
+      "caso": "Referencia válida publicada",
+      "http": 200,
+      "codigo": "01",
+      "resultado": "VALIDA"
+    },
+    {
+      "caso": "Longitud inválida publicada",
+      "http": 200,
+      "codigo": "02",
+      "resultado": "INVALIDA"
+    }
+  ],
+  "pruebasExternasAprobadas": 2,
   "tokenReutilizado": true,
   "tokenProtegidoEnCache": true,
-  "consultasReferencia": 1,
+  "consultasReferencia": 2,
   "llamadasSendTx": 0,
   "llamadasConfirmTx": 0,
   "consultasCatalogoExternas": 0,
   "saldoModificadoPorLaPrueba": false,
+  "alcance": "Diagnóstico técnico con transporte, autenticación, cifrado y parser de la aplicación. No altera tipoFront para superar la política financiera. No acredita sendTx/confirmTx.",
+  "diagnosticoPrevioEspecial": {
+    "idServicio": 107,
+    "idProducto": 271,
+    "http": 200,
+    "codigo": "02",
+    "formulario": [
+      "body",
+      "signed"
+    ],
+    "limite": "Un rechazo no demuestra que el tipo de producto esté admitido en el contrato general."
+  },
   "pendiente": [
-    "Referencia válida y autorizada",
-    "Caso sandbox de sendTx y confirmTx sin cargos",
+    "Aclarar tipoFront del catálogo frente al contrato general",
+    "Confirmar sandbox y caso financiero sin cargos para sendTx/confirmTx",
     "Configuración asignada para operación financiera"
   ],
-  "resultadoSeguro": "GESTOPAGO_PRUEBA_EXTERNA adaptadorReal=true referenciaNegativa=true http=200 codigo=02 resultado=INVALIDA tipoFrontCatalogo=2 tokenReutilizado=true authRequests=0 referenceRequests=1 pagosEjecutados=0"
+  "resultadosSeguros": [
+    "GESTOPAGO_PRUEBA_EXTERNA diagnosticoTecnico=true caso=VALIDA_PUBLICADA http=200 codigo=01 resultado=VALIDA tipoFrontCatalogo=2 tipoFrontDocumentado=4 conflictoCatalogo=true tokenReutilizado=true authRequests=0 referenceRequests=1 pagosEjecutados=0",
+    "GESTOPAGO_PRUEBA_EXTERNA diagnosticoTecnico=true caso=LONGITUD_INVALIDA_PUBLICADA http=200 codigo=02 resultado=INVALIDA tipoFrontCatalogo=2 tipoFrontDocumentado=4 conflictoCatalogo=true tokenReutilizado=true authRequests=0 referenceRequests=1 pagosEjecutados=0"
+  ]
 }

@@ -1,9 +1,6 @@
 package com.proyecto.servicios.integration.gestopago;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.proyecto.servicios.config.GestoPagoContratoProperties;
-import com.proyecto.servicios.entity.gestopago.GestoPagoProducto;
-import com.proyecto.servicios.repositorys.gestopago.GestoPagoProductoRepository;
 import com.proyecto.servicios.repositorys.gestopago.GestoPagoSecureTokenCache;
 import com.proyecto.servicios.service.Impl.GestoPagoTokenServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -15,18 +12,24 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-/** Diagnóstico externo opt-in. Solo authenticate y el caso NEGATIVO publicado de verifyReference.
+/** Diagnóstico externo opt-in. Solo authenticate y los ejemplos públicos de verifyReference.
  * No arranca App, no migra esquemas ni instancia clientes/servicios financieros.
+ * No altera tipoFront del catálogo ni autoriza su uso financiero cuando contradice la documentación.
  */
 @EnabledIfEnvironmentVariable(named="GESTOPAGO_EXTERNAL_REFERENCE_PROBE",matches="true")
 class GestoPagoExternalReferenceProbeTest {
-    @Test void casoNegativoDocumentadoConAesDePruebasSinPago() throws Exception {
+    @Test void casoValidoPublicadoSinPago() throws Exception {
+        probe("VALIDA_PUBLICADA","5610440665",GestoPagoReferenceVerifier.Resultado.VALIDA);
+    }
+    @Test void casoLongitudInvalidaPublicadoSinPago() throws Exception {
+        probe("LONGITUD_INVALIDA_PUBLICADA","000000000",GestoPagoReferenceVerifier.Resultado.INVALIDA);
+    }
+    private void probe(String caso,String referencia,GestoPagoReferenceVerifier.Resultado expected) throws Exception {
         var ds=new DriverManagerDataSource(env("GESTOPAGO_PROBE_DB_URL"),env("GESTOPAGO_PROBE_DB_USER"),env("DB_PASSWORD"));
         var sql=new JdbcTemplate(ds);
-        var row=sql.queryForMap("SELECT id_servicio,id_cat_tipo_servicio,tipo_front,activo FROM gestopago_productos WHERE id_producto=271");
-        assertEquals(107,((Number)row.get("id_servicio")).intValue(),"El ejemplo debe coincidir con el catálogo local");
+        var row=sql.queryForMap("SELECT id_servicio,id_cat_tipo_servicio,tipo_front,activo FROM gestopago_productos WHERE id_producto=272");
+        assertEquals(108,((Number)row.get("id_servicio")).intValue(),"El ejemplo debe coincidir con el catálogo local");
         assertEquals(Boolean.TRUE,row.get("activo"),"El producto documentado debe estar activo");
         var transport=new ReadOnlyTransport();
         var cache=new GestoPagoSecureTokenCache(ds,new DataSourceTransactionManager(ds),new TokenCacheCipher(env("GESTOPAGO_TOKEN_CACHE_KEY_BASE64")));
@@ -45,25 +48,18 @@ class GestoPagoExternalReferenceProbeTest {
         assertTrue(token.getToken().equals(tokens.obtenerTokenActivo(83,"GPS83-TPV-17").orElseThrow().getToken()),"Debe reutilizar el Bearer");
         assertTrue(stored.equals(sql.queryForObject("SELECT token_cifrado FROM gestopago_token_cache WHERE distribuidor=83 AND dispositivo='GPS83-TPV-17'",String.class)),"La reutilización no debe emitir otra sesión");
         var cipher=new GestoPagoPayloadCipher(env("GESTOPAGO_PROBE_TEST_SECRET_BASE64"),env("GESTOPAGO_PROBE_TEST_IV_BASE64"));
-        // Se lee metadata real; solo se sustituye el repositorio JPA para evitar arrancar/migrar App.
-        var repository=mock(GestoPagoProductoRepository.class);
-        var item=GestoPagoProducto.builder().idProducto(271).idServicio(107).activo(true)
-                .tipoFront((String)row.get("tipo_front")).idCatTipoServicio(((Number)row.get("id_cat_tipo_servicio")).intValue()).build();
-        when(repository.findByIdProducto(271)).thenReturn(Optional.of(item));
-        var policies=new GestoPagoContratoProperties();var rule=new GestoPagoContratoProperties.ReglaProducto();
-        rule.setHabilitado(true);rule.setIdServicio(107);rule.setTipoFront(item.getTipoFront());rule.setIdCatTipoServicio(item.getIdCatTipoServicio());
-        rule.setRequiereReferencia(true);rule.setVerificacionReferenciaAprobada(true);rule.setReferenciaMinima(1);rule.setReferenciaMaxima(100);
-        policies.getProductos().put(271,rule); // Autoriza SOLO esta consulta de prueba, nunca pagos.
-        var referenceClient=new GestoPagoReferenceClient(transport,cipher,tokens,repository,mapper,new GestoPagoReferenceParser(),policies);
-        ReflectionTestUtils.setField(referenceClient,"enabled",true);ReflectionTestUtils.setField(referenceClient,"url","https://gestopago.portalventas.net");
-        ReflectionTestUtils.setField(referenceClient,"distributor",83);ReflectionTestUtils.setField(referenceClient,"device","GPS83-TPV-17");
-        ReflectionTestUtils.setField(referenceClient,"apiKey",optional("GESTOPAGO_API_KEY"));
-        var detail=referenceClient.verificarDetalle(107,271,"TMX00000000000000000000000");
-        System.out.printf("GESTOPAGO_PRUEBA_EXTERNA adaptadorReal=true referenciaNegativa=true http=%d codigo=%s resultado=%s tipoFrontCatalogo=%s tokenReutilizado=true authRequests=%d referenceRequests=%d pagosEjecutados=0%n",
-                transport.http,transport.code,detail.resultado(),row.get("tipo_front"),transport.auths,transport.references);
+        String payload=mapper.writeValueAsString(Map.of("idProducto",272,"idServicio",108,"referencia",referencia));
+        var headers=new HashMap<String,String>();headers.put("Authorization","Bearer "+token.getToken());
+        if(!optional("GESTOPAGO_API_KEY").isBlank())headers.put("X-API-Key",optional("GESTOPAGO_API_KEY"));
+        // Diagnóstico técnico publicado, fuera del flujo de pagos: no falsifica la metadata para pasar su política.
+        var response=transport.post(URI.create("https://gestopago.portalventas.net/sistema/service/verifyReference.do"),headers,
+                Map.of("random",Long.toString(Instant.now().toEpochMilli()),"signed",cipher.cifrar(payload)));
+        var detail=new GestoPagoReferenceParser().parse(response);
+        System.out.printf("GESTOPAGO_PRUEBA_EXTERNA diagnosticoTecnico=true caso=%s http=%d codigo=%s resultado=%s tipoFrontCatalogo=%s tipoFrontDocumentado=4 conflictoCatalogo=%s tokenReutilizado=true authRequests=%d referenceRequests=%d pagosEjecutados=0%n",
+                caso,transport.http,transport.code,detail.resultado(),row.get("tipo_front"),!"4".equals(row.get("tipo_front")),transport.auths,transport.references);
         assertEquals(1,transport.references,"Solo debe ejecutarse una verificación externa");
         assertEquals(200,transport.http,"La comprobación no obtuvo el HTTP documentado; no se reintenta automáticamente");
-        assertEquals(GestoPagoReferenceVerifier.Resultado.INVALIDA,detail.resultado(),"El proveedor no confirmó el caso negativo documentado (CODIGO 02)");
+        assertEquals(expected,detail.resultado(),"El resultado del ejemplo publicado no coincide con el contrato; no autoriza pagos");
     }
     /** Lista cerrada: el propio diagnóstico impide sendTx, confirmTx y descarga de catálogo. */
     private static class ReadOnlyTransport extends GestoPagoTransport {

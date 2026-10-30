@@ -124,7 +124,7 @@ class PagoRealAplicacionTest {
                     body="{\"success\":true,\"token\":\"CONTROLLED_"+auths.incrementAndGet()+"\",\"expires_in\":86400}";
                 } else {
                     assertTrue(exchange.getRequestHeaders().getFirst("Authorization").startsWith("Bearer CONTROLLED_"));
-                    String nonce=path.endsWith("verifyReference.do")?"body":"random";
+                    String nonce="random";
                     assertNotNull(fields.get(nonce));assertEquals(Set.of(nonce,"signed"),fields.keySet());
                     String json=decrypt(fields.get("signed"));var node=mapper.readTree(json);
                     if(path.endsWith("verifyReference.do")) {
@@ -300,11 +300,10 @@ class PagoRealAplicacionTest {
         var p=crear("real-catalogo01");sql.update("UPDATE gestopago_productos SET precio=41,fecha_actualizacion=LOCALTIMESTAMP WHERE id_producto=219");
         worker.ejecutar(p.id());assertEquals(Estado.FAILED,pagos.consultar(usuario,p.id()).estado());saldo("1000.00","0.00");assertEquals(0,sends.get());
     }
-    @Test void referenciaTipo2VerificaYEnviaTelefonoFijoSegunPolitica(){
+    @Test void referenciaTipo2NoHabilitaPagoPorUnRechazoDiagnostico(){
         var r=new Solicitud(cuenta,new CrearPagoRequest(9000,900002,new BigDecimal("40"),null,"REFERENCIA05"));
-        var p=pagos.crear(usuario,"real-referencia-tipo2",r);assertEquals(1,references.get());worker.ejecutar(p.id());
-        assertEquals(Estado.CAPTURED,pagos.consultar(usuario,p.id()).estado());saldo("960.00","0.00");
-        assertTrue(providerBook.values().iterator().next().contains("\"telefono\":\"1111111111\""));
+        assertEquals("CONTRATO_REFERENCIA_NO_SOPORTADO",assertThrows(PagoException.class,()->pagos.crear(usuario,"real-referencia-tipo2",r)).getCodigo());
+        assertEquals(0,references.get());assertEquals(0,sends.get());saldo("1000.00","0.00");
     }
     @Test void actualizarEstatusConEntidadAntiguaNoRestauraSaldoCapturado(){
         var antigua=cuentasJpa.findById(cuenta).orElseThrow();var p=crear("real-jpa-saldo01");worker.ejecutar(p.id());
