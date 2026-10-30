@@ -89,10 +89,19 @@ public class OpenApi {
             if(externo) {
                 agregar(respuestas,ruta,400,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","El proveedor rechazó la solicitud enviada.");
                 agregar(respuestas,ruta,429,"SERVICIO_EXTERNO","Se alcanzó el límite de solicitudes a GestoPago; espera antes de reintentar","Límite de peticiones del proveedor alcanzado.");
+                if(ruta.startsWith("/api/gestopago/productos/")) {
+                    var limitada=respuestas.get("429");
+                    limitada.setDescription("Cuota compartida: máximo tres intentos externos en una ventana móvil de 24 horas. Los fallos también consumen intento.");
+                    limitada.addHeaderObject("Retry-After",new io.swagger.v3.oas.models.headers.Header()
+                            .description("Segundos hasta que venza el intento más antiguo; no dispara un reintento automático.")
+                            .schema(new IntegerSchema().example(86400)));
+                    limitada.getContent().get("application/json").addExamples("CUOTA_CATALOGO_AGOTADA",
+                            ejemplo(ruta,429,"CUOTA_CATALOGO_AGOTADA","Límite de catálogo alcanzado. Consulta los productos guardados localmente."));
+                }
                 agregar(respuestas,ruta,502,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","Respuesta inválida del proveedor.");
                 agregar(respuestas,ruta,503,"SERVICIO_EXTERNO","GestoPago no está disponible temporalmente; intenta más tarde","Proveedor temporalmente no disponible.");
                 agregar(respuestas,ruta,504,"SERVICIO_EXTERNO","GestoPago no respondió dentro del tiempo permitido; intenta nuevamente","Tiempo de comunicación agotado.");
-                respuestas.get("401").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,401,"SERVICIO_EXTERNO","No fue posible autenticar la conexión con GestoPago; contacta al administrador"));
+                respuestas.get("503").getContent().get("application/json").addExamples("SESION_PROVEEDOR",ejemplo(ruta,503,"SERVICIO_EXTERNO","La conexión con el proveedor no está disponible temporalmente."));
                 respuestas.get("404").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,404,"SERVICIO_EXTERNO","El recurso solicitado no está disponible en GestoPago"));
                 respuestas.get("500").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,500,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador"));
                 respuestas.addApiResponse("default",new ApiResponse().description("Otro error HTTP 4xx/5xx del proveedor con mensaje controlado y codigo SERVICIO_EXTERNO.")

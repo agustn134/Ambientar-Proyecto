@@ -46,6 +46,14 @@ public class GestoPagoErrorDecoder implements ErrorDecoder {
 
         // 401 Unauthorized / 403 Forbidden: Token inválido o sin permisos
         if (status == 401 || status == 403) {
+            if (status == 403 && response.body() != null) {
+                try (var input = response.body().asInputStream()) {
+                    byte[] body = input.readNBytes(8193);
+                    if (body.length <= 8192 && "EXPIRED".equals(new com.fasterxml.jackson.databind.ObjectMapper()
+                            .readTree(body).path("token").asText()))
+                        return new com.proyecto.servicios.exception.GestoPagoExpiredTokenException();
+                } catch (Exception ignored) { /* No conservar mensajes ni cuerpo del proveedor. */ }
+            }
             log.error("Fallo de autenticación con GestoPago. Verificar Bearer Token en la configuración.");
             return new GestoPagoAuthException(
                     "Acceso denegado por GestoPago (Status " + status + "). El token puede ser inválido o haber expirado.");

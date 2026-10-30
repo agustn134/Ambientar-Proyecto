@@ -18,6 +18,21 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.proyecto.servicios.exception.SimulacionException.class)
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleSimulacion(
+            com.proyecto.servicios.exception.SimulacionException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.valueOf(ex.getStatus()),
+                "Revisa los datos, el estado de la cuenta y el saldo ficticio. No se envió un pago real.",
+                request.getRequestURI(), ex.getCodigo());
+    }
+    @ExceptionHandler(com.proyecto.servicios.exception.CuotaCatalogoException.class)
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleCuotaCatalogo(
+            com.proyecto.servicios.exception.CuotaCatalogoException ex, HttpServletRequest request) {
+        var response=buildErrorResponse(HttpStatus.TOO_MANY_REQUESTS,
+                "Límite de catálogo alcanzado. Consulta los productos guardados localmente.",
+                request.getRequestURI(),"CUOTA_CATALOGO_AGOTADA");
+        return ResponseEntity.status(response.getStatusCode()).header("Retry-After",Long.toString(ex.getRetryAfterSeconds())).body(response.getBody());
+    }
 
     @ExceptionHandler(com.proyecto.servicios.exception.ContratoPagoException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleContratoPago(
@@ -30,8 +45,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GestoPagoAuthException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleGestoPagoAuthException(GestoPagoAuthException ex, HttpServletRequest request) {
-        log.warn("Error de autenticación GestoPago; status=401");
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "No fue posible autenticar la conexión con GestoPago; contacta al administrador", request.getRequestURI());
+        log.warn("Sesión del proveedor no disponible; status=503");
+        return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE, "La conexión con el proveedor no está disponible temporalmente.", request.getRequestURI());
     }
 
     @ExceptionHandler(GestoPagoException.class)

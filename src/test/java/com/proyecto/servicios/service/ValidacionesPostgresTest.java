@@ -43,8 +43,10 @@ class ValidacionesPostgresTest {
     }
     @Test void migracionConservaHistoricosYEsRepetible() {
         assertEquals(1,sql.queryForObject("SELECT count(*) FROM clientes WHERE curp='HISTORICO'",Integer.class));
-        assertEquals(0,Flyway.configure().dataSource(fuente).schemas(schema).defaultSchema(schema).load().migrate().migrationsExecuted);
-        assertEquals("9",sql.queryForObject("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1",String.class));
+        var migrador=Flyway.configure().dataSource(fuente).schemas(schema).defaultSchema(schema).load();
+        assertEquals(0,migrador.migrate().migrationsExecuted);
+        assertDoesNotThrow(migrador::validate);
+        assertEquals(0,migrador.info().pending().length,"Todas las migraciones disponibles deben quedar aplicadas");
     }
     @Test void rechazaDatosInvalidosEnEscrituraDirecta() {
         for(String cambio:new String[]{"correo_electronico='incorrecto'","telefono_movil='123'","ingreso_mensual=0","estatus='DESCONOCIDO'","fecha_nacimiento=CURRENT_DATE"})
