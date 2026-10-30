@@ -31,6 +31,7 @@ public class GestoPagoContratoProperties {
         private BigDecimal montoMaximo;
         private BigDecimal montoFijo;
         private boolean requiereReferencia;
+        private boolean verificacionReferenciaAprobada;
         private Integer referenciaMinima;
         private Integer referenciaMaxima;
     }

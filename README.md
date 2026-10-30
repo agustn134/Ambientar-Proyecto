@@ -68,7 +68,7 @@ Al vencer las 24 horas se marca revisión manual y se conserva la reserva. Si un
 - `GESTOPAGO_PASSWORD`, `GESTOPAGO_TOKEN_CACHE_KEY_BASE64`, `GESTOPAGO_CRYPTO_SECRET_BASE64`, `GESTOPAGO_CRYPTO_IV_BASE64` y `GESTOPAGO_UNIDAD` asignados/configurados correctamente. Basic y API key solo si el proveedor los exige para tu acceso.
 - `GESTOPAGO_PAYMENT_STORAGE_KEY_BASE64`: 32 bytes aleatorios en Base64, distinta de la clave del proveedor y de la caché del token. Protege el contrato original y las respuestas en PostgreSQL mediante AES-GCM. Conserva esta clave mientras existan operaciones pendientes; su rotación requiere migrar los datos cifrados.
 - Para **cada producto autorizado**, configurar `gestopago.contrato.productos[ID].integracion-aprobada=true` y `servicio-activo=true`, junto con su servicio, tipoFront, categoría, destino, importes y reglas de referencia. No hay productos aprobados para envío por defecto. El producto 219 solo está habilitado para validación local hasta aprobar su integración.
-- Para referencias, la política debe ser explícita para tipoFront=4 y destino REFERENCIA, con longitudes y `bloqueo-servicio-monto24h=true`. Otros contratos de referencia y tipos no documentados permanecen bloqueados. El catálogo local debe estar vigente (24 horas por defecto, configurable entre 1 y 168); la sincronización conserva su cuota compartida de tres intentos externos por ventana de 24 horas.
+- Para referencias, exigir `requiere-referencia=true`, `verificacion-referencia-aprobada=true`, longitudes y tipoFront/categoría coincidentes con el catálogo. El destino sigue la política del producto: por ejemplo, tipoFront=2 conserva el teléfono fijo. No se deduce la necesidad de verificación solo de tipoFront=4. Para pagos de servicios se exige además `bloqueo-servicio-monto24h=true`. El catálogo local debe estar vigente (24 horas por defecto, configurable entre 1 y 168); la sincronización conserva su cuota compartida de tres intentos externos por ventana de 24 horas.
 
 La aplicación obtiene el Bearer mediante la autenticación del proveedor y lo reutiliza en una caché cifrada con vencimiento. No se pega un Bearer en el código ni se devuelve al usuario. Las evidencias conservan solicitudes/respuestas cifradas, nunca Authorization o contraseñas. Swagger y las respuestas públicas solo muestran datos seguros y el estado de la operación.
 
@@ -77,7 +77,10 @@ La aplicación obtiene el Bearer mediante la autenticación del proveedor y lo r
 | Pruebas manuales `/api/simulacion` | Flujo ficticio: éxito, rechazo, ambos timeouts, reservas y repetición sin cambios de saldo. |
 | Pruebas automáticas de `PagoRealAplicacionTest` | Aplicación completa, autenticación local, PostgreSQL, AES, Bearer, HTTP local controlado, idempotencia, concurrencia, rollback y conciliación `06`/`70`. No llaman al proveedor externo. |
 | Autenticación y catálogo externos registrados previamente | Acceso a esos servicios; no acredita una venta en `sendTx`. |
-| `sendTx` / `confirmTx` con GestoPago | Requieren evidencia externa con entorno y caso autorizados; no se presentan como comprobados por estas pruebas locales. |
+| `verifyReference` con GestoPago | El caso negativo publicado para producto 271/servicio 107 respondió HTTP 200 y CODIGO 02 con AES de ejemplo; el catálogo local informa tipoFront=2. No acredita una referencia válida ni autoriza pagos. Esta ruta documenta `body` + `signed`; `sendTx` y `confirmTx` conservan `random` + `signed`. |
+| `sendTx` / `confirmTx` con GestoPago | Requieren evidencia externa con entorno y caso autorizados; no se presentan como comprobados por la prueba de referencia. |
+
+La comprobación externa sin pagos es opt-in: `GestoPagoExternalReferenceProbeTest`. Solo permite HTTPS a authenticate y verifyReference, reutiliza la caché cifrada y usa el ejemplo inválido documentado. No arranca App ni modifica el esquema, catálogo o saldos. Se ejecuta manualmente con las credenciales locales y las variables `GESTOPAGO_EXTERNAL_REFERENCE_PROBE`, `GESTOPAGO_PROBE_DB_URL`, `GESTOPAGO_PROBE_DB_USER`, `GESTOPAGO_PROBE_TEST_SECRET_BASE64` y `GESTOPAGO_PROBE_TEST_IV_BASE64`. No forma parte de CI ni se habilita por defecto.
 
 ## Ejecución local en Linux
 
@@ -176,7 +179,7 @@ El contrato de esta rama recibe IDs y filtros por body. Consulta la [tabla de ru
 
 ## Pruebas y resultados
 
-La ampliación financiera del 30 de octubre de 2026 aprobó **186 pruebas en 27 suites, sin fallos ni omisiones**, usando PostgreSQL 17 temporal. Incluye 22 casos de aplicación financiera con HTTP loopback y ocho pruebas nuevas de configuración y confirmación. [Resumen de la ejecución](tests/evidencias/gestopago/financiero-controlado-2026-10-30.json). No se realizaron pagos externos. CI exige estas suites y conserva los reportes completos.
+La ampliación financiera del 30 de octubre de 2026 aprobó **189 pruebas en 27 suites, sin fallos ni omisiones**, usando PostgreSQL 17 temporal. Incluye 23 casos de aplicación financiera con HTTP loopback y pruebas de configuración, confirmación y autorización de referencias por producto. [Resumen de la ejecución](tests/evidencias/gestopago/financiero-controlado-2026-10-30.json). Por separado, se aprobó una [comprobación externa negativa de referencia](tests/evidencias/gestopago/verificacion-externa-referencia-2026-10-30.json), sin ejecutar pagos. CI exige las suites locales y conserva los reportes completos; no ejecuta la prueba externa opt-in.
 
 La API en Render arrancó desde una base vacía, aplicó las ocho migraciones y cargó 159,340 asentamientos, 2,478 municipios y 32 estados. Se comprobaron respuestas **200** en sexos y código postal `37907`, además del alta **201** y la denegación **403** del listado general a un CLIENTE.
 

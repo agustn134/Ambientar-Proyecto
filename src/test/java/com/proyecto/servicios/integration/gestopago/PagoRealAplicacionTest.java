@@ -98,9 +98,17 @@ class PagoRealAplicacionTest {
         refRule.setHabilitado(true);refRule.setIntegracionAprobada(true);refRule.setServicioActivo(true);
         refRule.setIdServicio(9000);refRule.setTipoFront("4");refRule.setIdCatTipoServicio(1);
         refRule.setDestino(GestoPagoContratoProperties.Destino.REFERENCIA);refRule.setRequiereReferencia(true);
+        refRule.setVerificacionReferenciaAprobada(true);
         refRule.setReferenciaMinima(5);refRule.setReferenciaMaxima(20);refRule.setMontoMinimo(new BigDecimal("40"));
         refRule.setMontoMaximo(new BigDecimal("40"));refRule.setMontoFijo(new BigDecimal("40"));refRule.setBloqueoServicioMonto24h(true);
         policies.getProductos().put(900001,refRule);
+        sql.update("INSERT INTO gestopago_productos(id_producto,id_servicio,tipo_front,id_cat_tipo_servicio,precio) VALUES (900002,9000,'2',1,40)");
+        var fixedRule=new GestoPagoContratoProperties.ReglaProducto();fixedRule.setHabilitado(true);fixedRule.setIntegracionAprobada(true);
+        fixedRule.setServicioActivo(true);fixedRule.setIdServicio(9000);fixedRule.setTipoFront("2");fixedRule.setIdCatTipoServicio(1);
+        fixedRule.setDestino(GestoPagoContratoProperties.Destino.FIJO);fixedRule.setRequiereReferencia(true);
+        fixedRule.setVerificacionReferenciaAprobada(true);fixedRule.setReferenciaMinima(5);fixedRule.setReferenciaMaxima(40);
+        fixedRule.setMontoMinimo(new BigDecimal("40"));fixedRule.setMontoMaximo(new BigDecimal("40"));fixedRule.setMontoFijo(new BigDecimal("40"));
+        fixedRule.setBloqueoServicioMonto24h(true);policies.getProductos().put(900002,fixedRule);
         var login=mvc.perform(post("/auth/login").contentType("application/json").content("{\"correo\":\"realtest@example.com\",\"password\":\"SoloPrueba2026!\"}"))
                 .andExpect(status().isOk()).andReturn();
         jwt="Bearer "+mapper.readTree(login.getResponse().getContentAsString()).path("datos").path("accessToken").asText();
@@ -116,7 +124,8 @@ class PagoRealAplicacionTest {
                     body="{\"success\":true,\"token\":\"CONTROLLED_"+auths.incrementAndGet()+"\",\"expires_in\":86400}";
                 } else {
                     assertTrue(exchange.getRequestHeaders().getFirst("Authorization").startsWith("Bearer CONTROLLED_"));
-                    assertNotNull(fields.get("random"));assertEquals(Set.of("random","signed"),fields.keySet());
+                    String nonce=path.endsWith("verifyReference.do")?"body":"random";
+                    assertNotNull(fields.get(nonce));assertEquals(Set.of(nonce,"signed"),fields.keySet());
                     String json=decrypt(fields.get("signed"));var node=mapper.readTree(json);
                     if(path.endsWith("verifyReference.do")) {
                         references.incrementAndGet();body="<RESPONSE><MENSAJE><CODIGO>"+("INVALID_REF".equals(scenario.get())?"02":"01")+"</CODIGO></MENSAJE></RESPONSE>";
@@ -290,6 +299,12 @@ class PagoRealAplicacionTest {
     @Test void cambioDeCatalogoDespuesDeReservarCancelaAntesDelPost(){
         var p=crear("real-catalogo01");sql.update("UPDATE gestopago_productos SET precio=41,fecha_actualizacion=LOCALTIMESTAMP WHERE id_producto=219");
         worker.ejecutar(p.id());assertEquals(Estado.FAILED,pagos.consultar(usuario,p.id()).estado());saldo("1000.00","0.00");assertEquals(0,sends.get());
+    }
+    @Test void referenciaTipo2VerificaYEnviaTelefonoFijoSegunPolitica(){
+        var r=new Solicitud(cuenta,new CrearPagoRequest(9000,900002,new BigDecimal("40"),null,"REFERENCIA05"));
+        var p=pagos.crear(usuario,"real-referencia-tipo2",r);assertEquals(1,references.get());worker.ejecutar(p.id());
+        assertEquals(Estado.CAPTURED,pagos.consultar(usuario,p.id()).estado());saldo("960.00","0.00");
+        assertTrue(providerBook.values().iterator().next().contains("\"telefono\":\"1111111111\""));
     }
     @Test void actualizarEstatusConEntidadAntiguaNoRestauraSaldoCapturado(){
         var antigua=cuentasJpa.findById(cuenta).orElseThrow();var p=crear("real-jpa-saldo01");worker.ejecutar(p.id());

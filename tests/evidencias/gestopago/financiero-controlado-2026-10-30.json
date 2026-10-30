@@ -1,13 +1,13 @@
 {
-  "fechaUtc": "2026-10-30T19:44:59.6053398Z",
+  "fechaUtc": "2026-10-30T20:34:33.0551911Z",
   "rama": "feature/conciliacion-estados-gestopago",
   "baseCommit": "77410d89546fffd1ba75e2c0071f57f9de02c422",
   "entorno": "JDK 21, PostgreSQL 17 temporal, App y HTTP loopback controlado",
-  "totalPruebas": null,
+  "totalPruebas": 189.0,
   "totalSuites": 27,
   "pagosExternosEjecutados": false,
   "interoperabilidadFinancieraExternaAcreditada": false,
-  "notas": "Verifica lógica, transporte, AES, token y persistencia con proveedor controlado. No certifica sendTx/confirmTx en GestoPago. Los reportes completos se generan en CI.",
+  "notas": "Verifica lógica, transporte, AES, token y persistencia con proveedor controlado. No certifica sendTx/confirmTx en GestoPago. La prueba externa de referencia negativa se registra en un archivo separado.",
   "suites": [
     {
       "nombre": "com.proyecto.servicios.config.LoggingSecurityTest",
@@ -59,7 +59,7 @@
     },
     {
       "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoReferenceClientTest",
-      "pruebas": 6,
+      "pruebas": 8,
       "fallos": 0,
       "omitidos": 0
     },
@@ -71,7 +71,7 @@
     },
     {
       "nombre": "com.proyecto.servicios.integration.gestopago.PagoRealAplicacionTest",
-      "pruebas": 22,
+      "pruebas": 23,
       "fallos": 0,
       "omitidos": 0
     },

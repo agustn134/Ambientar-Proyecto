@@ -83,7 +83,7 @@ jobs:
               suite=ET.parse(file).getroot()
               assert all(int(suite.get(k,'0'))==0 for k in ('failures','errors','skipped')), file
               total+=int(suite.get('tests','0'))
-          assert total>=186, f'Se esperaban al menos 186 pruebas; se ejecutaron {total}'
+          assert total>=189, f'Se esperaban al menos 189 pruebas; se ejecutaron {total}'
           expected={'RegistroClienteIntegrationTest','ContratoValidacionesTest','ErroresHttpContratoTest','ValidacionesPostgresTest','GestoPagoCatalogoServiceTest','GestoPagoProductServiceTest'}
           expected.update({'GestoPagoValidacionHttpTest','LoggingSecurityTest','GestoPagoContratoServiceTest','GestoPagoPayloadCipherTest','GestoPagoTokenManagerTest','GestoPagoTokenCachePostgresTest','GestoPagoCatalogoPostgresTest','GestoPagoTransportTest','GestoPagoOutcomeParserTest','GestoPagoPaymentClientTest','TokenCacheCipherTest'})
           expected.update({'GestoPagoCatalogoQuotaPostgresTest','GestoPagoReferenceClientTest'})

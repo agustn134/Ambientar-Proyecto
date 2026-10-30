@@ -1,0 +1,33 @@
+{
+  "fechaUtc": "2026-10-30T20:20:53.9971645Z",
+  "fuenteContrato": "https://documenter.getpostman.com/view/19876210/Uz5MFtdn",
+  "hostProveedor": "gestopago.portalventas.net",
+  "endpoint": "/sistema/service/verifyReference.do",
+  "caso": "verifyReference_Fail_Invalid_Reference publicado por el proveedor",
+  "idServicio": 107,
+  "idProducto": 271,
+  "tipoFrontCatalogoLocal": "2",
+  "idCatTipoServicioCatalogoLocal": 5,
+  "formulario": [
+    "body",
+    "signed"
+  ],
+  "cifrado": "AES-256-CBC con el par público de pruebas; no acredita claves asignadas para producción",
+  "http": 200,
+  "codigoNegocio": "02",
+  "resultado": "INVALIDA",
+  "adaptadorAplicacionReal": true,
+  "tokenReutilizado": true,
+  "tokenProtegidoEnCache": true,
+  "consultasReferencia": 1,
+  "llamadasSendTx": 0,
+  "llamadasConfirmTx": 0,
+  "consultasCatalogoExternas": 0,
+  "saldoModificadoPorLaPrueba": false,
+  "pendiente": [
+    "Referencia válida y autorizada",
+    "Caso sandbox de sendTx y confirmTx sin cargos",
+    "Configuración asignada para operación financiera"
+  ],
+  "resultadoSeguro": "GESTOPAGO_PRUEBA_EXTERNA adaptadorReal=true referenciaNegativa=true http=200 codigo=02 resultado=INVALIDA tipoFrontCatalogo=2 tokenReutilizado=true authRequests=0 referenceRequests=1 pagosEjecutados=0"
+}

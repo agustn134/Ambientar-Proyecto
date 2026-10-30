@@ -1,6 +1,6 @@
 package com.proyecto.servicios.integration.gestopago;
 
-/** Validación externa documentada para tipoFront 4; no ejecuta pagos. */
+/** Validación externa autorizada por producto y contrastada con el catálogo; no ejecuta pagos. */
 public interface GestoPagoReferenceVerifier {
     Resultado verificar(Integer idServicio, Integer idProducto, String referencia);
     Detalle verificarDetalle(Integer idServicio, Integer idProducto, String referencia);
