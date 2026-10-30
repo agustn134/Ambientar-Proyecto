@@ -24,6 +24,8 @@ public class RespuestaExitosaAdvice implements ResponseBodyAdvice<Object> {
         String mensaje = body instanceof com.proyecto.servicios.model.gestopago.pago.ValidacionLocalResponse
                 ? "Contrato local válido. No se ha enviado ningún pago."
                 : request.getURI().getPath().startsWith("/api/simulacion/") ? "Operación ficticia. No se ha enviado ningún pago a GestoPago."
+                : body instanceof com.proyecto.servicios.model.gestopago.pago.PagoDtos.Pago
+                    ? "Consulta el estado financiero de la operación; la respuesta HTTP no acredita el pago."
                 : status==201?"Registro creado correctamente":"Operación realizada correctamente";
         return new Respuesta(LocalDateTime.now(),status,"EXITO",mensaje,
                 request.getURI().getPath(),body,List.of());

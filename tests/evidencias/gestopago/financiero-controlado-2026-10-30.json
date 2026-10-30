@@ -1,0 +1,175 @@
+{
+  "fechaUtc": "2026-10-30T19:44:59.6053398Z",
+  "rama": "feature/conciliacion-estados-gestopago",
+  "baseCommit": "77410d89546fffd1ba75e2c0071f57f9de02c422",
+  "entorno": "JDK 21, PostgreSQL 17 temporal, App y HTTP loopback controlado",
+  "totalPruebas": null,
+  "totalSuites": 27,
+  "pagosExternosEjecutados": false,
+  "interoperabilidadFinancieraExternaAcreditada": false,
+  "notas": "Verifica lógica, transporte, AES, token y persistencia con proveedor controlado. No certifica sendTx/confirmTx en GestoPago. Los reportes completos se generan en CI.",
+  "suites": [
+    {
+      "nombre": "com.proyecto.servicios.config.LoggingSecurityTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.ContratoValidacionesTest",
+      "pruebas": 2,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.ErroresHttpContratoTest",
+      "pruebas": 17,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.GestoPagoValidacionHttpTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoConfirmationParserTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoLiveGuardTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoOutcomeParserTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoPaymentClientTest",
+      "pruebas": 2,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoReferenceClientTest",
+      "pruebas": 6,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoTransportTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.PagoRealAplicacionTest",
+      "pruebas": 22,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.gestopago.TokenCacheCipherTest",
+      "pruebas": 2,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.simulacion.ProveedorSimuladoTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.integration.simulacion.SimulacionAislamientoTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.PagoSimuladoAplicacionTest",
+      "pruebas": 1,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.PagoSimuladoHttpTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.RegistroClienteIntegrationTest",
+      "pruebas": 46,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoCatalogoPostgresTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoCatalogoQuotaPostgresTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoCatalogoServiceTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoContratoServiceTest",
+      "pruebas": 6,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoPayloadCipherTest",
+      "pruebas": 2,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoProductServiceTest",
+      "pruebas": 11,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoTokenCachePostgresTest",
+      "pruebas": 1,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.GestoPagoTokenManagerTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.PagoSimuladoPostgresTest",
+      "pruebas": 18,
+      "fallos": 0,
+      "omitidos": 0
+    },
+    {
+      "nombre": "com.proyecto.servicios.service.ValidacionesPostgresTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "omitidos": 0
+    }
+  ]
+}

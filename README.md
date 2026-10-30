@@ -36,7 +36,48 @@ En [Swagger local](http://localhost:8080/swagger-ui/index.html), inicia sesión 
 
 El servicio `9900`, producto `990001`, es inventado para probar referencia y `tipoFront=4`: `SIM0000001` es válida, `SIM0000000` inválida y `SIM0000002` simula una verificación sin respuesta. El producto `219` del servicio `78` prueba la recarga ficticia de 40 MXN sin referencia. Los detalles de los cuerpos están en Swagger.
 
-La comprobación externa del cifrado, las reglas completas del producto real y `confirmTx` siguen pendientes por separado. Una simulación aprobada no certifica interoperabilidad con GestoPago.
+La simulación aprobada no certifica interoperabilidad con GestoPago. El flujo financiero separado se describe abajo; su comprobación con credenciales y un escenario asignados por el proveedor debe acreditarse por separado.
+
+### Integración financiera: perfil `live` o `prod`
+
+Este perfil utiliza el saldo de `cuentas` y puede enviar una operación a GestoPago. **No se activa en el despliegue ni con las claves públicas de ejemplo.** La simulación conserva sus rutas, tablas y dinero separados. Combinar `simulacion` con `live` o `prod` hace fallar el arranque.
+
+El recorrido es: sesión local → producto y cuenta autorizados → referencia externa cuando aplica → reserva y operación guardadas juntas → worker → `sendTx` una sola vez → captura o `UNKNOWN` → `confirmTx`. El envío y la consulta ocurren fuera de la transacción de base de datos. No se agrega un broker porque la tarea pendiente ya queda guardada en PostgreSQL junto con la reserva; varias instancias la reclaman con un bloqueo y una vigencia de 180 segundos.
+
+| Endpoint del perfil financiero | Uso |
+|---|---|
+| `POST /api/gestopago/pagos` | Recibe `Idempotency-Key` y `{ "cuentaId": 12, "pago": { "idServicio": 78, "idProducto": 219, "montoPago": 40.00, "telefono": "5512345678" } }`. Devuelve 202 y el ID; todavía no acredita un pago aplicado. |
+| `GET /api/gestopago/pagos/{id}` | Consulta el estado de una operación propia. |
+| `GET /api/gestopago/cuentas/{cuentaId}/saldo` | Devuelve contabilizado, reservado y disponible. |
+| `POST /api/gestopago/pagos/{id}/conciliar` | Consulta una operación incierta; nunca vuelve a enviar el pago. Respeta también la programación y la vigencia de la consulta. |
+
+El worker envía automáticamente las operaciones aceptadas cuando está habilitado. El cliente no elige escenarios de éxito o rechazo en este perfil. No existe un endpoint público de fondeo real. Los productos 9900/990001 y las referencias SIM pertenecen exclusivamente a las pruebas ficticias.
+
+`PagoService` aplica las reglas; `PagoRepository` reserva, captura y libera con bloqueos de cuenta; `PagoWorker` procesa los envíos y `PagoReconciliator` selecciona las consultas. La migración V13 agrega reservas, operaciones, movimientos, eventos y outbox. El disponible es `saldo - saldo_reservado`; el importe se descuenta del saldo contabilizado al confirmar la captura. Las restricciones de PostgreSQL impiden reservas negativas o superiores al saldo. Las actualizaciones JPA de estatus no pueden sobrescribir el saldo financiero con un valor antiguo.
+
+La misma clave y los mismos datos recuperan el pago original; cambiar los datos con esa clave devuelve 409. El UPC se genera en el servidor y tiene una restricción única. Para pagos de servicios se puede exigir además el bloqueo documentado de servicio+monto durante 24 horas, compartido entre cuentas e instancias. No se da por hecho que el proveedor proporcione una idempotencia universal.
+
+**Resultados y conciliación.** `sendTx` acredita éxito con `01`, ID, autorización y monto consistentes. Otros códigos, errores HTTP, cortes o respuestas incompletas quedan en `UNKNOWN` con reserva. `confirmTx` usa los mismos datos originales —incluidos UPC y horaLocal— desde los 62 segundos y antes de 24 horas. Su contrato es diferente: `06` con ID y autorización positivos acredita aplicada; `70`, ID_TX=-1 y autorización=0 acredita no aplicada. Una respuesta inconclusa conserva la reserva. Un token expirado se invalida; el pago no se reenvía y la siguiente consulta obtiene una sesión nueva.
+
+Al vencer las 24 horas se marca revisión manual y se conserva la reserva. Si un emisor perdió su vigencia tras iniciar el intento, un `70` requiere revisión manual: no hay un mecanismo externo documentado que impida que un proceso pausado se reanude tarde. Un `06` aún permite capturar. Las evidencias contradictorias se registran para revisión sin repetir movimientos. No se implementa una devolución automática sin un contrato documentado de reverso.
+
+**Configuración necesaria.** Mantén los valores en variables de entorno o en secretos inyectados por la plataforma:
+
+- `SPRING_PROFILES_ACTIVE=live` (o `render,live` si corresponde a ese entorno).
+- `GESTOPAGO_PAYMENT_ENABLED=true` y `GESTOPAGO_REFERENCE_ENABLED=true`.
+- `GESTOPAGO_PASSWORD`, `GESTOPAGO_TOKEN_CACHE_KEY_BASE64`, `GESTOPAGO_CRYPTO_SECRET_BASE64`, `GESTOPAGO_CRYPTO_IV_BASE64` y `GESTOPAGO_UNIDAD` asignados/configurados correctamente. Basic y API key solo si el proveedor los exige para tu acceso.
+- `GESTOPAGO_PAYMENT_STORAGE_KEY_BASE64`: 32 bytes aleatorios en Base64, distinta de la clave del proveedor y de la caché del token. Protege el contrato original y las respuestas en PostgreSQL mediante AES-GCM. Conserva esta clave mientras existan operaciones pendientes; su rotación requiere migrar los datos cifrados.
+- Para **cada producto autorizado**, configurar `gestopago.contrato.productos[ID].integracion-aprobada=true` y `servicio-activo=true`, junto con su servicio, tipoFront, categoría, destino, importes y reglas de referencia. No hay productos aprobados para envío por defecto. El producto 219 solo está habilitado para validación local hasta aprobar su integración.
+- Para referencias, la política debe ser explícita para tipoFront=4 y destino REFERENCIA, con longitudes y `bloqueo-servicio-monto24h=true`. Otros contratos de referencia y tipos no documentados permanecen bloqueados. El catálogo local debe estar vigente (24 horas por defecto, configurable entre 1 y 168); la sincronización conserva su cuota compartida de tres intentos externos por ventana de 24 horas.
+
+La aplicación obtiene el Bearer mediante la autenticación del proveedor y lo reutiliza en una caché cifrada con vencimiento. No se pega un Bearer en el código ni se devuelve al usuario. Las evidencias conservan solicitudes/respuestas cifradas, nunca Authorization o contraseñas. Swagger y las respuestas públicas solo muestran datos seguros y el estado de la operación.
+
+| Evidencia | Qué acredita |
+|---|---|
+| Pruebas manuales `/api/simulacion` | Flujo ficticio: éxito, rechazo, ambos timeouts, reservas y repetición sin cambios de saldo. |
+| Pruebas automáticas de `PagoRealAplicacionTest` | Aplicación completa, autenticación local, PostgreSQL, AES, Bearer, HTTP local controlado, idempotencia, concurrencia, rollback y conciliación `06`/`70`. No llaman al proveedor externo. |
+| Autenticación y catálogo externos registrados previamente | Acceso a esos servicios; no acredita una venta en `sendTx`. |
+| `sendTx` / `confirmTx` con GestoPago | Requieren evidencia externa con entorno y caso autorizados; no se presentan como comprobados por estas pruebas locales. |
 
 ## Ejecución local en Linux
 
@@ -135,6 +176,8 @@ El contrato de esta rama recibe IDs y filtros por body. Consulta la [tabla de ru
 
 ## Pruebas y resultados
 
+La ampliación financiera del 30 de octubre de 2026 aprobó **186 pruebas en 27 suites, sin fallos ni omisiones**, usando PostgreSQL 17 temporal. Incluye 22 casos de aplicación financiera con HTTP loopback y ocho pruebas nuevas de configuración y confirmación. [Resumen de la ejecución](tests/evidencias/gestopago/financiero-controlado-2026-10-30.json). No se realizaron pagos externos. CI exige estas suites y conserva los reportes completos.
+
 La API en Render arrancó desde una base vacía, aplicó las ocho migraciones y cargó 159,340 asentamientos, 2,478 municipios y 32 estados. Se comprobaron respuestas **200** en sexos y código postal `37907`, además del alta **201** y la denegación **403** del listado general a un CLIENTE.
 
 - Suite Java histórica: **67 pruebas aprobadas**, cero fallos y cero omisiones. [Resultado](docs/evidencias/suite-java.json).
@@ -154,7 +197,7 @@ Las incidencias históricas corresponden a altas repetidas, preparación de dato
 
 ## Archivos de entrega
 
-El repositorio reúne el código fuente, el script SQL único, las migraciones V1–V9, el ZIP postal, los diagramas y las evidencias. Este README es el documento técnico principal. El paquete opcional se genera en Linux con:
+El repositorio reúne el código fuente, las migraciones V1–V13, el script SQL de la entrega inicial, el ZIP postal, los diagramas y las evidencias. Para el esquema actualizado de pagos se aplican las migraciones de Flyway. Este README es el documento técnico principal. El paquete opcional se genera en Linux con:
 
 ```bash
 python3 scripts/empaquetar-entrega.py --incluir-jar

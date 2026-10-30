@@ -19,7 +19,8 @@ public final class SimulacionDtos {
     public record Saldo(long cuentaId, BigDecimal contabilizado, BigDecimal reservado,
                          BigDecimal disponible, boolean simulado) {}
     public record Pago(UUID id, long cuentaId, BigDecimal monto, Estado estado,
-                        boolean simulado, boolean enviadoAProveedorReal) {}
+                        @io.swagger.v3.oas.annotations.media.Schema(example="true") boolean simulado,
+                        @io.swagger.v3.oas.annotations.media.Schema(example="false") boolean enviadoAProveedorReal) {}
     public record Producto(int idServicio, int idProducto, int tipoFront, String nombre,
                             BigDecimal minimo, BigDecimal maximo, boolean requiereReferencia,
                             String referenciaDePrueba) {}

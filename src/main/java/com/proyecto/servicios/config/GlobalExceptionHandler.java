@@ -18,6 +18,13 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.proyecto.servicios.exception.PagoException.class)
+    public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handlePago(
+            com.proyecto.servicios.exception.PagoException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.valueOf(ex.getStatus()),
+                "Consulta el estado de la operación. No reenvíes un pago incierto con una clave nueva.",
+                request.getRequestURI(),ex.getCodigo());
+    }
     @ExceptionHandler(com.proyecto.servicios.exception.SimulacionException.class)
     public ResponseEntity<RegistroClienteExceptionHandler.ErrorRegistro> handleSimulacion(
             com.proyecto.servicios.exception.SimulacionException ex, HttpServletRequest request) {

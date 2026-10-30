@@ -56,11 +56,15 @@ public class GestoPagoContratoService {
         boolean especial = producto.getIdCatTipoServicio() == 10 || producto.getIdCatTipoServicio() == 11;
         var destino = regla.getDestino();
         exigir(destino != null, "REGLA_INCOMPLETA");
-        exigir("1".equals(producto.getTipoFront()) || "2".equals(producto.getTipoFront()), "DESTINO_NO_SOPORTADO");
+        exigir("1".equals(producto.getTipoFront()) || "2".equals(producto.getTipoFront())
+                || ("4".equals(producto.getTipoFront()) && regla.isIntegracionAprobada()
+                    && regla.isRequiereReferencia() && destino==Destino.REFERENCIA), "DESTINO_NO_SOPORTADO");
         // La excepción solo se activa por una política explícita aprobada para este producto.
         exigir(especial ? destino == Destino.FIJO_ESPECIAL
                 : ("1".equals(producto.getTipoFront()) && (destino == Destino.TELEFONO || destino == Destino.REFERENCIA))
-                || ("2".equals(producto.getTipoFront()) && destino == Destino.FIJO), "DESTINO_NO_SOPORTADO");
+                || ("2".equals(producto.getTipoFront()) && destino == Destino.FIJO)
+                || ("4".equals(producto.getTipoFront()) && regla.isIntegracionAprobada()
+                    && regla.isRequiereReferencia() && destino==Destino.REFERENCIA), "DESTINO_NO_SOPORTADO");
         String telefono;
         if (destino == Destino.TELEFONO) {
             exigir(solicitud.telefono() != null && solicitud.telefono().matches("[0-9]{10}"), "TELEFONO_INVALIDO");
