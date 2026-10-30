@@ -20,6 +20,24 @@ Este README reúne el documento técnico de la solución. La revisión de los en
 - [Matriz de pruebas funcionales](https://docs.google.com/spreadsheets/d/1wuJ65P2yGV9EE4FCUEvcD3ppr8lwz2MxvaRizK-WxH0/edit).
 - [Resultados de la suite Java](docs/evidencias/suite-java.json) y [plan y resultados de JMeter](docs/jmeter-plan-resultados.md).
 
+## Pagos ficticios desde Swagger
+
+Activa `SPRING_PROFILES_ACTIVE=simulacion` y configura `SIMULACION_STORAGE_KEY_BASE64` con una clave privada de 32 bytes en Base64. Conserva la misma clave al reiniciar o usar varias instancias. Conserva las variables de conexión, JWT y catálogo postal de tu ejecución local. En IntelliJ puedes seleccionar **App (simulación)** si ya preparaste esa configuración local.
+
+Este modo usa tus usuarios y cuentas para comprobar permisos, pero lleva un **saldo ficticio separado**. No cambia `cuentas.saldo`, no necesita credenciales de GestoPago y bloquea sus conexiones externas. El par AES público de ejemplo se usa exclusivamente dentro del simulador; los datos guardados usan otra clave privada. Para detener este modo, quita el perfil y reinicia. Las rutas `/api/simulacion` desaparecen.
+
+En [Swagger local](http://localhost:8080/swagger-ui/index.html), inicia sesión y pulsa **Authorize**. Busca **Pagos ficticios**:
+
+1. Consulta `/api/simulacion/productos` y usa el ID de una cuenta tuya.
+2. Agrega fondos con `/cuentas/{cuentaId}/fondear`, por ejemplo `{"monto":200.00}`.
+3. Crea `/pagos` con el ejemplo **Con referencia**, tu `cuentaId` e `Idempotency-Key: prueba-0001`. Devuelve `RESERVED` y un ID de pago.
+4. Ejecuta `/pagos/{id}/procesar` y consulta el saldo ficticio. `EXITO` captura el importe; `RECHAZO` libera la reserva.
+5. Para otro pago cambia la clave y usa `TIMEOUT_APLICADO` o `TIMEOUT_NO_APLICADO`. Queda `UNKNOWN` con reserva. `/pagos/{id}/conciliar` lo resuelve sin reenviar.
+
+El servicio `9900`, producto `990001`, es inventado para probar referencia y `tipoFront=4`: `SIM0000001` es válida, `SIM0000000` inválida y `SIM0000002` simula una verificación sin respuesta. El producto `219` del servicio `78` prueba la recarga ficticia de 40 MXN sin referencia. Los detalles de los cuerpos están en Swagger.
+
+La comprobación externa del cifrado, las reglas completas del producto real y `confirmTx` siguen pendientes por separado. Una simulación aprobada no certifica interoperabilidad con GestoPago.
+
 ## Ejecución local en Linux
 
 Desde la raíz del proyecto, configurar la conexión y ejecutar:

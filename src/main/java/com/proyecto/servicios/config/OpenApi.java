@@ -28,7 +28,8 @@ public class OpenApi {
             respuestas.keySet().removeIf(code -> !code.startsWith("2"));
             boolean registro=ruta.equals("/clientes") && metodo==PathItem.HttpMethod.POST;
             boolean login=ruta.equals("/auth/login");
-            boolean externo=ruta.startsWith("/api/gestopago/");
+            boolean validacionLocal=ruta.equals("/api/gestopago/pagos/validar");
+            boolean externo=ruta.startsWith("/api/gestopago/") && !validacionLocal;
             boolean protegido=!registro && !login && !ruta.startsWith("/catalogos/");
             boolean sinCuerpo=ruta.equals("/usuarios/password") || ruta.equals("/clientes") && metodo==PathItem.HttpMethod.DELETE;
             if(sinCuerpo) {
@@ -71,13 +72,36 @@ public class OpenApi {
             agregar(respuestas,ruta,405,"METODO_NO_PERMITIDO","El método HTTP no está permitido para esta ruta; consulta Swagger","Se utilizó un método HTTP distinto sobre esta ruta; primero se evalúa la seguridad.");
             agregar(respuestas,ruta,406,"RESPUESTA_NO_ACEPTABLE","Solicita una respuesta JSON con Accept: application/json","Formato de respuesta no disponible.");
             agregar(respuestas,ruta,500,"ERROR_INTERNO","Ha ocurrido un error inesperado en el servidor.","Error interno controlado, sin trazas ni detalles técnicos.");
+            if(validacionLocal) {
+                agregar(respuestas,ruta,422,"MONTO_NO_PERMITIDO","La solicitud no cumple las reglas del producto habilitado.",
+                    "El catálogo o la política local rechazan el producto, servicio, monto o destino. No se envía un pago.");
+                if(respuestas.get("200") != null) {
+                    respuestas.get("200").setDescription("Contrato local válido; no se ejecuta un pago ni se verifica saldo.");
+                    respuestas.get("200").getContent().get("application/json").addExamples("VALIDACION_LOCAL",
+                        new io.swagger.v3.oas.models.examples.Example().value(Map.of(
+                            "timestamp", "2026-10-29T03:05:42", "status", 200, "codigo", "EXITO",
+                            "mensaje", "Contrato local válido. No se ha enviado ningún pago.", "path", ruta,
+                            "datos", Map.of("contratoLocalValido", true, "idServicio", 78, "idProducto", 219,
+                                "montoPago", 40, "requiereVerificacionReferencia", false, "pagoEnviado", false),
+                            "errores", List.of())));
+                }
+            }
             if(externo) {
                 agregar(respuestas,ruta,400,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","El proveedor rechazó la solicitud enviada.");
                 agregar(respuestas,ruta,429,"SERVICIO_EXTERNO","Se alcanzó el límite de solicitudes a GestoPago; espera antes de reintentar","Límite de peticiones del proveedor alcanzado.");
+                if(ruta.startsWith("/api/gestopago/productos/")) {
+                    var limitada=respuestas.get("429");
+                    limitada.setDescription("Cuota compartida: máximo tres intentos externos en una ventana móvil de 24 horas. Los fallos también consumen intento.");
+                    limitada.addHeaderObject("Retry-After",new io.swagger.v3.oas.models.headers.Header()
+                            .description("Segundos hasta que venza el intento más antiguo; no dispara un reintento automático.")
+                            .schema(new IntegerSchema().example(86400)));
+                    limitada.getContent().get("application/json").addExamples("CUOTA_CATALOGO_AGOTADA",
+                            ejemplo(ruta,429,"CUOTA_CATALOGO_AGOTADA","Límite de catálogo alcanzado. Consulta los productos guardados localmente."));
+                }
                 agregar(respuestas,ruta,502,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","Respuesta inválida del proveedor.");
                 agregar(respuestas,ruta,503,"SERVICIO_EXTERNO","GestoPago no está disponible temporalmente; intenta más tarde","Proveedor temporalmente no disponible.");
                 agregar(respuestas,ruta,504,"SERVICIO_EXTERNO","GestoPago no respondió dentro del tiempo permitido; intenta nuevamente","Tiempo de comunicación agotado.");
-                respuestas.get("401").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,401,"SERVICIO_EXTERNO","No fue posible autenticar la conexión con GestoPago; contacta al administrador"));
+                respuestas.get("503").getContent().get("application/json").addExamples("SESION_PROVEEDOR",ejemplo(ruta,503,"SERVICIO_EXTERNO","La conexión con el proveedor no está disponible temporalmente."));
                 respuestas.get("404").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,404,"SERVICIO_EXTERNO","El recurso solicitado no está disponible en GestoPago"));
                 respuestas.get("500").getContent().get("application/json").addExamples("SERVICIO_EXTERNO",ejemplo(ruta,500,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador"));
                 respuestas.addApiResponse("default",new ApiResponse().description("Otro error HTTP 4xx/5xx del proveedor con mensaje controlado y codigo SERVICIO_EXTERNO.")

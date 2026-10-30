@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "gestoPagoService", url = "${gestopago.service.url}")
+@FeignClient(name = "gestoPagoService", url = "${gestopago.service.url}", configuration=com.proyecto.servicios.config.GestoPagoCatalogoFeignConfig.class)
 public interface GestoPagoProductClient {
 
     @GetMapping(
