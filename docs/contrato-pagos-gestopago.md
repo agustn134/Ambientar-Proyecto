@@ -1,6 +1,6 @@
 # Validación local de GestoPago
 
-Esta rama permite probar el contrato en Swagger sin realizar recargas ni tocar el saldo.
+Esta nota corresponde al endpoint de validación local: permite probar el contrato en Swagger sin realizar recargas ni tocar el saldo.
 
 - Iniciar sesión con POST /auth/login y pegar datos.accessToken en Authorize.
 - Abrir POST /api/gestopago/pagos/validar.
@@ -13,5 +13,5 @@ Esta rama permite probar el contrato en Swagger sin realizar recargas ni tocar e
 El catálogo local debe conservar producto activo, servicio 78, categoría 13, tipoFront 1 y precio 40.
 Los demás productos permanecen bloqueados hasta definir sus reglas.
 
-El envío, token del proveedor, saldo, duplicados y conciliación se completan en las siguientes ramas.
+El envío, token del proveedor, reservas, duplicados y conciliación tienen un flujo separado, descrito en el [README](../README.md#integración-financiera-perfil-live-o-prod). Requiere el perfil financiero y políticas aprobadas; aprobar esta validación local no lo habilita ni acredita una operación externa.
 El plan y las evidencias se mantienen en las issues y en el PR de GitHub.

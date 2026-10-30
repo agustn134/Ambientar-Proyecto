@@ -2,6 +2,7 @@ package com.proyecto.servicios.integration.gestopago;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyecto.servicios.exception.GestoPagoException;
+import com.proyecto.servicios.config.GestoPagoContratoProperties;
 import com.proyecto.servicios.repositorys.gestopago.GestoPagoProductoRepository;
 import com.proyecto.servicios.service.GestoPagoTokenService;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,14 +19,15 @@ public class GestoPagoReferenceClient implements GestoPagoReferenceVerifier {
     private final GestoPagoProductoRepository productos;
     private final ObjectMapper mapper;
     private final GestoPagoReferenceParser parser;
+    private final GestoPagoContratoProperties policies;
     @Value("${gestopago.reference.enabled:false}") private boolean enabled;
     @Value("${gestopago.service.url}") private String url;
     @Value("${gestopago.auth.id-distribuidor}") private Integer distributor;
     @Value("${gestopago.auth.codigo-dispositivo}") private String device;
     @Value("${gestopago.api-key:}") private String apiKey="";
     public GestoPagoReferenceClient(GestoPagoTransport transport,GestoPagoPayloadCipher cipher,GestoPagoTokenService tokens,
-            GestoPagoProductoRepository productos,ObjectMapper mapper,GestoPagoReferenceParser parser) {
-        this.transport=transport;this.cipher=cipher;this.tokens=tokens;this.productos=productos;this.mapper=mapper;this.parser=parser;
+            GestoPagoProductoRepository productos,ObjectMapper mapper,GestoPagoReferenceParser parser,GestoPagoContratoProperties policies) {
+        this.transport=transport;this.cipher=cipher;this.tokens=tokens;this.productos=productos;this.mapper=mapper;this.parser=parser;this.policies=policies;
     }
     @Override public Resultado verificar(Integer servicio,Integer producto,String referencia) {
         return verificarDetalle(servicio,producto,referencia).resultado();
@@ -35,7 +37,17 @@ public class GestoPagoReferenceClient implements GestoPagoReferenceVerifier {
         if(servicio==null || servicio<=0 || producto==null || producto<=0 || referencia==null
                 || !referencia.matches("[A-Za-z0-9]{1,100}")) throw new IllegalArgumentException("Solicitud de referencia inválida.");
         var item=productos.findByIdProducto(producto).orElseThrow(()->new IllegalArgumentException("Producto no disponible."));
-        if(!Boolean.TRUE.equals(item.getActivo()) || !servicio.equals(item.getIdServicio()) || !"4".equals(item.getTipoFront()))
+        var rule=policies.getProductos().get(producto);
+        // El contrato GENERAL documentado exige tipoFront=4 y aprobación explícita por producto.
+        if(!Boolean.TRUE.equals(item.getActivo()) || !servicio.equals(item.getIdServicio()) || rule==null
+                || !rule.isHabilitado() || !rule.isRequiereReferencia() || !rule.isVerificacionReferenciaAprobada()
+                || !Objects.equals(rule.getIdServicio(),servicio) || !Objects.equals(rule.getTipoFront(),item.getTipoFront())
+                || rule.getIdCatTipoServicio()==null || !Objects.equals(rule.getIdCatTipoServicio(),item.getIdCatTipoServicio())
+                || !"4".equals(item.getTipoFront())
+                || rule.getReferenciaMinima()==null || rule.getReferenciaMaxima()==null
+                || rule.getReferenciaMinima()<1 || rule.getReferenciaMaxima()>100
+                || rule.getReferenciaMinima()>rule.getReferenciaMaxima()
+                || referencia.length()<rule.getReferenciaMinima() || referencia.length()>rule.getReferenciaMaxima())
             throw new IllegalArgumentException("El producto no admite este contrato de referencia.");
         String signed;
         try { signed=cipher.cifrar(mapper.writeValueAsString(Map.of("idProducto",producto,"idServicio",servicio,"referencia",referencia))); }

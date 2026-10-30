@@ -29,7 +29,10 @@ public class OpenApi {
             boolean registro=ruta.equals("/clientes") && metodo==PathItem.HttpMethod.POST;
             boolean login=ruta.equals("/auth/login");
             boolean validacionLocal=ruta.equals("/api/gestopago/pagos/validar");
-            boolean externo=ruta.startsWith("/api/gestopago/") && !validacionLocal;
+            boolean financiero=(ruta.startsWith("/api/gestopago/pagos") && !validacionLocal) || ruta.startsWith("/api/gestopago/cuentas/");
+            boolean simulacion=ruta.startsWith("/api/simulacion/");
+            boolean aceptar=metodo==PathItem.HttpMethod.POST && (ruta.equals("/api/gestopago/pagos") || ruta.equals("/api/simulacion/pagos"));
+            boolean externo=ruta.startsWith("/api/gestopago/") && !validacionLocal && !financiero;
             boolean protegido=!registro && !login && !ruta.startsWith("/catalogos/");
             boolean sinCuerpo=ruta.equals("/usuarios/password") || ruta.equals("/clientes") && metodo==PathItem.HttpMethod.DELETE;
             if(sinCuerpo) {
@@ -37,6 +40,7 @@ public class OpenApi {
                 respuestas.addApiResponse("204",new ApiResponse().description("Operación completada correctamente. Sin cuerpo de respuesta."));
             }
             if(registro && respuestas.containsKey("200")) respuestas.addApiResponse("201",respuestas.remove("200"));
+            if(aceptar && respuestas.containsKey("200")) respuestas.addApiResponse("202",respuestas.remove("200"));
             operation.getResponses().forEach((code,response) -> {
                 response.setDescription(code.equals("204") ? "Operación completada correctamente. Sin cuerpo de respuesta."
                     : registro ? "Cliente, usuario, domicilio y cuenta creados correctamente" : "Operación realizada correctamente. El resultado se encuentra en datos; una lista sin coincidencias devuelve una lista vacía.");
@@ -85,6 +89,12 @@ public class OpenApi {
                                 "montoPago", 40, "requiereVerificacionReferencia", false, "pagoEnviado", false),
                             "errores", List.of())));
                 }
+            }
+            if(financiero || simulacion) {
+                agregar(respuestas,ruta,409,"IDEMPOTENCIA_CONFLICTO","La clave ya corresponde a otros datos. Consulta la operación existente.","Conflicto de idempotencia o posible duplicado.");
+                agregar(respuestas,ruta,422,"REGLA_FINANCIERA","La cuenta, saldo o producto no permiten esta operación.","Regla de negocio incumplida; no se envía un pago.");
+                agregar(respuestas,ruta,503,"REFERENCIA_NO_CONCLUYENTE","No fue posible verificar la referencia. No se reservan fondos.","Verificación previa no disponible.");
+                if(aceptar && respuestas.get("202")!=null)respuestas.get("202").setDescription("Pago persistido en RESERVED. No acredita una venta aplicada. Consulta datos.estado.");
             }
             if(externo) {
                 agregar(respuestas,ruta,400,"SERVICIO_EXTERNO","GestoPago no pudo completar la operación; intenta nuevamente y, si persiste, contacta al administrador","El proveedor rechazó la solicitud enviada.");
