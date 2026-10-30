@@ -19,6 +19,10 @@ public class GestoPagoContratoProperties {
     @Getter @Setter
     public static class ReglaProducto {
         private boolean habilitado;
+        // Habilitar localmente un producto no autoriza su envío financiero.
+        private boolean integracionAprobada;
+        private boolean servicioActivo;
+        private boolean bloqueoServicioMonto24h;
         private Integer idServicio;
         private String tipoFront;
         private Integer idCatTipoServicio;
@@ -27,6 +31,7 @@ public class GestoPagoContratoProperties {
         private BigDecimal montoMaximo;
         private BigDecimal montoFijo;
         private boolean requiereReferencia;
+        private boolean verificacionReferenciaAprobada;
         private Integer referenciaMinima;
         private Integer referenciaMaxima;
     }
