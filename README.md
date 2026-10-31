@@ -82,6 +82,8 @@ La aplicación obtiene el Bearer mediante la autenticación del proveedor y lo r
 
 La comprobación externa sin pagos es opt-in: `GestoPagoExternalReferenceProbeTest`. Solo permite HTTPS a authenticate y verifyReference, reutiliza la caché cifrada y consulta los ejemplos públicos válido e inválido de 272/108 mediante `random` + `signed`. Es un diagnóstico técnico, separado de la autorización de productos: no falsea tipoFront para superar la política del pago. No arranca App ni modifica el esquema, catálogo o saldos. Se ejecuta manualmente con las credenciales locales y las variables `GESTOPAGO_EXTERNAL_REFERENCE_PROBE`, `GESTOPAGO_PROBE_DB_URL`, `GESTOPAGO_PROBE_DB_USER`, `GESTOPAGO_PROBE_TEST_SECRET_BASE64` y `GESTOPAGO_PROBE_TEST_IV_BASE64`. No forma parte de CI ni se habilita por defecto.
 
+**Si aparece «carrier no responde».** Un HTTP 200 con `AUTORIZACION/CODIGO_MENSAJE=03` no acredita un pago ni permite liberar automáticamente el dinero. Ese formato se reprodujo con un proveedor HTTP local a partir de un [reporte de clase](https://github.com/elmanee/prueba/blob/481ddea45b54dc168b3af706ccf12de6865c1a74/README.md); no es una respuesta externa obtenida por este proyecto ni prueba una caída general de GestoPago. Se conserva `UNKNOWN` con reserva y solo se consulta la confirmación, sin repetir la venta. También se bloquea una supuesta venta exitosa con autorización numérica cero o negativa. La respuesta pública no expone el XML ni el mensaje crudo del proveedor; la evidencia queda cifrada.
+
 ## Ejecución local en Linux
 
 Desde la raíz del proyecto, configurar la conexión y ejecutar:
@@ -179,7 +181,7 @@ El contrato de esta rama recibe IDs y filtros por body. Consulta la [tabla de ru
 
 ## Pruebas y resultados
 
-La ampliación financiera del 30 de octubre de 2026 aprobó **189 pruebas en 27 suites, sin fallos ni omisiones**, usando PostgreSQL 17 temporal. Incluye 23 casos de aplicación financiera con HTTP loopback y pruebas de configuración, confirmación y autorización de referencias por producto. [Resumen de la ejecución](tests/evidencias/gestopago/financiero-controlado-2026-10-30.json). Por separado, se aprobaron [dos comprobaciones externas de referencia](tests/evidencias/gestopago/verificacion-externa-referencia-2026-10-30.json), válida e inválida, sin ejecutar pagos. CI exige las suites locales y conserva los reportes completos; no ejecuta las pruebas externas opt-in.
+La ampliación financiera del 30 de octubre de 2026 aprobó **193 pruebas en 27 suites, sin fallos ni omisiones**, usando PostgreSQL 17 temporal. Incluye 25 casos de aplicación financiera con HTTP loopback y pruebas de configuración, confirmación y autorización de referencias por producto. La revisión añadió cuatro regresiones para el reporte de carrier no disponible y las autorizaciones numéricas inválidas: no capturan ni liberan la reserva por una respuesta inconclusa. [Resumen de la ejecución](tests/evidencias/gestopago/financiero-controlado-2026-10-30.json). Por separado, se aprobaron [dos comprobaciones externas de referencia](tests/evidencias/gestopago/verificacion-externa-referencia-2026-10-30.json), válida e inválida, sin ejecutar pagos. CI exige las suites locales y conserva los reportes completos; no ejecuta las pruebas externas opt-in.
 
 La API en Render arrancó desde una base vacía, aplicó las ocho migraciones y cargó 159,340 asentamientos, 2,478 municipios y 32 estados. Se comprobaron respuestas **200** en sexos y código postal `37907`, además del alta **201** y la denegación **403** del listado general a un CLIENTE.
 

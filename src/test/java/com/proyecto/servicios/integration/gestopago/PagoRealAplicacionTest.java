@@ -135,10 +135,13 @@ class PagoRealAplicacionTest {
                         if("EXPIRED".equals(scenario.get())){status=403;body="{\"token\":\"EXPIRED\"}";}
                         else if("INCOMPLETA".equals(scenario.get()))body="<RESPONSE/>";
                         else if("RECHAZO".equals(scenario.get()))body="<RESPONSE><MENSAJE><CODIGO>02</CODIGO></MENSAJE></RESPONSE>";
+                        else if("CARRIER_NO_DISPONIBLE".equals(scenario.get()))body=carrierNoDisponible();
+                        else if("AUTORIZACION_CERO".equals(scenario.get()))body="<RESPONSE><ID_TX>123</ID_TX><NUM_AUTORIZACION>0</NUM_AUTORIZACION><MONTO>40.00</MONTO><MENSAJE><CODIGO>01</CODIGO></MENSAJE></RESPONSE>";
                         else body="<RESPONSE><ID_TX>123</ID_TX><NUM_AUTORIZACION>100</NUM_AUTORIZACION><MONTO>40.00</MONTO><MENSAJE><CODIGO>01</CODIGO></MENSAJE></RESPONSE>";
                     } else if(path.endsWith("confirmTx.do")) {
                         confirms.incrementAndGet();assertEquals(providerBook.get(node.path("upc").asText()),json,"confirmTx debe conservar todos los parámetros originales");
                         if("INCOMPLETA".equals(scenario.get()))body="<RESPONSE/>";
+                        else if("CARRIER_NO_DISPONIBLE".equals(scenario.get()))body=carrierNoDisponible();
                         else if(Set.of("TIMEOUT_NO_APLICADO","RECHAZO").contains(scenario.get()))body=confirm("70","-1","0");
                         else body=confirm("06","123","100");
                     } else throw new AssertionError("Ruta no autorizada por la prueba");
@@ -209,6 +212,27 @@ class PagoRealAplicacionTest {
     @Test void respuestaIncompletaNiConciliacionAmbiguaLiberanReserva() {
         scenario.set("INCOMPLETA");var p=crear("real-incompleta-01");worker.ejecutar(p.id());age(p.id());worker.ejecutar(p.id());
         assertEquals(Estado.UNKNOWN,pagos.consultar(usuario,p.id()).estado());saldo("1000.00","40.00");assertEquals(1,sends.get());
+    }
+    @Test void carrierNoDisponibleMantieneReservaYConsultaSinRepetirVenta()throws Exception {
+        scenario.set("CARRIER_NO_DISPONIBLE");var p=crear("real-carrier-001");worker.ejecutar(p.id());
+        assertEquals(Estado.UNKNOWN,pagos.consultar(usuario,p.id()).estado());saldo("1000.00","40.00");
+        age(p.id());worker.ejecutar(p.id());
+        assertEquals(Estado.UNKNOWN,pagos.consultar(usuario,p.id()).estado());saldo("1000.00","40.00");
+        assertEquals(1,sends.get());assertEquals(1,confirms.get());
+        assertEquals(0,sql.queryForObject("SELECT count(*) FROM pago_movimientos WHERE tipo IN ('CAPTURA','LIBERACION')",Integer.class));
+        String body=mvc.perform(get("/api/gestopago/pagos/"+p.id()).header("Authorization",jwt))
+                .andExpect(status().isOk()).andExpect(jsonPath("datos.estado").value("UNKNOWN"))
+                .andReturn().getResponse().getContentAsString();
+        assertFalse(body.contains("CODIGO_MENSAJE"));assertFalse(body.contains("Carrier no responde"));
+        assertFalse(body.contains("CONTROLLED_"));
+        String evidence=sql.queryForObject("SELECT evidencia_cifrada FROM pago_eventos WHERE pago_id=? AND tipo='SEND_RESPONSE'",String.class,p.id());
+        assertTrue(evidence.startsWith("v1."));assertFalse(evidence.contains("Carrier no responde"));
+    }
+    @Test void exitoConAutorizacionCeroNoDescuentaNiRepiteEnvio() {
+        scenario.set("AUTORIZACION_CERO");var p=crear("real-auth-cero-01");worker.ejecutar(p.id());
+        assertEquals(Estado.UNKNOWN,pagos.consultar(usuario,p.id()).estado());saldo("1000.00","40.00");
+        worker.ejecutar(p.id());assertEquals(1,sends.get());assertEquals(0,confirms.get());
+        assertEquals(0,sql.queryForObject("SELECT count(*) FROM pago_movimientos WHERE tipo IN ('CAPTURA','LIBERACION')",Integer.class));
     }
     @Test void tokenExpiradoNoReenviaVentaYSeRenuevaParaConsultar() {
         scenario.set("EXPIRED");var p=crear("real-expira-01");worker.ejecutar(p.id());
@@ -320,5 +344,6 @@ class PagoRealAplicacionTest {
     void parallel(Runnable work)throws Exception{var pool=Executors.newFixedThreadPool(2);try{var a=pool.submit(work);var b=pool.submit(work);a.get(15,TimeUnit.SECONDS);b.get(15,TimeUnit.SECONDS);}finally{pool.shutdownNow();}}
     static Map<String,String> form(String body){var fields=new HashMap<String,String>();for(String part:body.split("&")){var pair=part.split("=",2);fields.put(URLDecoder.decode(pair[0],StandardCharsets.UTF_8),URLDecoder.decode(pair[1],StandardCharsets.UTF_8));}return fields;}
     static String decrypt(String signed)throws Exception{var cipher=Cipher.getInstance("AES/CBC/PKCS5Padding");cipher.init(Cipher.DECRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(GestoPagoLiveGuardTest.key(32,1)),"AES"),new IvParameterSpec(Base64.getDecoder().decode(GestoPagoLiveGuardTest.key(16,2))));return new String(cipher.doFinal(Base64.getDecoder().decode(signed)),StandardCharsets.UTF_8);}
+    static String carrierNoDisponible(){return "<AUTORIZACION><NUM_AUTORIZACION>-1</NUM_AUTORIZACION><CODIGO_MENSAJE>03</CODIGO_MENSAJE><MENSAJE>Carrier no responde</MENSAJE></AUTORIZACION>";}
     static String confirm(String code,String id,String auth){return "<RESPONSE><NUM_AUTORIZACION>"+auth+"</NUM_AUTORIZACION><MENSAJE><CODIGO>"+code+"</CODIGO><ID_TX>"+id+"</ID_TX></MENSAJE></RESPONSE>";}
 }

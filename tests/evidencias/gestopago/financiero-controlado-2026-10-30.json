@@ -1,13 +1,13 @@
 {
-  "fechaUtc": "2026-10-30T21:12:38.5397999Z",
-  "rama": "feature/conciliacion-estados-gestopago",
-  "baseCommit": "77410d89546fffd1ba75e2c0071f57f9de02c422",
+  "fechaUtc": "2026-10-31T04:20:36.6695355Z",
+  "rama": "codex/revision-respuestas-gestopago",
+  "baseCommit": "97d04f6d3e60efac99dc3c54a4551fc56b87bec0",
   "entorno": "JDK 21, PostgreSQL 17 temporal, App y HTTP loopback controlado",
-  "totalPruebas": 189,
+  "totalPruebas": 193,
   "totalSuites": 27,
   "pagosExternosEjecutados": false,
   "interoperabilidadFinancieraExternaAcreditada": false,
-  "notas": "Verifica lógica, transporte, AES, token y persistencia con proveedor controlado. No certifica sendTx/confirmTx en GestoPago. La prueba externa de referencia negativa se registra en un archivo separado.",
+  "notas": "Verifica lógica, transporte, AES, token y persistencia con proveedor HTTP local controlado. Incluye carrier no disponible y autorizaciones numéricas cero o negativas, sin captura ni liberación indebida. No certifica sendTx/confirmTx en GestoPago. Las dos comprobaciones externas de referencia se registran en un archivo separado.",
   "suites": [
     {
       "nombre": "com.proyecto.servicios.config.LoggingSecurityTest",
@@ -47,7 +47,7 @@
     },
     {
       "nombre": "com.proyecto.servicios.integration.gestopago.GestoPagoOutcomeParserTest",
-      "pruebas": 3,
+      "pruebas": 5,
       "fallos": 0,
       "omitidos": 0
     },
@@ -71,7 +71,7 @@
     },
     {
       "nombre": "com.proyecto.servicios.integration.gestopago.PagoRealAplicacionTest",
-      "pruebas": 23,
+      "pruebas": 25,
       "fallos": 0,
       "omitidos": 0
     },
