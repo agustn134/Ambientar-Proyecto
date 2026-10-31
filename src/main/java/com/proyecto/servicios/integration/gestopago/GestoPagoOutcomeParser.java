@@ -49,7 +49,8 @@ public class GestoPagoOutcomeParser {
             for(String field : java.util.List.of("ID_TX","NUM_AUTORIZACION","MONTO"))
                 if(xml.getElementsByTagName(field).item(0).getParentNode()!=xml.getDocumentElement()) return Result.unknown();
             if (!id.matches("[0-9]+") || new java.math.BigInteger(id).signum()<=0
-                    || authorization.isBlank() || authorization.length()>60 || authorization.equals("-1")
+                    || authorization.isBlank() || authorization.length()>60
+                    || (authorization.matches("-?[0-9]+") && new java.math.BigInteger(authorization).signum()<=0)
                     || new BigDecimal(one(xml,"MONTO")).compareTo(expectedAmount)!=0) return Result.unknown();
             return new Result(State.CONFIRMED,code,id,authorization,false);
         } catch (Exception error) { return Result.unknown(); }
