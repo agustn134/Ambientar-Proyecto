@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#17449E" />
+  <meta name="description" content="GPago Web y PWA para pagos de servicios en línea con verificación OTP y sesión única." />
+  <title>GPago · Pagos de Servicios</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand-lockup">
+        <img src="/icons/icon-192.png" alt="GPago" width="40" height="40" style="border-radius: 10px;" />
+        <span class="brand-name">GPago Web</span>
+      </div>
+      <div class="header-actions" id="header-actions">
+        <button id="pwa-install-btn" type="button" class="btn btn-secondary hidden">Instalar app</button>
+        <button id="header-logout-btn" type="button" class="btn btn-text hidden">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="main-nav hidden" id="main-nav" aria-label="Navegación principal">
+    <div class="container nav-tabs" role="tablist" aria-label="Secciones de GPago">
+      <button type="button" class="nav-tab" role="tab" data-tab="profile" aria-selected="true">Perfil</button>
+      <button type="button" class="nav-tab" role="tab" data-tab="catalog" aria-selected="false">Catálogo</button>
+      <button type="button" class="nav-tab" role="tab" data-tab="history" aria-selected="false">Historial</button>
+    </div>
+  </nav>
+
+  <div class="container" style="margin-top: 12px;">
+    <div id="offline-banner" class="status-banner status-network hidden" role="status" aria-live="polite">
+      <div class="status-header">
+        <span class="status-icon" aria-hidden="true">⚠</span>
+        <h2>Sin conexión a Internet</h2>
+      </div>
+      <p>
+        Estás visualizando el shell público PWA sin conexión. Las operaciones de sesión, saldos,
+        compras e historial están bloqueadas hasta restablecer conectividad HTTPS con el servidor.
+      </p>
+    </div>
+  </div>
+
+  <main id="main-content" class="container main-shell" tabindex="-1">
+    <div id="gpago-app" aria-live="polite">
+      <section class="card form-shell">
+        <p class="help-text">Cargando aplicación segura GPago...</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <p class="help-text">
+        GPago · Identidad y operaciones financieras en tiempo real con el servidor.
+        El token JWT permanece en memoria volátil y nunca se guarda en localStorage.
+      </p>
+    </div>
+  </footer>
+
+  <div id="modal-root" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title"></div>
+
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>
