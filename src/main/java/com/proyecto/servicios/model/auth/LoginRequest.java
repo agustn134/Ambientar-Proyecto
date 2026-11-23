@@ -2,6 +2,7 @@ package com.proyecto.servicios.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.proyecto.servicios.entity.usuario.PlataformaCliente;
 import com.proyecto.servicios.model.cliente.TextoEstricto;
 import com.proyecto.servicios.model.usuario.PasswordEstricto;
 import com.proyecto.servicios.validation.PasswordLoginValida;
@@ -15,10 +16,20 @@ public record LoginRequest(
     @JsonDeserialize(using = TextoEstricto.class) String correo,
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JsonDeserialize(using = PasswordEstricto.class)
-    @PasswordLoginValida(message = "La contraseña es obligatoria y no puede superar 72 bytes UTF-8") String password
+    @PasswordLoginValida(message = "La contraseña es obligatoria y no puede superar 72 bytes UTF-8") String password,
+    PlataformaCliente plataforma
 ) {
+    public LoginRequest(String correo, String password) {
+        this(correo, password, PlataformaCliente.WEB);
+    }
+
     public LoginRequest {
         if (correo != null) correo = correo.toLowerCase(Locale.ROOT);
+        if (plataforma == null) plataforma = PlataformaCliente.WEB;
     }
-    @Override public String toString() { return "LoginRequest[credenciales protegidas]"; }
+
+    @Override
+    public String toString() {
+        return "LoginRequest[credenciales protegidas]";
+    }
 }

@@ -19,7 +19,7 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST,"/clientes","/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST,"/clientes","/auth/login","/auth/otp/verificar","/auth/otp/reenviar","/auth/sesion/reemplazar").permitAll()
                 .requestMatchers(HttpMethod.GET,"/catalogos/**").permitAll()
                 .requestMatchers(HttpMethod.POST,"/catalogos/codigos-postales/consultar").permitAll()
                 .requestMatchers(HttpMethod.GET,"/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()

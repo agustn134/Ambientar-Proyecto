@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CuentaController {
     private final ConsultaClienteService consultas;
+
+    @GetMapping("/me")
+    public java.util.List<ConsultasResponse.Cuenta> propias(@AuthenticationPrincipal Jwt jwt) {
+        return consultas.cuentasPropias(Long.parseLong(jwt.getSubject()));
+    }
+
     @PostMapping("/listar")
     public ConsultasResponse.Pagina<ConsultasResponse.Cuenta> listar(@Valid @RequestBody FiltroCuentas filtro,@AuthenticationPrincipal Jwt jwt) {
         return consultas.listarCuentas(filtro,Long.parseLong(jwt.getSubject()));
