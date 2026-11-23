@@ -85,9 +85,12 @@ class _CatalogViewState extends State<CatalogView> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Catálogo de servicios',
-                              style: GpagoTokens.titleStyle,
+                            Semantics(
+                              header: true,
+                              child: const Text(
+                                'Catálogo de servicios',
+                                style: GpagoTokens.titleStyle,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -626,8 +629,9 @@ class _MetadataRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GpagoTokens.helpStyle),
+        Flexible(child: Text(label, style: GpagoTokens.helpStyle)),
         const SizedBox(width: 12),
         Flexible(
           child: Text(

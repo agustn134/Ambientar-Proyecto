@@ -38,6 +38,7 @@ class AuthController extends ChangeNotifier {
 
   AuthStage _stage = AuthStage.restoring;
   bool _busy = false;
+  bool _sessionExpiredNotice = false;
   DesafioOtpDto? _desafio;
   ConflictoSesionDto? _conflicto;
   LoginTokensDto? _tokens;
@@ -49,6 +50,7 @@ class AuthController extends ChangeNotifier {
   AuthStage get stage => _stage;
   GpagoApiClient get apiClient => _api;
   bool get isBusy => _busy;
+  bool get hasSessionExpiredNotice => _sessionExpiredNotice;
   DesafioOtpDto? get desafio => _desafio;
   ConflictoSesionDto? get conflicto => _conflicto;
   LoginTokensDto? get tokens => _tokens;
@@ -57,6 +59,32 @@ class AuthController extends ChangeNotifier {
   List<CuentaPropiaDto> get cuentas => _cuentas;
   AuthFeedback? get feedback => _feedback;
   DateTime nowUtc() => _clock().toUtc();
+
+  void descartarAvisoSesionExpirada() {
+    if (!_sessionExpiredNotice) return;
+    _sessionExpiredNotice = false;
+    notifyListeners();
+  }
+
+  /// Comprueba vigencia local del JWT y expulsa limpiando almacenamiento si ya caducó.
+  Future<bool> verificarVigenciaLocal() async {
+    final current = _tokens;
+    if (current != null && current.estaVigente(_clock())) {
+      return true;
+    }
+    await storage.clear();
+    _limpiarEstadoLocal();
+    _sessionExpiredNotice = true;
+    _feedback = const AuthFeedback(
+      tone: GpagoBannerTone.pending,
+      title: 'Sesión expirada',
+      description:
+          'Tu sesión venció por tiempo de seguridad. Inicia sesión nuevamente.',
+    );
+    _stage = AuthStage.login;
+    notifyListeners();
+    return false;
+  }
 
   Future<void> restoreSession() async {
     _busy = true;
@@ -72,6 +100,7 @@ class AuthController extends ChangeNotifier {
       if (!saved.estaVigente(_clock())) {
         await storage.clear();
         _limpiarEstadoLocal();
+        _sessionExpiredNotice = true;
         _feedback = const AuthFeedback(
           tone: GpagoBannerTone.pending,
           title: 'Sesión expirada',
@@ -81,6 +110,7 @@ class AuthController extends ChangeNotifier {
         _stage = AuthStage.login;
         return;
       }
+      _sessionExpiredNotice = false;
       _tokens = saved;
       await _cargarPerfilYCuentas(saved.accessToken);
       _stage = AuthStage.authenticated;
@@ -99,6 +129,7 @@ class AuthController extends ChangeNotifier {
     if (_busy) return;
     _busy = true;
     _feedback = null;
+    _sessionExpiredNotice = false;
     notifyListeners();
     try {
       final desafio = await _api.iniciarLogin(
@@ -292,6 +323,7 @@ class AuthController extends ChangeNotifier {
     } finally {
       await storage.clear();
       _limpiarEstadoLocal();
+      _sessionExpiredNotice = false;
       _feedback = const AuthFeedback(
         tone: GpagoBannerTone.success,
         title: 'Sesión cerrada',
@@ -305,6 +337,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> _finalizarAutenticacion(LoginTokensDto tokens) async {
     await storage.save(tokens);
+    _sessionExpiredNotice = false;
     _tokens = tokens;
     _desafio = null;
     _conflicto = null;
@@ -354,6 +387,7 @@ class AuthController extends ChangeNotifier {
     if (ex.esNoAutenticado || ex.statusCode == 403) {
       await storage.clear();
       _limpiarEstadoLocal();
+      _sessionExpiredNotice = true;
       _feedback = const AuthFeedback(
         tone: GpagoBannerTone.pending,
         title: 'Sesión revocada o expirada',

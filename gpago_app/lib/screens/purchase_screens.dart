@@ -224,9 +224,11 @@ class _CaptureStep extends StatelessWidget {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            child: FocusTraversalGroup(
+              policy: OrderedTraversalPolicy(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 const Text('Cuenta de cargo', style: GpagoTokens.subtitleStyle),
                 const SizedBox(height: 8),
                 if (controller.cuentas.isEmpty)
@@ -382,6 +384,7 @@ class _CaptureStep extends StatelessWidget {
                 ),
               ],
             ),
+            ),
           ),
         ),
       ],
@@ -483,7 +486,13 @@ class _ReviewStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Confirmar y pagar servicio', style: GpagoTokens.titleStyle),
+        Semantics(
+          header: true,
+          child: const Text(
+            'Confirmar y pagar servicio',
+            style: GpagoTokens.titleStyle,
+          ),
+        ),
         const SizedBox(height: 6),
         const Text(
           'Revisa con atención el importe, el destino y la cuenta financiera antes de confirmar la operación.',
@@ -493,9 +502,11 @@ class _ReviewStep extends StatelessWidget {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            child: FocusTraversalGroup(
+              policy: OrderedTraversalPolicy(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 Row(
                   children: [
                     Container(
@@ -662,6 +673,7 @@ class _ReviewStep extends StatelessWidget {
                   child: const Text('Modificar datos'),
                 ),
               ],
+            ),
             ),
           ),
         ),

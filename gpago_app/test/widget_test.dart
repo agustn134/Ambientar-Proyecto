@@ -1360,4 +1360,439 @@ void main() {
       expect(find.text('Sin compras capturadas registradas'), findsOneWidget);
     },
   );
+
+  test(
+    'M5: Política HTTPS obligatoria, cabeceras centralizadas y redacción de logs/excepciones',
+    () async {
+      expect(
+        GpagoApiClient.validateSecureBaseUri(
+          'https://ambientar-proyecto.onrender.com/',
+        ).toString(),
+        'https://ambientar-proyecto.onrender.com',
+      );
+      expect(
+        GpagoApiClient.validateSecureBaseUri(
+          'http://localhost:8080',
+        ).toString(),
+        'http://localhost:8080',
+      );
+      expect(
+        () => GpagoApiClient.validateSecureBaseUri('http://api.gpago.com'),
+        throwsArgumentError,
+      );
+      expect(
+        () => GpagoApiClient.validateSecureBaseUri(
+          'https://usuario:secreto@api.gpago.com',
+        ),
+        throwsArgumentError,
+      );
+
+      late Map<String, String> capturedHeaders;
+      final client = GpagoApiClient(
+        baseUrl: 'https://api.gpago.local',
+        plataforma: PlataformaCliente.web,
+        transport: _FakeTransport((method, path, headers, body) async {
+          capturedHeaders = headers;
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }),
+      );
+
+      await client.consultarPerfilAuth(accessToken: 'jwt-m5-check');
+      expect(capturedHeaders['Accept'], 'application/json');
+      expect(capturedHeaders['X-Client-Platform'], 'WEB');
+      expect(capturedHeaders['X-Requested-With'], 'GPago-Client');
+      expect(capturedHeaders['Cache-Control'], 'no-store');
+      expect(capturedHeaders['Authorization'], 'Bearer jwt-m5-check');
+
+      await expectLater(
+        () => client.consultarPerfilAuth(accessToken: 'bad\r\ninjected'),
+        throwsA(isA<GpagoApiException>()),
+      );
+
+      const rawSecret =
+          'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig '
+          'password=MiClave123! telefono=5512345678 '
+          '{"codigoOtp":"654321","numeroCuenta":"12345678901234567890"}';
+      final redacted = GpagoLogRedactor.redact(rawSecret);
+      expect(redacted, isNot(contains('MiClave123!')));
+      expect(redacted, isNot(contains('eyJhbGciOiJIUzI1NiJ9')));
+      expect(redacted, isNot(contains('5512345678')));
+      expect(redacted, isNot(contains('654321')));
+      expect(redacted, isNot(contains('12345678901234567890')));
+
+      const ex = GpagoApiException(
+        statusCode: 401,
+        codigo: 'NO_AUTENTICADO',
+        mensaje: 'Rechazo con Bearer eyJhbGciOi.eyJzdWIi.sig y telefono=5599887766',
+      );
+      final exText = ex.toString();
+      expect(exText, contains('NO_AUTENTICADO'));
+      expect(exText, isNot(contains('eyJhbGciOi')));
+      expect(exText, isNot(contains('5599887766')));
+    },
+  );
+
+  testWidgets(
+    'M5: Almacenamiento nativo por canal seguro y expulsión desde ruta protegida ante 401 o expiración',
+    (WidgetTester tester) async {
+      const channel = MethodChannel('mx.gpago.app/secure_session');
+      final nativeVault = <String, String>{};
+      final channelOps = <String>[];
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        channelOps.add(call.method);
+        final args = (call.arguments as Map<Object?, Object?>)
+            .cast<String, Object?>();
+        final key = args['key']! as String;
+        switch (call.method) {
+          case 'write':
+            nativeVault[key] = args['value']! as String;
+            return null;
+          case 'read':
+            return nativeVault[key];
+          case 'delete':
+            nativeVault.remove(key);
+            return null;
+          default:
+            return null;
+        }
+      });
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+
+      var now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      final secureStorage = PlatformSecureSessionStorage();
+      await secureStorage.save(
+        LoginTokensDto(
+          accessToken: 'jwt-m5-nativo',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '14141414-1414-1414-1414-141414141414',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+      expect(channelOps, contains('write'));
+      expect(nativeVault, isNotEmpty);
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([
+            {
+              'cuentaId': 45,
+              'numeroCuenta': '12345678901234567890',
+              'clienteId': 12,
+              'saldo': 500.00,
+              'estatus': 'ACTIVA',
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/productos') {
+          return _okJson([
+            {
+              'id': 1,
+              'idProducto': 219,
+              'idServicio': 78,
+              'servicio': 'Oui Movil',
+              'producto': 'Recarga 40',
+              'idCatTipoServicio': 13,
+              'tipoFront': '1',
+              'hasDigitoVerificador': false,
+              'precio': 40.00,
+              'showAyuda': false,
+              'tipoReferencia': null,
+              'legend': null,
+              'activo': true,
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/cuentas/45/saldo') {
+          return _okJson({
+            'cuentaId': 45,
+            'contabilizado': 500.00,
+            'reservado': 0.00,
+            'disponible': 500.00,
+          });
+        }
+        if (method == 'POST' && path == '/api/gestopago/pagos/validar') {
+          return _errJson(
+            401,
+            'NO_AUTENTICADO',
+            'Tu sesión fue reemplazada desde Web.',
+          );
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: secureStorage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await _tapVisible(tester, const Key('nav_catalog_tab'));
+      await _tapVisible(tester, const Key('product_detail_button_219'));
+      await _tapVisible(tester, const Key('product_detail_action_button'));
+
+      expect(find.text('Preparar pago'), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('purchase_phone_field')));
+      await tester.enterText(
+        find.byKey(const Key('purchase_phone_field')),
+        '5512345678',
+      );
+      await _tapVisible(tester, const Key('purchase_validate_button'));
+
+      // Debe expulsar de PurchaseFlowScreen, limpiar almacenamiento nativo y mostrar aviso de sesión expirada/revocada.
+      expect(find.text('Preparar pago'), findsNothing);
+      expect(find.text('Iniciar sesión'), findsOneWidget);
+      expect(find.text('Sesión revocada o expirada'), findsOneWidget);
+      expect(
+        find.byKey(const Key('session_expired_notice_card')),
+        findsOneWidget,
+      );
+      expect(channelOps, contains('delete'));
+      expect(nativeVault, isEmpty);
+      expect(await secureStorage.read(), isNull);
+
+      await _tapVisible(tester, const Key('session_expired_ack_button'));
+      expect(
+        find.byKey(const Key('session_expired_notice_card')),
+        findsNothing,
+      );
+
+      // Verifica expiración local antes de navegar por cambio de reloj.
+      final validToken = LoginTokensDto(
+        accessToken: 'jwt-ttl-local',
+        tokenType: 'Bearer',
+        expiresIn: 60,
+        expiresAt: now.add(const Duration(seconds: 60)),
+        sesionId: '15151515-1515-1515-1515-151515151515',
+        plataforma: PlataformaCliente.android,
+      );
+      await secureStorage.save(validToken);
+      await controller.restoreSession();
+      expect(controller.stage, AuthStage.authenticated);
+
+      now = now.add(const Duration(seconds: 120));
+      final vigente = await controller.verificarVigenciaLocal();
+      expect(vigente, isFalse);
+      expect(controller.stage, AuthStage.login);
+      expect(controller.hasSessionExpiredNotice, isTrue);
+      expect(await secureStorage.read(), isNull);
+    },
+  );
+
+  testWidgets(
+    'M5: Reflujo 320px, escalado de texto 1.6x, tamaños táctiles >= 48dp y accesibilidad sin desbordamientos',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        tester.platformDispatcher.clearTextScaleFactorTestValue();
+      });
+
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      final expiredStorage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-expirado-ui',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.subtract(const Duration(seconds: 10)),
+          sesionId: '16161616-1616-1616-1616-161616161616',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana María Guadalupe',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario.largo.ejemplo@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([
+            {
+              'cuentaId': 45,
+              'numeroCuenta': '12345678901234567890',
+              'clienteId': 12,
+              'saldo': 1250.5,
+              'estatus': 'ACTIVA',
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/productos') {
+          return _okJson([
+            {
+              'id': 1,
+              'idProducto': 219,
+              'idServicio': 78,
+              'servicio': 'Servicio Telefonía Nacional',
+              'producto': 'Recarga Tiempo Aire 40 Pesos',
+              'idCatTipoServicio': 13,
+              'tipoFront': '1',
+              'hasDigitoVerificador': false,
+              'precio': 40.00,
+              'showAyuda': true,
+              'tipoReferencia': 't',
+              'legend': 'Captura el número telefónico de diez dígitos sin espacios.',
+              'activo': true,
+            },
+          ]);
+        }
+        if (method == 'GET' &&
+            path == '/api/gestopago/pagos/historial?page=0&size=10') {
+          return _okJson({
+            'contenido': [
+              {
+                'id': 'aaaaaaaa-0001-4000-8000-000000000001',
+                'cuentaId': 45,
+                'idServicio': 78,
+                'servicio': 'Servicio Telefonía Nacional',
+                'idProducto': 219,
+                'producto': 'Recarga Tiempo Aire 40 Pesos',
+                'monto': 40.00,
+                'estado': 'CAPTURED',
+                'referenciaInternaUpc': '100000000000001',
+                'folioProveedorIdTx': 'TX-ACCESS-001',
+                'creadoEn': '2026-11-21T10:25:00',
+                'capturadoEn': '2026-11-21T10:30:00',
+              },
+            ],
+            'page': 0,
+            'size': 10,
+            'totalElementos': 1,
+            'totalPaginas': 1,
+          });
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: expiredStorage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      // Pantalla de Login + aviso de sesión expirada a 320px y escala 1.6x sin overflows.
+      expect(tester.takeException(), isNull);
+      expect(
+        find.byKey(const Key('session_expired_notice_card')),
+        findsOneWidget,
+      );
+      final submitSize = tester.getSize(
+        find.byKey(const Key('login_submit_button')),
+      );
+      expect(submitSize.height, greaterThanOrEqualTo(GpagoTokens.minTouchTarget));
+      expect(submitSize.width, greaterThanOrEqualTo(GpagoTokens.minTouchTarget));
+      final ackSize = tester.getSize(
+        find.byKey(const Key('session_expired_ack_button')),
+      );
+      expect(ackSize.height, greaterThanOrEqualTo(GpagoTokens.minTouchTarget));
+
+      // Autenticamos manualmente en almacenamiento para verificar Perfil, Catálogo e Historial a 320px/1.6x.
+      await expiredStorage.save(
+        LoginTokensDto(
+          accessToken: 'jwt-access-ok',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '17171717-1717-1717-1717-171717171717',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+      await controller.restoreSession();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      final logoutSize = tester.getSize(find.byKey(const Key('logout_button')));
+      expect(logoutSize.height, greaterThanOrEqualTo(GpagoTokens.minTouchTarget));
+
+      await _tapVisible(tester, const Key('nav_catalog_tab'));
+      expect(tester.takeException(), isNull);
+      final catalogDetailFinder = find.byKey(
+        const Key('product_detail_button_219'),
+      );
+      await _ensureMountedAndVisible(tester, catalogDetailFinder);
+      expect(tester.takeException(), isNull);
+      final detailBtnSize = tester.getSize(catalogDetailFinder);
+      expect(
+        detailBtnSize.height,
+        greaterThanOrEqualTo(GpagoTokens.minTouchTarget),
+      );
+
+      await _tapVisible(tester, const Key('nav_history_tab'));
+      expect(tester.takeException(), isNull);
+      final historyDetailFinder = find.byKey(
+        const Key('history_detail_button_aaaaaaaa-0001-4000-8000-000000000001'),
+      );
+      await _ensureMountedAndVisible(tester, historyDetailFinder);
+      expect(tester.takeException(), isNull);
+      final historyBtnSize = tester.getSize(historyDetailFinder);
+      expect(
+        historyBtnSize.height,
+        greaterThanOrEqualTo(GpagoTokens.minTouchTarget),
+      );
+    },
+  );
 }
