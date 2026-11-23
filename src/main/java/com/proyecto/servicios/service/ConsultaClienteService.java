@@ -59,6 +59,10 @@ public class ConsultaClienteService {
         return cuentas.findAllByClienteIdOrderByIdAsc(clienteId).stream().map(this::cuenta).toList();
     }
 
+    public List<ConsultasResponse.Cuenta> cuentasPropias(long usuarioId) {
+        return cuentasDeCliente(sesiones.consultar(usuarioId).clienteId(),usuarioId);
+    }
+
     public ConsultasResponse.Cuenta porNumeroCuenta(String numeroCuenta,long usuarioId) {
         var sesion=sesiones.consultar(usuarioId);
         Cuenta cuenta=cuentas.findByNumeroCuenta(numeroCuenta).orElseThrow(RecursoNoEncontradoException::new);
@@ -129,5 +133,5 @@ public class ConsultaClienteService {
             l==null?null:new Laboral(l.getOcupacion(),l.getEmpresa(),l.getIngresoMensual()),cuentas.findAllByClienteIdOrderByIdAsc(c.getId()).stream().map(this::cuenta).toList());
     }
 
-    private ConsultasResponse.Cuenta cuenta(Cuenta c) { return new ConsultasResponse.Cuenta(c.getNumeroCuenta(),c.getCliente().getId(),c.getSaldo(),c.getEstatus(),c.getFechaCreacion()); }
+    private ConsultasResponse.Cuenta cuenta(Cuenta c) { return new ConsultasResponse.Cuenta(c.getId(),c.getNumeroCuenta(),c.getCliente().getId(),c.getSaldo(),c.getEstatus(),c.getFechaCreacion()); }
 }

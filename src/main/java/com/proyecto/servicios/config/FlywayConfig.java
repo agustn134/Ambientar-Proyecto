@@ -32,6 +32,7 @@ public class FlywayConfig {
                 .schemas(schema)
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
+                .outOfOrder(true)
                 .load();
         flyway.migrate();
         return flyway;
