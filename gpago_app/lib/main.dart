@@ -1,83 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'controllers/auth_controller.dart';
+import 'models/auth_models.dart';
+import 'screens/auth_screens.dart';
+import 'services/gpago_api_client.dart';
+import 'services/session_storage.dart';
+import 'theme/gpago_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
-  runApp(const GPagoApp());
+  final controller = AuthController(
+    apiClient: GpagoApiClient(
+      baseUrl: GPagoApp.apiBaseUrl,
+      plataforma: PlataformaCliente.android,
+    ),
+    storage: PlatformSecureSessionStorage(),
+  );
+  runApp(GPagoApp(controller: controller));
 }
 
-class GPagoApp extends StatelessWidget {
-  const GPagoApp({super.key});
+class GPagoApp extends StatefulWidget {
+  const GPagoApp({super.key, this.controller});
+
+  final AuthController? controller;
 
   static String get apiBaseUrl => dotenv.get('API_BASE_URL');
+
+  @override
+  State<GPagoApp> createState() => _GPagoAppState();
+}
+
+class _GPagoAppState extends State<GPagoApp> {
+  late final AuthController _controller;
+  late final bool _ownsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _ownsController = widget.controller == null;
+    _controller =
+        widget.controller ??
+        AuthController(
+          apiClient: GpagoApiClient(
+            baseUrl: GPagoApp.apiBaseUrl,
+            plataforma: PlataformaCliente.android,
+          ),
+          storage: PlatformSecureSessionStorage(),
+        );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.restoreSession();
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_ownsController) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GPago',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      theme: GpagoTokens.lightTheme(),
+      home: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return switch (_controller.stage) {
+            AuthStage.restoring => const _RestoringSessionView(),
+            AuthStage.login => LoginScreen(controller: _controller),
+            AuthStage.otpVerification => OtpVerificationScreen(
+              controller: _controller,
+            ),
+            AuthStage.sessionConflict => SessionConflictScreen(
+              controller: _controller,
+            ),
+            AuthStage.authenticated => ProtectedHomeScreen(
+              controller: _controller,
+            ),
+          };
+        },
       ),
-      home: const HomePage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class _RestoringSessionView extends StatelessWidget {
+  const _RestoringSessionView();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('GPago'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Bienvenido a Gesto Pago',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'API Backend: ${GPagoApp.apiBaseUrl}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              const Text('Veces que has presionado el botón:'),
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ],
+    return const Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Verificando sesión segura...',
+                  style: GpagoTokens.bodyStyle,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Incrementar',
-        child: const Icon(Icons.add),
       ),
     );
   }
