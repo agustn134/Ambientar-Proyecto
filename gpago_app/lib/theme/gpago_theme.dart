@@ -123,7 +123,13 @@ abstract final class GpagoTokens {
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: canvas,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       fontFamily: 'Roboto',
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(minTouchTarget, minTouchTarget),
+        ),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: surface,
         foregroundColor: ink,

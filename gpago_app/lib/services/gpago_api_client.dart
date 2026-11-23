@@ -6,6 +6,8 @@ import '../models/catalog_models.dart';
 import '../models/history_models.dart';
 import '../models/purchase_models.dart';
 
+export '../models/auth_models.dart' show GpagoLogRedactor;
+
 class RawHttpResponse {
   const RawHttpResponse({
     required this.statusCode,
@@ -112,8 +114,48 @@ class GpagoApiClient {
     required String baseUrl,
     GpagoHttpTransport? transport,
     this.plataforma = PlataformaCliente.android,
-  }) : baseUri = Uri.parse(baseUrl.replaceAll(RegExp(r'/+$'), '')),
+    bool allowLoopbackHttp = true,
+  }) : baseUri = validateSecureBaseUri(
+         baseUrl,
+         allowLoopbackHttp: allowLoopbackHttp,
+       ),
        _transport = transport ?? IoGpagoHttpTransport();
+
+  static const Set<String> _loopbackHosts = {
+    'localhost',
+    '127.0.0.1',
+    '10.0.2.2',
+    '::1',
+  };
+
+  /// Exige HTTPS en cualquier destino remoto; solo autoriza HTTP en loopback local durante desarrollo.
+  static Uri validateSecureBaseUri(
+    String rawBaseUrl, {
+    bool allowLoopbackHttp = true,
+  }) {
+    final normalized = rawBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    final parsed = Uri.tryParse(normalized);
+    if (parsed == null || parsed.host.isEmpty || parsed.userInfo.isNotEmpty) {
+      throw ArgumentError.value(
+        rawBaseUrl,
+        'baseUrl',
+        'La URL base debe incluir un host válido y sin credenciales incrustadas.',
+      );
+    }
+    final scheme = parsed.scheme.toLowerCase();
+    final isLoopback = _loopbackHosts.contains(parsed.host.toLowerCase());
+    if (scheme == 'https') {
+      return parsed;
+    }
+    if (scheme == 'http' && allowLoopbackHttp && isLoopback) {
+      return parsed;
+    }
+    throw ArgumentError.value(
+      rawBaseUrl,
+      'baseUrl',
+      'Por seguridad solo se permite transporte HTTPS fuera de loopback local.',
+    );
+  }
 
   final Uri baseUri;
   final GpagoHttpTransport _transport;
@@ -375,12 +417,22 @@ class GpagoApiClient {
     final uri = Uri.parse('$baseUri$path');
     final headers = <String, String>{
       'Accept': 'application/json',
+      'X-Client-Platform': plataforma.apiValue,
+      'X-Requested-With': 'GPago-Client',
+      'Cache-Control': 'no-store',
       ...extraHeaders,
     };
     if (body != null) {
-      headers['Content-Type'] = 'application/json';
+      headers['Content-Type'] = 'application/json; charset=utf-8';
     }
     if (accessToken != null && accessToken.isNotEmpty) {
+      if (RegExp(r'[\r\n]').hasMatch(accessToken)) {
+        throw const GpagoApiException(
+          statusCode: 401,
+          codigo: 'NO_AUTENTICADO',
+          mensaje: 'Token de sesión con formato inválido.',
+        );
+      }
       headers['Authorization'] = 'Bearer $accessToken';
     }
 

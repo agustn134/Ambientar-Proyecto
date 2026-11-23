@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/catalog_controller.dart';
 import '../controllers/history_controller.dart';
+import '../models/auth_models.dart';
 import '../models/catalog_models.dart';
 import '../models/history_models.dart';
 import '../theme/gpago_theme.dart';
@@ -77,25 +78,39 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Card(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('Iniciar sesión', style: GpagoTokens.titleStyle),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Ingresa tus credenciales para recibir un código de verificación en tu correo.',
-                    style: GpagoTokens.helpStyle,
-                  ),
-                  if (feedback != null) ...[
-                    const SizedBox(height: 16),
-                    GpagoStatusBanner(
-                      tone: feedback.tone,
-                      title: feedback.title,
-                      description: feedback.description,
+            child: FocusTraversalGroup(
+              policy: OrderedTraversalPolicy(),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: const Text(
+                        'Iniciar sesión',
+                        style: GpagoTokens.titleStyle,
+                      ),
                     ),
-                  ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Ingresa tus credenciales para recibir un código de verificación en tu correo.',
+                      style: GpagoTokens.helpStyle,
+                    ),
+                    if (feedback != null) ...[
+                      const SizedBox(height: 16),
+                      GpagoStatusBanner(
+                        tone: feedback.tone,
+                        title: feedback.title,
+                        description: feedback.description,
+                      ),
+                    ],
+                    if (ctrl.hasSessionExpiredNotice) ...[
+                      const SizedBox(height: 16),
+                      _SessionExpiredNoticeCard(
+                        onAcknowledge: ctrl.descartarAvisoSesionExpirada,
+                      ),
+                    ],
                   const SizedBox(height: 20),
                   TextFormField(
                     key: const Key('login_correo_field'),
@@ -170,8 +185,77 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Traducción nativa de la pantalla Stitch "Sesión expirada o revocada" (`45a28c055a6f4b7c909f05f9d6fc3037`).
+class _SessionExpiredNoticeCard extends StatelessWidget {
+  const _SessionExpiredNoticeCard({required this.onAcknowledge});
+
+  final VoidCallback onAcknowledge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('session_expired_notice_card'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: GpagoTokens.canvas,
+        borderRadius: BorderRadius.circular(GpagoTokens.radiusCard),
+        border: Border.all(
+          color: GpagoTokens.pendingInk.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.verified_user_outlined,
+                color: GpagoTokens.pendingInk,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Tu sesión ha dejado de estar activa',
+                  style: GpagoTokens.bodyStyle.copyWith(
+                    color: GpagoTokens.pendingInk,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '• Se cerraron las rutas protegidas de esta sesión.',
+            style: GpagoTokens.helpStyle,
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            '• Se eliminó el token JWT del almacenamiento seguro local.',
+            style: GpagoTokens.helpStyle,
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            '• Ninguna operación nueva puede enviarse hasta autenticar de nuevo.',
+            style: GpagoTokens.helpStyle,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            key: const Key('session_expired_ack_button'),
+            onPressed: onAcknowledge,
+            child: const Text('Entendido'),
+          ),
+        ],
       ),
     );
   }
@@ -272,7 +356,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Verificación en dos pasos', style: GpagoTokens.titleStyle),
+            Semantics(
+              header: true,
+              child: const Text(
+                'Verificación en dos pasos',
+                style: GpagoTokens.titleStyle,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
               'Ingresa el código de 6 dígitos que enviamos a ${desafio.correoEnmascarado}. Este código de un solo uso caduca al agotarse el tiempo.',
@@ -290,46 +380,54 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextFormField(
-                        key: const Key('otp_code_field'),
-                        controller: _otpController,
-                        enabled: !ctrl.isBusy,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 24,
-                          letterSpacing: 6,
-                          fontWeight: FontWeight.w600,
-                          color: GpagoTokens.ink,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: 'Código OTP de 6 dígitos',
-                          hintText: '000000',
-                          counterText: '',
-                          suffixIcon: TextButton.icon(
-                            key: const Key('otp_paste_button'),
-                            onPressed: ctrl.isBusy ? null : _pegarCodigo,
-                            icon: const Icon(Icons.content_paste, size: 18),
-                            label: const Text('Pegar código'),
+                child: FocusTraversalGroup(
+                  policy: OrderedTraversalPolicy(),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          key: const Key('otp_code_field'),
+                          controller: _otpController,
+                          enabled: !ctrl.isBusy,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _submit(),
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 24,
+                            letterSpacing: 6,
+                            fontWeight: FontWeight.w600,
+                            color: GpagoTokens.ink,
                           ),
+                          decoration: InputDecoration(
+                            labelText: 'Código OTP de 6 dígitos',
+                            hintText: '000000',
+                            counterText: '',
+                            suffixIconConstraints: const BoxConstraints(
+                              minWidth: GpagoTokens.minTouchTarget,
+                              minHeight: GpagoTokens.minTouchTarget,
+                            ),
+                            suffixIcon: TextButton.icon(
+                              key: const Key('otp_paste_button'),
+                              onPressed: ctrl.isBusy ? null : _pegarCodigo,
+                              icon: const Icon(Icons.content_paste, size: 18),
+                              label: const Text('Pegar código'),
+                            ),
+                          ),
+                          validator: (value) {
+                            final trimmed = value?.trim() ?? '';
+                            if (!RegExp(r'^[0-9]{6}$').hasMatch(trimmed)) {
+                              return 'Ingresa los 6 dígitos numéricos del código';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          final trimmed = value?.trim() ?? '';
-                          if (!RegExp(r'^[0-9]{6}$').hasMatch(trimmed)) {
-                            return 'Ingresa los 6 dígitos numéricos del código';
-                          }
-                          return null;
-                        },
-                      ),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 12,
@@ -411,6 +509,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       ),
                     ],
                   ),
+                ),
                 ),
               ),
             ),
@@ -551,33 +650,59 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
     super.dispose();
   }
 
+  Future<void> _expulsarPorSesionInvalida(GpagoApiException ex) async {
+    _catalogController.limpiar();
+    _historyController.limpiar();
+    if (mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+    await widget.controller.manejarSesionNoAutorizada(ex);
+  }
+
+  Future<bool> _asegurarSesionVigente() async {
+    final current = widget.controller.tokens;
+    if (current != null && current.estaVigente(widget.controller.nowUtc())) {
+      return true;
+    }
+    _catalogController.limpiar();
+    _historyController.limpiar();
+    if (mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+    await widget.controller.verificarVigenciaLocal();
+    return false;
+  }
+
   Future<void> _cargarCatalogo() async {
+    if (!await _asegurarSesionVigente()) return;
     final token = widget.controller.tokens?.accessToken;
     if (token == null || token.isEmpty) return;
     await _catalogController.cargarProductos(
       accessToken: token,
-      onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+      onUnauthorized: _expulsarPorSesionInvalida,
     );
   }
 
   Future<void> _cargarHistorial({int? page}) async {
+    if (!await _asegurarSesionVigente()) return;
     final token = widget.controller.tokens?.accessToken;
     if (token == null || token.isEmpty) return;
     await _historyController.cargarPagina(
       accessToken: token,
       page: page ?? _historyController.currentPage,
-      onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+      onUnauthorized: _expulsarPorSesionInvalida,
     );
   }
 
   Future<void> _abrirDetalleHistorial(ComprobanteHistorialDto item) async {
+    if (!await _asegurarSesionVigente()) return;
     final token = widget.controller.tokens?.accessToken;
     if (token == null || token.isEmpty || !mounted) return;
     unawaited(
       _historyController.cargarDetalle(
         accessToken: token,
         pagoId: item.id,
-        onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+        onUnauthorized: _expulsarPorSesionInvalida,
       ),
     );
     await showModalBottomSheet<void>(
@@ -591,12 +716,13 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
         controller: _historyController,
         initialItem: item,
         onRetryDetail: () async {
+          if (!await _asegurarSesionVigente()) return;
           final currentToken = widget.controller.tokens?.accessToken;
           if (currentToken == null || currentToken.isEmpty) return;
           await _historyController.cargarDetalle(
             accessToken: currentToken,
             pagoId: item.id,
-            onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+            onUnauthorized: _expulsarPorSesionInvalida,
           );
         },
       ),
@@ -604,6 +730,11 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
   }
 
   void _onDestinationSelected(int index) {
+    final current = widget.controller.tokens;
+    if (current == null || !current.estaVigente(widget.controller.nowUtc())) {
+      unawaited(_asegurarSesionVigente());
+      return;
+    }
     setState(() => _selectedIndex = index);
     if (index == 1 && !_catalogController.hasLoadedOnce) {
       _cargarCatalogo();
@@ -613,6 +744,7 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
   }
 
   Future<void> _abrirFlujoCompra(ProductoCatalogoDto producto) async {
+    if (!await _asegurarSesionVigente()) return;
     final token = widget.controller.tokens?.accessToken;
     if (token == null || token.isEmpty || !mounted) return;
     await Navigator.of(context).push(
@@ -622,12 +754,7 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
           producto: producto,
           cuentas: widget.controller.cuentas,
           readAccessToken: () => widget.controller.tokens?.accessToken ?? '',
-          onUnauthorized: (ex) async {
-            if (mounted) {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            }
-            await widget.controller.manejarSesionNoAutorizada(ex);
-          },
+          onUnauthorized: _expulsarPorSesionInvalida,
           onBalanceUpdated: widget.controller.actualizarSaldoCuenta,
         ),
       ),
@@ -651,7 +778,10 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Cuenta verificada', style: GpagoTokens.titleStyle),
+          Semantics(
+            header: true,
+            child: const Text('Cuenta verificada', style: GpagoTokens.titleStyle),
+          ),
           const SizedBox(height: 8),
           Text(
             'Sesión única activa en ${tokens.plataforma.etiqueta}.',
@@ -708,8 +838,11 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       const Text(
                         'Cuentas propias',
@@ -794,22 +927,34 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
       ),
     );
 
+    void handleLogout() {
+      _catalogController.limpiar();
+      _historyController.limpiar();
+      controller.cerrarSesion();
+    }
+
+    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final compactAppBar =
+        MediaQuery.sizeOf(context).width < 380 && textScale > 1.25;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('GPago'),
         actions: [
-          TextButton.icon(
-            key: const Key('logout_button'),
-            onPressed: controller.isBusy
-                ? null
-                : () {
-                    _catalogController.limpiar();
-                    _historyController.limpiar();
-                    controller.cerrarSesion();
-                  },
-            icon: const Icon(Icons.logout),
-            label: const Text('Cerrar sesión'),
-          ),
+          if (compactAppBar)
+            IconButton(
+              key: const Key('logout_button'),
+              tooltip: 'Cerrar sesión',
+              onPressed: controller.isBusy ? null : handleLogout,
+              icon: const Icon(Icons.logout),
+            )
+          else
+            TextButton.icon(
+              key: const Key('logout_button'),
+              onPressed: controller.isBusy ? null : handleLogout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Cerrar sesión'),
+            ),
         ],
       ),
       body: switch (_selectedIndex) {

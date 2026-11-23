@@ -248,5 +248,42 @@ class GpagoApiException implements Exception {
   bool get esOtpBloqueado => codigo == 'OTP_BLOQUEADO';
 
   @override
-  String toString() => 'GpagoApiException($statusCode, $codigo)';
+  String toString() =>
+      'GpagoApiException($statusCode, ${GpagoLogRedactor.redact(codigo)}, ${GpagoLogRedactor.redact(mensaje)})';
+}
+
+/// Redactor defensivo para impedir fuga de JWT, contraseñas, OTP y referencias en trazas de cliente.
+abstract final class GpagoLogRedactor {
+  static final RegExp _bearerRegex = RegExp(
+    r'Bearer\s+[A-Za-z0-9._~+/-]+=*',
+    caseSensitive: false,
+  );
+  static final RegExp _jwtRegex = RegExp(
+    r'eyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}',
+  );
+  static final RegExp _jsonSecretRegex = RegExp(
+    r'"(password|accessToken|codigoOtp|tokenConfirmacion|telefono|referencia|numeroCuenta)"\s*:\s*"[^"]*"',
+    caseSensitive: false,
+  );
+  static final RegExp _kvSecretRegex = RegExp(
+    r'\b(password|accessToken|codigoOtp|tokenConfirmacion|telefono|referencia|numeroCuenta)\s*[=:]\s*([^\s,;]+)',
+    caseSensitive: false,
+  );
+  static final RegExp _longDigitsRegex = RegExp(r'\b\d{10,20}\b');
+
+  static String redact(String input) {
+    if (input.isEmpty) return input;
+    var sanitized = input.replaceAll(_bearerRegex, 'Bearer [REDACTED]');
+    sanitized = sanitized.replaceAll(_jwtRegex, '[JWT_REDACTED]');
+    sanitized = sanitized.replaceAllMapped(
+      _jsonSecretRegex,
+      (m) => '"${m.group(1)}":"[REDACTED]"',
+    );
+    sanitized = sanitized.replaceAllMapped(
+      _kvSecretRegex,
+      (m) => '${m.group(1)}=[REDACTED]',
+    );
+    sanitized = sanitized.replaceAll(_longDigitsRegex, '[DIGITS_REDACTED]');
+    return sanitized;
+  }
 }

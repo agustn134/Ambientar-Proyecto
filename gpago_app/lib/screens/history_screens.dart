@@ -47,9 +47,12 @@ class HistoryView extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Historial de pagos aplicados',
-                              style: GpagoTokens.titleStyle,
+                            Semantics(
+                              header: true,
+                              child: const Text(
+                                'Historial de pagos aplicados',
+                                style: GpagoTokens.titleStyle,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
