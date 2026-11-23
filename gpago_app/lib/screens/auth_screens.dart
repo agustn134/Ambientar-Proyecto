@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/catalog_controller.dart';
+import '../controllers/history_controller.dart';
 import '../models/catalog_models.dart';
+import '../models/history_models.dart';
 import '../theme/gpago_theme.dart';
 import 'catalog_screens.dart';
+import 'history_screens.dart';
 import 'purchase_screens.dart';
 
 class _CenteredFormShell extends StatelessWidget {
@@ -527,6 +530,7 @@ class ProtectedHomeScreen extends StatefulWidget {
 
 class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
   late final CatalogController _catalogController;
+  late final HistoryController _historyController;
   int _selectedIndex = 0;
 
   @override
@@ -535,11 +539,15 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
     _catalogController = CatalogController(
       apiClient: widget.controller.apiClient,
     );
+    _historyController = HistoryController(
+      apiClient: widget.controller.apiClient,
+    );
   }
 
   @override
   void dispose() {
     _catalogController.dispose();
+    _historyController.dispose();
     super.dispose();
   }
 
@@ -552,10 +560,55 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
     );
   }
 
+  Future<void> _cargarHistorial({int? page}) async {
+    final token = widget.controller.tokens?.accessToken;
+    if (token == null || token.isEmpty) return;
+    await _historyController.cargarPagina(
+      accessToken: token,
+      page: page ?? _historyController.currentPage,
+      onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+    );
+  }
+
+  Future<void> _abrirDetalleHistorial(ComprobanteHistorialDto item) async {
+    final token = widget.controller.tokens?.accessToken;
+    if (token == null || token.isEmpty || !mounted) return;
+    unawaited(
+      _historyController.cargarDetalle(
+        accessToken: token,
+        pagoId: item.id,
+        onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+      ),
+    );
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: GpagoTokens.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => HistoryDetailSheet(
+        controller: _historyController,
+        initialItem: item,
+        onRetryDetail: () async {
+          final currentToken = widget.controller.tokens?.accessToken;
+          if (currentToken == null || currentToken.isEmpty) return;
+          await _historyController.cargarDetalle(
+            accessToken: currentToken,
+            pagoId: item.id,
+            onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+          );
+        },
+      ),
+    );
+  }
+
   void _onDestinationSelected(int index) {
     setState(() => _selectedIndex = index);
     if (index == 1 && !_catalogController.hasLoadedOnce) {
       _cargarCatalogo();
+    } else if (index == 2 && !_historyController.hasLoadedOnce) {
+      _cargarHistorial(page: 0);
     }
   }
 
@@ -751,6 +804,7 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
                 ? null
                 : () {
                     _catalogController.limpiar();
+                    _historyController.limpiar();
                     controller.cerrarSesion();
                   },
             icon: const Icon(Icons.logout),
@@ -758,16 +812,23 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
           ),
         ],
       ),
-      body: _selectedIndex == 0
-          ? profileBody
-          : CatalogView(
-              controller: _catalogController,
-              onRefresh: _cargarCatalogo,
-              hasPurchaseAccount: controller.cuentas.any(
-                (c) => c.cuentaId > 0 && c.estatus.toUpperCase() == 'ACTIVA',
-              ),
-              onStartPurchase: _abrirFlujoCompra,
-            ),
+      body: switch (_selectedIndex) {
+        0 => profileBody,
+        1 => CatalogView(
+          controller: _catalogController,
+          onRefresh: _cargarCatalogo,
+          hasPurchaseAccount: controller.cuentas.any(
+            (c) => c.cuentaId > 0 && c.estatus.toUpperCase() == 'ACTIVA',
+          ),
+          onStartPurchase: _abrirFlujoCompra,
+        ),
+        _ => HistoryView(
+          controller: _historyController,
+          onRefresh: () => _cargarHistorial(),
+          onLoadPage: (p) => _cargarHistorial(page: p),
+          onOpenDetail: _abrirDetalleHistorial,
+        ),
+      },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _onDestinationSelected,
@@ -783,6 +844,12 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
             icon: Icon(Icons.grid_view_outlined),
             selectedIcon: Icon(Icons.grid_view),
             label: 'Catálogo',
+          ),
+          NavigationDestination(
+            key: Key('nav_history_tab'),
+            icon: Icon(Icons.history_outlined),
+            selectedIcon: Icon(Icons.history),
+            label: 'Historial',
           ),
         ],
       ),

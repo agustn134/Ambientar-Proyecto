@@ -30,11 +30,12 @@ class _FakeTransport implements GpagoHttpTransport {
     required Map<String, String> headers,
     String? body,
   }) async {
-    calls.add('$method ${uri.path}');
+    final fullPath = uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path;
+    calls.add('$method $fullPath');
     final decoded = body != null
         ? jsonDecode(body) as Map<String, dynamic>
         : null;
-    return handler(method, uri.path, headers, decoded);
+    return handler(method, fullPath, headers, decoded);
   }
 }
 
@@ -73,10 +74,21 @@ RawHttpResponse _errJson(
   );
 }
 
-Future<void> _tapVisible(WidgetTester tester, Key key) async {
-  final finder = find.byKey(key);
+Future<void> _ensureMountedAndVisible(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    final listFinder = find.byType(ListView);
+    if (listFinder.evaluate().isNotEmpty) {
+      await tester.drag(listFinder.last, const Offset(0, -450));
+      await tester.pumpAndSettle();
+    }
+  }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
+}
+
+Future<void> _tapVisible(WidgetTester tester, Key key) async {
+  final finder = find.byKey(key);
+  await _ensureMountedAndVisible(tester, finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -1074,6 +1086,278 @@ void main() {
         find.text('Código de servidor: IDEMPOTENCIA_CONFLICTO'),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    'M4: Historial paginado solo CAPTURED, detalle trazable sin fabricar folios y filtro defensivo',
+    (WidgetTester tester) async {
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      final storage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-m4-ok',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '12121212-1212-1212-1212-121212121212',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([]);
+        }
+        if (method == 'GET' &&
+            path == '/api/gestopago/pagos/historial?page=0&size=10') {
+          return _okJson({
+            'contenido': [
+              {
+                'id': 'aaaaaaaa-0001-4000-8000-000000000001',
+                'cuentaId': 45,
+                'idServicio': 78,
+                'servicio': 'Oui Movil',
+                'idProducto': 219,
+                'producto': 'Recarga 40',
+                'monto': 40.00,
+                'estado': 'CAPTURED',
+                'referenciaInternaUpc': '100000000000001',
+                'folioProveedorIdTx': 'TX-M4-001',
+                'creadoEn': '2026-11-21T10:25:00',
+                'capturadoEn': '2026-11-21T10:30:00',
+              },
+              {
+                'id': 'aaaaaaaa-0002-4000-8000-000000000002',
+                'cuentaId': 45,
+                'idServicio': 56,
+                'servicio': 'Servicio Luz',
+                'idProducto': 300,
+                'producto': 'Pago Luz',
+                'monto': 250.00,
+                'estado': 'CAPTURED',
+                'referenciaInternaUpc': '100000000000002',
+                'folioProveedorIdTx': null,
+                'creadoEn': '2026-11-20T09:00:00',
+                'capturadoEn': '2026-11-20T09:05:00',
+              },
+              // Guardia defensiva: aunque llegara otro estado, nunca debe mostrarse.
+              {
+                'id': 'bbbbbbbb-0009-4000-8000-000000000009',
+                'cuentaId': 45,
+                'idServicio': 78,
+                'servicio': 'Oui Movil',
+                'idProducto': 219,
+                'producto': 'Intento Fallido',
+                'monto': 40.00,
+                'estado': 'FAILED',
+                'referenciaInternaUpc': '999999999999999',
+                'folioProveedorIdTx': null,
+              },
+            ],
+            'page': 0,
+            'size': 10,
+            'totalElementos': 11,
+            'totalPaginas': 2,
+          });
+        }
+        if (method == 'GET' &&
+            path == '/api/gestopago/pagos/historial?page=1&size=10') {
+          return _okJson({
+            'contenido': [
+              {
+                'id': 'aaaaaaaa-0003-4000-8000-000000000003',
+                'cuentaId': 45,
+                'idServicio': 80,
+                'servicio': null,
+                'idProducto': 310,
+                'producto': null,
+                'monto': 120.00,
+                'estado': 'CAPTURED',
+                'referenciaInternaUpc': '100000000000003',
+                'folioProveedorIdTx': null,
+                'creadoEn': '2026-11-19T14:00:00',
+                'capturadoEn': '2026-11-19T14:01:00',
+              },
+            ],
+            'page': 1,
+            'size': 10,
+            'totalElementos': 11,
+            'totalPaginas': 2,
+          });
+        }
+        if (method == 'GET' &&
+            path ==
+                '/api/gestopago/pagos/historial/aaaaaaaa-0003-4000-8000-000000000003') {
+          return _okJson({
+            'id': 'aaaaaaaa-0003-4000-8000-000000000003',
+            'cuentaId': 45,
+            'idServicio': 80,
+            'servicio': 'Internet MX',
+            'idProducto': 310,
+            'producto': 'Paquete Hogar 120',
+            'monto': 120.00,
+            'estado': 'CAPTURED',
+            'referenciaInternaUpc': '100000000000003',
+            'folioProveedorIdTx': 'TX-DET-310',
+            'creadoEn': '2026-11-19T14:00:00',
+            'capturadoEn': '2026-11-19T14:01:00',
+          });
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: storage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await _tapVisible(tester, const Key('nav_history_tab'));
+
+      expect(find.text('Historial de pagos aplicados'), findsOneWidget);
+      expect(find.text('Recarga 40'), findsOneWidget);
+      expect(find.text('Pago Luz'), findsOneWidget);
+      expect(find.text('Intento Fallido'), findsNothing);
+      expect(find.text('TX-M4-001'), findsOneWidget);
+      expect(find.text('Sin folio externo reportado'), findsOneWidget);
+      await _ensureMountedAndVisible(
+        tester,
+        find.byKey(const Key('history_pagination_bar')),
+      );
+      expect(find.text('Página 1 de 2'), findsOneWidget);
+
+      await _tapVisible(tester, const Key('history_next_page_button'));
+
+      await _ensureMountedAndVisible(
+        tester,
+        find.byKey(const Key('history_pagination_bar')),
+      );
+      expect(find.text('Página 2 de 2'), findsOneWidget);
+      await _ensureMountedAndVisible(tester, find.text('Producto #310'));
+      expect(find.text('Producto #310'), findsOneWidget);
+
+      await _tapVisible(
+        tester,
+        const Key(
+          'history_detail_button_aaaaaaaa-0003-4000-8000-000000000003',
+        ),
+      );
+
+      expect(find.text('Detalle del comprobante'), findsOneWidget);
+      expect(find.text('Paquete Hogar 120'), findsOneWidget);
+      expect(find.text('TX-DET-310'), findsOneWidget);
+      expect(find.text('100000000000003'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'M4: Historial maneja error de red con reintento y estado vacío sin fabricar datos',
+    (WidgetTester tester) async {
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      int calls = 0;
+      final storage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-m4-vacio',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '13131313-1313-1313-1313-131313131313',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([]);
+        }
+        if (method == 'GET' &&
+            path == '/api/gestopago/pagos/historial?page=0&size=10') {
+          calls++;
+          if (calls == 1) {
+            throw const GpagoApiException(
+              statusCode: 0,
+              codigo: 'ERROR_COMUNICACION',
+              mensaje: 'Error de red consultando historial',
+              isNetworkError: true,
+            );
+          }
+          return _okJson({
+            'contenido': <Object>[],
+            'page': 0,
+            'size': 10,
+            'totalElementos': 0,
+            'totalPaginas': 0,
+          });
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: storage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await _tapVisible(tester, const Key('nav_history_tab'));
+      expect(find.text('Sin conexión con GPago'), findsOneWidget);
+
+      await _tapVisible(tester, const Key('history_retry_button'));
+      expect(find.byKey(const Key('history_empty_state')), findsOneWidget);
+      expect(find.text('Sin compras capturadas registradas'), findsOneWidget);
     },
   );
 }

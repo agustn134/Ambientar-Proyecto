@@ -3,6 +3,7 @@ package com.proyecto.servicios.model.gestopago.pago;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public final class PagoDtos {
@@ -13,4 +14,17 @@ public final class PagoDtos {
     }
     public record Pago(UUID id, long cuentaId, BigDecimal monto, Estado estado, boolean revisionManual) {}
     public record Saldo(long cuentaId, BigDecimal contabilizado, BigDecimal reservado, BigDecimal disponible) {}
+    public record ComprobanteHistorial(
+            UUID id,
+            long cuentaId,
+            int idServicio,
+            String servicio,
+            int idProducto,
+            String producto,
+            BigDecimal monto,
+            Estado estado,
+            String referenciaInternaUpc,
+            String folioProveedorIdTx,
+            LocalDateTime creadoEn,
+            LocalDateTime capturadoEn) {}
 }

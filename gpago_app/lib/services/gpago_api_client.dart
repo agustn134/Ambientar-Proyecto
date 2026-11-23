@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import '../models/auth_models.dart';
 import '../models/catalog_models.dart';
+import '../models/history_models.dart';
 import '../models/purchase_models.dart';
 
 class RawHttpResponse {
@@ -312,6 +313,39 @@ class GpagoApiClient {
       accessToken: accessToken,
     );
     return SaldoCuentaFinancieraDto.fromJson(datos as Map<String, dynamic>);
+  }
+
+  Future<PaginaHistorialDto> consultarHistorialPagos({
+    required String accessToken,
+    int page = 0,
+    int size = 10,
+  }) async {
+    final datos = await _requestJson(
+      method: 'GET',
+      path: '/api/gestopago/pagos/historial?page=$page&size=$size',
+      accessToken: accessToken,
+    );
+    return PaginaHistorialDto.fromJson(datos as Map<String, dynamic>);
+  }
+
+  Future<ComprobanteHistorialDto> consultarDetalleHistorialPago({
+    required String accessToken,
+    required String pagoId,
+  }) async {
+    final datos = await _requestJson(
+      method: 'GET',
+      path: '/api/gestopago/pagos/historial/$pagoId',
+      accessToken: accessToken,
+    );
+    final dto = ComprobanteHistorialDto.fromJson(datos as Map<String, dynamic>);
+    if (!dto.esCapturada) {
+      throw const GpagoApiException(
+        statusCode: 404,
+        codigo: 'RECURSO_NO_ENCONTRADO',
+        mensaje: 'El comprobante solicitado no corresponde a una operación capturada.',
+      );
+    }
+    return dto;
   }
 
   Future<dynamic> _requestJson({
