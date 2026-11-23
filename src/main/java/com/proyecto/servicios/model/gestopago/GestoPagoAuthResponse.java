@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GestoPagoAuthResponse {
+    @Override public String toString() { return "GestoPagoAuthResponse[protegido]"; }
 
     private String token;
 

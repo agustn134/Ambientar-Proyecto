@@ -32,7 +32,7 @@ public class ProductoDto {
     private Boolean hasDigitoVerificador;
 
     @XmlAttribute(name = "precio")
-    private Double precio;
+    private java.math.BigDecimal precio;
 
     @XmlAttribute(name = "showAyuda")
     private Boolean showAyuda;

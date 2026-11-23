@@ -9,4 +9,5 @@ public interface GestoPagoTokenService {
     void renovarToken();
 
     Optional<GestoPagoToken> obtenerTokenActivo(Integer idDistribuidor, String codigoDispositivo);
+    void invalidarToken(Integer idDistribuidor, String codigoDispositivo, String token);
 }

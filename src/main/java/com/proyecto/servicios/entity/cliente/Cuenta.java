@@ -24,7 +24,8 @@ public class Cuenta {
     @Column(name = "numero_cuenta", nullable = false, unique = true, length = 20)
     private String numeroCuenta;
 
-    @Column(name = "saldo", nullable = false)
+    // Las actualizaciones financieras se hacen con bloqueo JDBC. Un merge JPA de estatus no restaura un saldo viejo.
+    @Column(name = "saldo", nullable = false, updatable = false)
     private BigDecimal saldo;
 
     @Column(name = "estatus", nullable = false, length = 20)
