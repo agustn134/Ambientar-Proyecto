@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#17449E" />
+  <title>GPago · Sin conexión</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand-lockup">
+        <span class="brand-badge" aria-hidden="true">GP</span>
+        <span class="brand-name">GPago</span>
+      </div>
+    </div>
+  </header>
+  <main class="container main-shell">
+    <section class="card form-shell" aria-labelledby="offline-title">
+      <div class="status-banner status-network" role="status">
+        <div class="status-header">
+          <span class="status-icon" aria-hidden="true">⚠</span>
+          <h1 id="offline-title">Sin conexión con el servidor GPago</h1>
+        </div>
+        <p>
+          Por seguridad financiera, las operaciones de autenticación, consulta de saldos, pagos e historial
+          requieren conectividad HTTPS en tiempo real con el servidor y permanecen deshabilitadas sin red.
+        </p>
+      </div>
+      <div class="actions-stack">
+        <a class="btn btn-primary" href="/">Reintentar conexión</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

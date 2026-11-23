@@ -1,5 +1,6 @@
 package com.proyecto.servicios.service;
 
+import com.proyecto.servicios.entity.usuario.PlataformaCliente;
 import com.proyecto.servicios.entity.usuario.Usuario;
 import com.proyecto.servicios.model.auth.LoginResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,16 +25,38 @@ public class JwtService {
             @Value("${security.jwt.audience:gestopago-api}") String audience,
             @Value("${security.jwt.ttl-seconds:300}") long ttl) {
         if (ttl < 1 || ttl > 3600) throw new IllegalArgumentException("JWT TTL debe estar entre 1 y 3600 segundos");
-        this.encoder=encoder; this.clock=authClock; this.issuer=issuer; this.audience=audience; this.ttl=ttl;
+        this.encoder = encoder;
+        this.clock = authClock;
+        this.issuer = issuer;
+        this.audience = audience;
+        this.ttl = ttl;
+    }
+
+    public long getTtlSeconds() {
+        return ttl;
     }
 
     public LoginResponse emitir(Usuario usuario) {
-        Instant now=clock.instant();
-        Instant expires=now.plusSeconds(ttl);
-        JwtClaimsSet claims=JwtClaimsSet.builder().issuer(issuer).audience(List.of(audience))
-                .subject(usuario.getId().toString()).issuedAt(now).notBefore(now).expiresAt(expires)
-                .id(UUID.randomUUID().toString()).claim("ver", usuario.getVersionToken()).claim("rol",usuario.getRol().name()).build();
-        String token=encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(),claims)).getTokenValue();
-        return new LoginResponse(token,"Bearer",ttl,expires);
+        return emitir(usuario, UUID.randomUUID(), PlataformaCliente.WEB);
+    }
+
+    public LoginResponse emitir(Usuario usuario, UUID sesionId, PlataformaCliente plataforma) {
+        Instant now = clock.instant();
+        Instant expires = now.plusSeconds(ttl);
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .audience(List.of(audience))
+                .subject(usuario.getId().toString())
+                .issuedAt(now)
+                .notBefore(now)
+                .expiresAt(expires)
+                .id(UUID.randomUUID().toString())
+                .claim("ver", usuario.getVersionToken())
+                .claim("rol", usuario.getRol().name())
+                .claim("sid", sesionId.toString())
+                .claim("plat", plataforma.name())
+                .build();
+        String token = encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
+        return new LoginResponse(token, "Bearer", ttl, expires, sesionId, plataforma);
     }
 }

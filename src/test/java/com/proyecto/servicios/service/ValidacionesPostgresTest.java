@@ -43,7 +43,7 @@ class ValidacionesPostgresTest {
     }
     @Test void migracionConservaHistoricosYEsRepetible() {
         assertEquals(1,sql.queryForObject("SELECT count(*) FROM clientes WHERE curp='HISTORICO'",Integer.class));
-        var migrador=Flyway.configure().dataSource(fuente).schemas(schema).defaultSchema(schema).load();
+        var migrador=Flyway.configure().dataSource(fuente).schemas(schema).defaultSchema(schema).outOfOrder(true).load();
         assertEquals(0,migrador.migrate().migrationsExecuted);
         assertDoesNotThrow(migrador::validate);
         assertEquals(0,migrador.info().pending().length,"Todas las migraciones disponibles deben quedar aplicadas");

@@ -14,7 +14,7 @@ public final class ConsultasResponse {
     public record Domicilio(String calle,String numeroExterior,String numeroInterior,String colonia,String municipio,
                             String estado,String codigoPostal,Short paisId,Integer asentamientoId) {}
     public record Laboral(String ocupacion,String empresa,BigDecimal ingresoMensual) {}
-    public record Cuenta(String numeroCuenta,Long clienteId,BigDecimal saldo,String estatus,LocalDateTime fechaCreacion) {}
+    public record Cuenta(Long cuentaId,String numeroCuenta,Long clienteId,BigDecimal saldo,String estatus,LocalDateTime fechaCreacion) {}
     public record Saldo(String numeroCuenta,BigDecimal saldo) {}
     public record DetalleCliente(ResumenCliente cliente,LocalDate fechaNacimiento,Short sexoId,Short nacionalidadId,
                                  Short estadoCivilId,String telefonoMovil,String telefonoAlternativo,Domicilio domicilio,

@@ -26,9 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** HTTP real + JPA + SQL V3, aislado de GestoPago y de las bases del usuario. */
 @SpringBootTest(classes=RegistroClienteIntegrationTest.Config.class, properties={
-    "spring.datasource.url=jdbc:h2:mem:registro;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
+    "spring.datasource.url=jdbc:h2:mem:registro;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=15000",
     "spring.datasource.username=sa", "spring.datasource.password=", "spring.flyway.enabled=false",
-    "security.jwt.secret=MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE="
+    "security.jwt.secret=MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=",
+    "auth.otp.buzon-local-pruebas=true"
 })
 @AutoConfigureMockMvc
 class RegistroClienteIntegrationTest {
@@ -42,6 +43,7 @@ class RegistroClienteIntegrationTest {
         RegistroClienteExceptionHandler.class, GlobalExceptionHandler.class, RespuestaExitosaAdvice.class, PasswordConfig.class, LoggingAspect.class,
         JwtConfig.class,SecurityConfig.class,com.proyecto.servicios.security.UsuarioJwtValidator.class,
         com.proyecto.servicios.security.SecurityErrorHandler.class,com.proyecto.servicios.service.LoginService.class,
+        com.proyecto.servicios.service.OtpCorreoService.class,
         com.proyecto.servicios.service.JwtService.class,com.proyecto.servicios.service.UsuarioSesionService.class,
         com.proyecto.servicios.controller.AuthController.class})
     static class Config {
@@ -52,6 +54,7 @@ class RegistroClienteIntegrationTest {
                     new ClassPathResource("db/migration/V6__version_token_usuarios.sql"),
                     new ClassPathResource("db/migration/V7__catalogos_mexico.sql"),
                     new ClassPathResource("db/migration/V8__roles_y_fecha_registro.sql"),
+                    new ClassPathResource("db/migration/V14__auth_otp_y_sesion_unica.sql"),
                     new ClassPathResource("catalogo-postal-prueba.sql"))
                 .execute(dataSource);
             return new Object();
@@ -65,6 +68,7 @@ class RegistroClienteIntegrationTest {
     @Autowired org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     @Autowired org.springframework.security.oauth2.jwt.JwtEncoder jwtEncoder;
     @Autowired org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder;
+    @Autowired com.proyecto.servicios.service.OtpCorreoService otpCorreo;
 
     ObjectNode editable(ObjectNode registro) {
         ObjectNode body=registro.deepCopy();body.remove(java.util.List.of("curp","rfc","password"));return body;
@@ -191,9 +195,28 @@ class RegistroClienteIntegrationTest {
     }
 
     String tokenDe(String correo) throws Exception {
-        ObjectNode request=mapper.createObjectNode().put("correo",correo).put("password",valido().get("password").asText());
-        return extraerToken(ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString()))
-            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+        return mapper.readTree(completarLogin(correo,valido().get("password").asText())).get("accessToken").asText();
+    }
+
+    String completarLogin(String correo, String password) throws Exception {
+        ObjectNode request=mapper.createObjectNode().put("correo",correo).put("password",password);
+        String desafioJson=ejecutarContrato(post("/auth/login").contentType("application/json").content(request.toString()))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String desafioId=mapper.readTree(desafioJson).get("desafioId").asText();
+        String codigo=otpCorreo.obtenerUltimoCodigoParaPruebas(correo);
+        ObjectNode verificar=mapper.createObjectNode().put("desafioId",desafioId).put("codigoOtp",codigo);
+        var mvcResult=ejecutarContrato(post("/auth/otp/verificar").contentType("application/json").content(verificar.toString())).andReturn();
+        if (mvcResult.getResponse().getStatus()==409) {
+            var conflicto=mapper.readTree(mvcResult.getResponse().getContentAsString()).get("datos");
+            ObjectNode reemplazar=mapper.createObjectNode()
+                .put("desafioId",conflicto.get("desafioId").asText())
+                .put("tokenConfirmacion",conflicto.get("tokenConfirmacion").asText())
+                .put("confirmarCierre",true);
+            return ejecutarContrato(post("/auth/sesion/reemplazar").contentType("application/json").content(reemplazar.toString()))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        }
+        assertEquals(200,mvcResult.getResponse().getStatus());
+        return mvcResult.getResponse().getContentAsString();
     }
 
     String ejecutivo(com.fasterxml.jackson.databind.JsonNode registro) throws Exception {
@@ -371,6 +394,9 @@ class RegistroClienteIntegrationTest {
     }
 
     @BeforeEach void limpiar() {
+        otpCorreo.limpiarBuzonPruebas();
+        sql.update("DELETE FROM usuario_desafios_otp");
+        sql.update("DELETE FROM usuario_sesiones_activas");
         sql.update("DELETE FROM usuarios");
         sql.update("DELETE FROM cuentas");
         sql.update("DELETE FROM domicilios");
@@ -549,8 +575,7 @@ class RegistroClienteIntegrationTest {
 
     String registrarYToken() throws Exception {
         enviar(valido()).andExpect(status().isCreated());
-        return iniciarSesion(valido().get("password").asText()).andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
+        return completarLogin(valido().get("correoElectronico").asText(),valido().get("password").asText());
     }
 
     org.springframework.test.web.servlet.ResultActions iniciarSesion(String password) throws Exception {
@@ -654,8 +679,7 @@ class RegistroClienteIntegrationTest {
     @Test void cuentaInactivaPermiteLoginPeroClienteInactivoNo() throws Exception {
         enviar(valido()).andExpect(status().isCreated());
         sql.update("UPDATE cuentas SET estatus='INACTIVA'");
-        String token=extraerToken(iniciarSesion(valido().get("password").asText()).andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString());
+        String token=tokenDe(valido().get("correoElectronico").asText());
         ejecutarContrato(get("/auth/me").header("Authorization","Bearer "+token)).andExpect(status().isOk());
         sql.update("UPDATE clientes SET estatus='INACTIVO'");
         iniciarSesion(valido().get("password").asText()).andExpect(status().isUnauthorized());

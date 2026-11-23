@@ -2,8 +2,11 @@ package com.proyecto.servicios.config;
 
 import com.proyecto.servicios.controller.ClienteController;
 import com.proyecto.servicios.controller.AuthController;
+import com.proyecto.servicios.exception.ConflictoSesionActivaException;
 import com.proyecto.servicios.exception.CredencialesInvalidasException;
+import com.proyecto.servicios.exception.OtpException;
 import com.proyecto.servicios.exception.RegistroClienteException;
+import com.proyecto.servicios.model.auth.ConflictoSesionResponse;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
@@ -23,6 +26,8 @@ public class RegistroClienteExceptionHandler {
     public record ErrorCampo(String campo, String mensaje) {}
     public record ErrorRegistro(LocalDateTime timestamp, int status, String codigo, String mensaje,
                                 String path, List<ErrorCampo> errores) {}
+    public record ErrorConflictoSesion(LocalDateTime timestamp, int status, String codigo, String mensaje,
+                                         String path, ConflictoSesionResponse datos, List<ErrorCampo> errores) {}
 
     @ExceptionHandler(org.springframework.web.bind.MissingRequestHeaderException.class)
     public ResponseEntity<ErrorRegistro> encabezadoAusente(org.springframework.web.bind.MissingRequestHeaderException ex,HttpServletRequest request) {
@@ -44,6 +49,21 @@ public class RegistroClienteExceptionHandler {
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ResponseEntity<ErrorRegistro> login(CredencialesInvalidasException ex, HttpServletRequest request) {
         return respuesta(401,"CREDENCIALES_INVALIDAS",ex.getMessage(),List.of(),request);
+    }
+
+    @ExceptionHandler(OtpException.class)
+    public ResponseEntity<ErrorRegistro> otp(OtpException ex, HttpServletRequest request) {
+        return respuesta(ex.getStatus(), ex.getCodigo(), ex.getMessage(), List.of(), request);
+    }
+
+    @ExceptionHandler(ConflictoSesionActivaException.class)
+    public ResponseEntity<ErrorConflictoSesion> conflictoSesion(ConflictoSesionActivaException ex, HttpServletRequest request) {
+        log.warn("Conflicto de sesión activa detectado; status=409; codigo=CONFLICTO_SESION_ACTIVA");
+        return ResponseEntity.status(409)
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .header("Cache-Control", "no-store")
+            .body(new ErrorConflictoSesion(LocalDateTime.now(), 409, "CONFLICTO_SESION_ACTIVA",
+                ex.getMessage(), request.getRequestURI(), ex.getConflicto(), List.of()));
     }
 
     @ExceptionHandler(com.proyecto.servicios.exception.RecursoNoEncontradoException.class)
