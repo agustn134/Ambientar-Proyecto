@@ -30,10 +30,11 @@ public class OpenApi {
             boolean login=ruta.equals("/auth/login") || ruta.equals("/auth/otp/verificar")
                 || ruta.equals("/auth/otp/reenviar") || ruta.equals("/auth/sesion/reemplazar");
             boolean validacionLocal=ruta.equals("/api/gestopago/pagos/validar");
-            boolean financiero=(ruta.startsWith("/api/gestopago/pagos") && !validacionLocal) || ruta.startsWith("/api/gestopago/cuentas/");
+            boolean historial=ruta.startsWith("/api/gestopago/pagos/historial");
+            boolean financiero=(ruta.startsWith("/api/gestopago/pagos") && !validacionLocal && !historial) || ruta.startsWith("/api/gestopago/cuentas/");
             boolean simulacion=ruta.startsWith("/api/simulacion/");
             boolean aceptar=metodo==PathItem.HttpMethod.POST && (ruta.equals("/api/gestopago/pagos") || ruta.equals("/api/simulacion/pagos"));
-            boolean externo=ruta.startsWith("/api/gestopago/") && !validacionLocal && !financiero;
+            boolean externo=ruta.startsWith("/api/gestopago/") && !validacionLocal && !financiero && !historial;
             boolean protegido=!registro && !login && !ruta.startsWith("/catalogos/");
             boolean sinCuerpo=ruta.equals("/usuarios/password") || ruta.equals("/auth/logout")
                 || ruta.equals("/clientes") && metodo==PathItem.HttpMethod.DELETE;
@@ -76,7 +77,7 @@ public class OpenApi {
                 agregar(respuestas,ruta,429,"LIMITE_REENVIOS_OTP","Se alcanzó el límite de reenvíos de código OTP; inicia sesión nuevamente","Máximo de reenvíos alcanzado.");
             }
             if(protegido) agregar(respuestas,ruta,403,"ACCESO_DENEGADO","No tienes permiso para esta operación","El rol o los permisos no permiten esta operación.");
-            if(protegido && !ruta.endsWith("/listar") && !ruta.equals("/auth/me") && !ruta.equals("/auth/logout") && !ruta.equals("/cuentas/me")) agregar(respuestas,ruta,404,"RECURSO_NO_ENCONTRADO","Recurso no encontrado","Registro inexistente o no disponible para este usuario. No se revela la existencia de registros ajenos.");
+            if(protegido && !ruta.endsWith("/listar") && !ruta.equals("/auth/me") && !ruta.equals("/auth/logout") && !ruta.equals("/cuentas/me") && !ruta.equals("/api/gestopago/pagos/historial")) agregar(respuestas,ruta,404,"RECURSO_NO_ENCONTRADO","Recurso no encontrado","Registro inexistente o no disponible para este usuario. No se revela la existencia de registros ajenos.");
             if(registro || ruta.equals("/clientes") && metodo==PathItem.HttpMethod.PUT) {
                 agregar(respuestas,ruta,409,"DATO_DUPLICADO","Un identificador o correo ya está registrado","Datos duplicados o conflicto con registros relacionados.");
                 respuestas.get("409").getContent().get("application/json").addExamples("CONFLICTO_DATOS",ejemplo(ruta,409,"CONFLICTO_DATOS","La operación entra en conflicto con registros relacionados; verifica las referencias enviadas"));
