@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/catalog_controller.dart';
 import '../theme/gpago_theme.dart';
+import 'catalog_screens.dart';
 
 class _CenteredFormShell extends StatelessWidget {
   const _CenteredFormShell({
@@ -512,13 +514,52 @@ class SessionConflictScreen extends StatelessWidget {
   }
 }
 
-class ProtectedHomeScreen extends StatelessWidget {
+class ProtectedHomeScreen extends StatefulWidget {
   const ProtectedHomeScreen({super.key, required this.controller});
 
   final AuthController controller;
 
   @override
+  State<ProtectedHomeScreen> createState() => _ProtectedHomeScreenState();
+}
+
+class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
+  late final CatalogController _catalogController;
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _catalogController = CatalogController(
+      apiClient: widget.controller.apiClient,
+    );
+  }
+
+  @override
+  void dispose() {
+    _catalogController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _cargarCatalogo() async {
+    final token = widget.controller.tokens?.accessToken;
+    if (token == null || token.isEmpty) return;
+    await _catalogController.cargarProductos(
+      accessToken: token,
+      onUnauthorized: widget.controller.manejarSesionNoAutorizada,
+    );
+  }
+
+  void _onDestinationSelected(int index) {
+    setState(() => _selectedIndex = index);
+    if (index == 1 && !_catalogController.hasLoadedOnce) {
+      _cargarCatalogo();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
     final perfil = controller.perfil;
     final cliente = controller.cliente;
     final tokens = controller.tokens;
@@ -528,166 +569,194 @@ class ProtectedHomeScreen extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final profileBody = _CenteredFormShell(
+      maxWidth: GpagoTokens.maxContentWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Cuenta verificada', style: GpagoTokens.titleStyle),
+          const SizedBox(height: 8),
+          Text(
+            'Sesión única activa en ${tokens.plataforma.etiqueta}.',
+            style: GpagoTokens.helpStyle,
+          ),
+          if (feedback != null) ...[
+            const SizedBox(height: 16),
+            GpagoStatusBanner(
+              tone: feedback.tone,
+              title: feedback.title,
+              description: feedback.description,
+            ),
+          ],
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Perfil', style: GpagoTokens.subtitleStyle),
+                  const SizedBox(height: 12),
+                  Text(
+                    cliente?.nombreCompleto.isNotEmpty == true
+                        ? cliente!.nombreCompleto
+                        : perfil.correo,
+                    style: GpagoTokens.bodyStyle.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(perfil.correo, style: GpagoTokens.helpStyle),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      Chip(label: Text('Rol: ${perfil.rol}')),
+                      Chip(
+                        label: Text(
+                          'Estatus: ${cliente?.estatus ?? (perfil.activo ? 'ACTIVO' : 'INACTIVO')}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Cuentas propias',
+                        style: GpagoTokens.subtitleStyle,
+                      ),
+                      OutlinedButton.icon(
+                        key: const Key('refresh_session_button'),
+                        onPressed: controller.isBusy
+                            ? null
+                            : controller.refrescarSesionProtegida,
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: const Text('Verificar sesión'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (controller.cuentas.isEmpty)
+                    const Text(
+                      'No se encontraron cuentas asociadas a este cliente.',
+                      style: GpagoTokens.helpStyle,
+                    )
+                  else
+                    ...controller.cuentas.map(
+                      (cuenta) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: GpagoTokens.canvas,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFD7E0EC)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 4,
+                                alignment: WrapAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Cuenta ID #${cuenta.cuentaId}',
+                                    style: GpagoTokens.bodyStyle.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    cuenta.estatus,
+                                    style: GpagoTokens.helpStyle.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: cuenta.estatus == 'ACTIVA'
+                                          ? GpagoTokens.successInk
+                                          : GpagoTokens.muted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              SelectableText(
+                                cuenta.numeroCuenta,
+                                style: GpagoTokens.folioStyle,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _formatMxn(cuenta.saldo),
+                                style: GpagoTokens.amountStyle.copyWith(
+                                  fontSize: 24,
+                                  height: 32 / 24,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('GPago'),
         actions: [
           TextButton.icon(
             key: const Key('logout_button'),
-            onPressed: controller.isBusy ? null : controller.cerrarSesion,
+            onPressed: controller.isBusy
+                ? null
+                : () {
+                    _catalogController.limpiar();
+                    controller.cerrarSesion();
+                  },
             icon: const Icon(Icons.logout),
             label: const Text('Cerrar sesión'),
           ),
         ],
       ),
-      body: _CenteredFormShell(
-        maxWidth: GpagoTokens.maxContentWidth,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Cuenta verificada', style: GpagoTokens.titleStyle),
-            const SizedBox(height: 8),
-            Text(
-              'Sesión única activa en ${tokens.plataforma.etiqueta}.',
-              style: GpagoTokens.helpStyle,
+      body: _selectedIndex == 0
+          ? profileBody
+          : CatalogView(
+              controller: _catalogController,
+              onRefresh: _cargarCatalogo,
             ),
-            if (feedback != null) ...[
-              const SizedBox(height: 16),
-              GpagoStatusBanner(
-                tone: feedback.tone,
-                title: feedback.title,
-                description: feedback.description,
-              ),
-            ],
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Perfil', style: GpagoTokens.subtitleStyle),
-                    const SizedBox(height: 12),
-                    Text(
-                      cliente?.nombreCompleto.isNotEmpty == true
-                          ? cliente!.nombreCompleto
-                          : perfil.correo,
-                      style: GpagoTokens.bodyStyle.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(perfil.correo, style: GpagoTokens.helpStyle),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      children: [
-                        Chip(label: Text('Rol: ${perfil.rol}')),
-                        Chip(
-                          label: Text(
-                            'Estatus: ${cliente?.estatus ?? (perfil.activo ? 'ACTIVO' : 'INACTIVO')}',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Cuentas propias',
-                          style: GpagoTokens.subtitleStyle,
-                        ),
-                        OutlinedButton.icon(
-                          key: const Key('refresh_session_button'),
-                          onPressed: controller.isBusy
-                              ? null
-                              : controller.refrescarSesionProtegida,
-                          icon: const Icon(Icons.refresh, size: 18),
-                          label: const Text('Verificar sesión'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    if (controller.cuentas.isEmpty)
-                      const Text(
-                        'No se encontraron cuentas asociadas a este cliente.',
-                        style: GpagoTokens.helpStyle,
-                      )
-                    else
-                      ...controller.cuentas.map(
-                        (cuenta) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: GpagoTokens.canvas,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFD7E0EC),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Wrap(
-                                  spacing: 12,
-                                  runSpacing: 4,
-                                  alignment: WrapAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Cuenta ID #${cuenta.cuentaId}',
-                                      style: GpagoTokens.bodyStyle.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      cuenta.estatus,
-                                      style: GpagoTokens.helpStyle.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: cuenta.estatus == 'ACTIVA'
-                                            ? GpagoTokens.successInk
-                                            : GpagoTokens.muted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                SelectableText(
-                                  cuenta.numeroCuenta,
-                                  style: GpagoTokens.folioStyle,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _formatMxn(cuenta.saldo),
-                                  style: GpagoTokens.amountStyle.copyWith(
-                                    fontSize: 24,
-                                    height: 32 / 24,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onDestinationSelected,
+        destinations: const [
+          NavigationDestination(
+            key: Key('nav_profile_tab'),
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+          NavigationDestination(
+            key: Key('nav_catalog_tab'),
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view),
+            label: 'Catálogo',
+          ),
+        ],
       ),
     );
   }
