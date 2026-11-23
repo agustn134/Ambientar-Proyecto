@@ -18,7 +18,7 @@ public interface GestoPagoProductoMapper {
     /**
      * Convierte un ProductoDto (respuesta XML de la API) a la entidad GestoPagoProducto.
      * Los campos gestionados por JPA/auditoria se ignoran para que los @PrePersist los manejen.
-     * MapStruct convierte Double -> BigDecimal automaticamente via BigDecimal.valueOf().
+     * El precio conserva BigDecimal desde el XML hasta la entidad, sin pasar por double.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "activo", constant = "true")

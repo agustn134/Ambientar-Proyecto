@@ -17,6 +17,31 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class ErroresHttpContratoTest {
+    @Test void cuotaLocalDevuelve429YTiempoDeEspera() throws Exception {
+        var quota=org.mockito.Mockito.mock(com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota.class);
+        org.mockito.Mockito.doThrow(new CuotaCatalogoException(120)).when(quota).reservarIntento();
+        var http=MockMvcBuilders.standaloneSetup(new CuotaController(quota)).setControllerAdvice(new GlobalExceptionHandler()).build();
+        http.perform(get("/cuota"))
+            .andExpect(status().isTooManyRequests()).andExpect(header().string("Retry-After","120"))
+            .andExpect(jsonPath("codigo").value("CUOTA_CATALOGO_AGOTADA"));
+    }
+    @RestController static class CuotaController {
+        private final com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota quota;
+        CuotaController(com.proyecto.servicios.repositorys.gestopago.GestoPagoCatalogoQuota quota){this.quota=quota;}
+        @GetMapping("/cuota") Object consultar(){quota.reservarIntento();return java.util.Map.of("ok",true);}
+    }
+    @Test void ejemploDeValidacionLocalNuncaIndicaPagoEnviado() {
+        var op = new Operation().responses(new ApiResponses().addApiResponse("200", new ApiResponse()
+                .content(new Content().addMediaType("application/json", new MediaType().schema(new ObjectSchema())))));
+        var api = new OpenApi().openAPI().paths(new Paths().addPathItem("/api/gestopago/pagos/validar", new PathItem().post(op)));
+        new OpenApi().respuestasUniformes().customise(api);
+        var ejemplo = (java.util.Map<?, ?>) op.getResponses().get("200").getContent().get("application/json")
+                .getExamples().get("VALIDACION_LOCAL").getValue();
+        assertEquals(200, ejemplo.get("status"));
+        assertEquals(false, ((java.util.Map<?, ?>) ejemplo.get("datos")).get("pagoEnviado"));
+        assertTrue(op.getResponses().containsKey("422"));
+        assertFalse(op.getResponses().containsKey("502"));
+    }
     @RestController
     static class ErroresControlados {
         @GetMapping(value="/json",produces="application/json") Object json() { return java.util.Map.of("dato",1); }
@@ -43,7 +68,7 @@ class ErroresHttpContratoTest {
             .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("SELECT secreto"))));
     }
     @ParameterizedTest
-    @CsvSource({"401,401","429,429","500,500","502,502","503,503","504,504","200,502","999,502"})
+    @CsvSource({"401,503","429,429","500,500","502,502","503,503","504,504","200,502","999,502"})
     void proveedorNoFiltraDetallesNiProduceExitoAnteUnaExcepcion(int providerStatus,int expected) throws Exception {
         mvc().perform(post("/externo").contentType("application/json").content("{\"status\":"+providerStatus+"}"))
             .andExpect(status().is(expected)).andExpect(jsonPath("status").value(expected))

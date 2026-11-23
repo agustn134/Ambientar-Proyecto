@@ -332,6 +332,24 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void actualizarSaldoCuenta(int cuentaId, double nuevoSaldoContabilizado) {
+    final updated = _cuentas
+        .map(
+          (c) => c.cuentaId == cuentaId
+              ? CuentaPropiaDto(
+                  cuentaId: c.cuentaId,
+                  numeroCuenta: c.numeroCuenta,
+                  clienteId: c.clienteId,
+                  saldo: nuevoSaldoContabilizado,
+                  estatus: c.estatus,
+                )
+              : c,
+        )
+        .toList();
+    _cuentas = updated;
+    notifyListeners();
+  }
+
   Future<void> _manejarErrorEnSesion(GpagoApiException ex) async {
     if (ex.esNoAutenticado || ex.statusCode == 403) {
       await storage.clear();

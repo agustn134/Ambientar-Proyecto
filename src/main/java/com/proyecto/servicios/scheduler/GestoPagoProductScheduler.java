@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
  * @see com.proyecto.servicios.service.GestoPagoProductService
  */
 @Component
+@org.springframework.context.annotation.Profile("!simulacion")
 @RequiredArgsConstructor
 @Slf4j
 public class GestoPagoProductScheduler {

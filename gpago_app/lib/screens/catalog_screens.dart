@@ -9,10 +9,14 @@ class CatalogView extends StatefulWidget {
     super.key,
     required this.controller,
     required this.onRefresh,
+    this.onStartPurchase,
+    this.hasPurchaseAccount = true,
   });
 
   final CatalogController controller;
   final Future<void> Function() onRefresh;
+  final void Function(ProductoCatalogoDto producto)? onStartPurchase;
+  final bool hasPurchaseAccount;
 
   @override
   State<CatalogView> createState() => _CatalogViewState();
@@ -44,7 +48,11 @@ class _CatalogViewState extends State<CatalogView> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => _ProductDetailSheet(producto: producto),
+      builder: (sheetContext) => _ProductDetailSheet(
+        producto: producto,
+        onStartPurchase: widget.onStartPurchase,
+        hasPurchaseAccount: widget.hasPurchaseAccount,
+      ),
     );
   }
 
@@ -436,9 +444,15 @@ class _AvailabilityBadge extends StatelessWidget {
 }
 
 class _ProductDetailSheet extends StatelessWidget {
-  const _ProductDetailSheet({required this.producto});
+  const _ProductDetailSheet({
+    required this.producto,
+    this.onStartPurchase,
+    this.hasPurchaseAccount = true,
+  });
 
   final ProductoCatalogoDto producto;
+  final void Function(ProductoCatalogoDto producto)? onStartPurchase;
+  final bool hasPurchaseAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -570,15 +584,29 @@ class _ProductDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
+            if (producto.estaDisponible && !hasPurchaseAccount) ...[
+              const GpagoStatusBanner(
+                tone: GpagoBannerTone.pending,
+                title: 'Cuenta financiera requerida',
+                description:
+                    'No tienes una cuenta propia activa con identificador en el servidor para iniciar compras.',
+              ),
+              const SizedBox(height: 12),
+            ],
             ElevatedButton(
               key: const Key('product_detail_action_button'),
-              onPressed: producto.estaDisponible
-                  ? () => Navigator.of(context).pop()
+              onPressed: producto.estaDisponible && hasPurchaseAccount
+                  ? () {
+                      Navigator.of(context).pop();
+                      onStartPurchase?.call(producto);
+                    }
                   : null,
               child: Text(
-                producto.estaDisponible
-                    ? 'Listo para compra'
-                    : 'Producto no disponible',
+                !producto.estaDisponible
+                    ? 'Producto no disponible'
+                    : (!hasPurchaseAccount
+                          ? 'Sin cuenta activa para comprar'
+                          : 'Continuar a compra'),
               ),
             ),
           ],
@@ -617,16 +645,5 @@ String _formatPrecio(double? precio) {
   if (precio == null || precio <= 0) {
     return 'Importe variable';
   }
-  final fixed = precio.toStringAsFixed(2);
-  final parts = fixed.split('.');
-  final intPart = parts[0];
-  final buf = StringBuffer();
-  for (var i = 0; i < intPart.length; i++) {
-    final remaining = intPart.length - i;
-    if (i > 0 && remaining % 3 == 0) {
-      buf.write(',');
-    }
-    buf.write(intPart[i]);
-  }
-  return '\$${buf.toString()}.${parts[1]} MXN';
+  return GpagoTokens.formatMxn(precio);
 }
