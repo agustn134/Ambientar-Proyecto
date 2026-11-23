@@ -47,6 +47,7 @@ class AuthController extends ChangeNotifier {
   AuthFeedback? _feedback;
 
   AuthStage get stage => _stage;
+  GpagoApiClient get apiClient => _api;
   bool get isBusy => _busy;
   DesafioOtpDto? get desafio => _desafio;
   ConflictoSesionDto? get conflicto => _conflicto;
@@ -324,6 +325,11 @@ class AuthController extends ChangeNotifier {
     _perfil = perfil;
     _cliente = cliente;
     _cuentas = cuentas;
+  }
+
+  Future<void> manejarSesionNoAutorizada(GpagoApiException ex) async {
+    await _manejarErrorEnSesion(ex);
+    notifyListeners();
   }
 
   Future<void> _manejarErrorEnSesion(GpagoApiException ex) async {

@@ -366,4 +366,312 @@ void main() {
     expect(find.text('Sesión revocada o expirada'), findsOneWidget);
     expect(await storage.read(), isNull);
   });
+
+  testWidgets(
+    'M2: Lista catálogo real, agrupa por idCatTipoServicio, muestra detalle y no invoca sincronización',
+    (WidgetTester tester) async {
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      final storage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-catalogo-ok',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '66666666-6666-6666-6666-666666666666',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/productos') {
+          expect(headers['Authorization'], 'Bearer jwt-catalogo-ok');
+          return _okJson([
+            {
+              'id': 1,
+              'idProducto': 185,
+              'idServicio': 56,
+              'servicio': 'Servicio Agua',
+              'producto': 'Agua Cancun',
+              'idCatTipoServicio': 15,
+              'tipoFront': '2',
+              'hasDigitoVerificador': false,
+              'precio': 10.00,
+              'showAyuda': true,
+              'tipoReferencia': 'c',
+              'legend': 'Atención a clientes',
+              'fechaCreacion': '2026-10-08T12:00:00',
+              'fechaActualizacion': '2026-10-08T12:00:00',
+              'activo': true,
+            },
+            {
+              'id': 2,
+              'idProducto': 210,
+              'idServicio': 80,
+              'servicio': 'Telefonía',
+              'producto': 'Recarga 100',
+              'idCatTipoServicio': 20,
+              'tipoFront': '1',
+              'hasDigitoVerificador': true,
+              'precio': 100.00,
+              'showAyuda': false,
+              'tipoReferencia': null,
+              'legend': null,
+              'fechaCreacion': '2026-10-08T12:00:00',
+              'fechaActualizacion': '2026-10-08T12:00:00',
+              'activo': false,
+            },
+          ]);
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: storage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('nav_catalog_tab')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Catálogo de servicios'), findsOneWidget);
+      expect(find.text('Todas (2)'), findsOneWidget);
+      expect(find.text('Categoría #15 (1)'), findsOneWidget);
+      expect(find.text('Categoría #20 (1)'), findsOneWidget);
+      expect(find.text('Agua Cancun'), findsOneWidget);
+      expect(find.text('Recarga 100'), findsOneWidget);
+      expect(find.text('Disponible'), findsOneWidget);
+      expect(find.text('No disponible'), findsOneWidget);
+
+      // Filtrar por Categoría #20
+      await tester.tap(find.byKey(const Key('catalog_chip_20')));
+      await tester.pumpAndSettle();
+      expect(find.text('Agua Cancun'), findsNothing);
+      expect(find.text('Recarga 100'), findsOneWidget);
+
+      // Abrir detalle del producto no disponible y sin leyenda
+      final detailBtn = find.byKey(const Key('product_detail_button_210'));
+      await tester.ensureVisible(detailBtn);
+      await tester.pumpAndSettle();
+      await tester.tap(detailBtn);
+      await tester.pumpAndSettle();
+      expect(find.text('210'), findsOneWidget);
+      expect(
+        find.text('Sin indicaciones adicionales registradas para este producto.'),
+        findsOneWidget,
+      );
+      final actionButton = tester.widget<ElevatedButton>(
+        find.byKey(const Key('product_detail_action_button')),
+      );
+      expect(actionButton.onPressed, isNull);
+
+      expect(
+        transport.calls.any(
+          (call) =>
+              call.contains('sincronizar') ||
+              call.contains('consultar-externo'),
+        ),
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets('M2: Maneja catálogo vacío sin inventar productos', (
+    WidgetTester tester,
+  ) async {
+    final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+    final storage = InMemorySessionStorage(
+      LoginTokensDto(
+        accessToken: 'jwt-catalogo-vacio',
+        tokenType: 'Bearer',
+        expiresIn: 300,
+        expiresAt: now.add(const Duration(seconds: 300)),
+        sesionId: '77777777-7777-7777-7777-777777777777',
+        plataforma: PlataformaCliente.android,
+      ),
+    );
+
+    final transport = _FakeTransport((method, path, headers, body) async {
+      if (method == 'GET' && path == '/auth/me') {
+        return _okJson({
+          'usuarioId': 7,
+          'clienteId': 12,
+          'correo': 'usuario@example.com',
+          'activo': true,
+          'rol': 'CLIENTE',
+        });
+      }
+      if (method == 'GET' && path == '/clientes/me') {
+        return _okJson({
+          'cliente': {
+            'clienteId': 12,
+            'nombre': 'Ana',
+            'apellidoPaterno': 'Pérez',
+            'apellidoMaterno': 'López',
+            'correo': 'usuario@example.com',
+            'estatus': 'ACTIVO',
+          },
+        });
+      }
+      if (method == 'GET' && path == '/cuentas/me') {
+        return _okJson([]);
+      }
+      if (method == 'GET' && path == '/api/gestopago/productos') {
+        return _okJson([]);
+      }
+      fail('Ruta inesperada: $method $path');
+    });
+
+    final controller = AuthController(
+      apiClient: GpagoApiClient(
+        baseUrl: 'https://api.gpago.local',
+        transport: transport,
+      ),
+      storage: storage,
+      clock: () => now,
+    );
+
+    await tester.pumpWidget(GPagoApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('nav_catalog_tab')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Catálogo sin productos disponibles'), findsOneWidget);
+  });
+
+  testWidgets(
+    'M2: Maneja error de red y servicio indisponible con recuperación al reintentar',
+    (WidgetTester tester) async {
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      int catalogAttempts = 0;
+      final storage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-catalogo-red',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '88888888-8888-8888-8888-888888888888',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/productos') {
+          catalogAttempts++;
+          if (catalogAttempts == 1) {
+            throw const GpagoApiException(
+              statusCode: 0,
+              codigo: 'ERROR_COMUNICACION',
+              mensaje: 'Sin conexión de red al consultar el catálogo',
+              isNetworkError: true,
+            );
+          }
+          if (catalogAttempts == 2) {
+            return _errJson(
+              503,
+              'SERVICIO_EXTERNO',
+              'Catálogo temporalmente no disponible',
+            );
+          }
+          return _okJson([
+            {
+              'id': 1,
+              'idProducto': 185,
+              'idServicio': 56,
+              'servicio': 'Servicio Agua',
+              'producto': 'Agua Cancun',
+              'idCatTipoServicio': 15,
+              'tipoFront': '2',
+              'hasDigitoVerificador': false,
+              'precio': 10.00,
+              'showAyuda': false,
+              'tipoReferencia': 'c',
+              'legend': null,
+              'activo': true,
+            },
+          ]);
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: storage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('nav_catalog_tab')));
+      await tester.pumpAndSettle();
+      expect(find.text('Sin conexión con GPago'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('catalog_retry_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Catálogo no disponible'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('catalog_retry_button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Agua Cancun'), findsOneWidget);
+    },
+  );
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import '../models/auth_models.dart';
+import '../models/catalog_models.dart';
 
 class RawHttpResponse {
   const RawHttpResponse({
@@ -199,6 +200,22 @@ class GpagoApiClient {
     final list = datos as List<dynamic>;
     return list
         .map((item) => CuentaPropiaDto.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Consume únicamente el catálogo local sincronizado en servidor; nunca invoca rutas de cuota externa.
+  Future<List<ProductoCatalogoDto>> consultarCatalogoProductos({
+    required String accessToken,
+  }) async {
+    final datos = await _requestJson(
+      method: 'GET',
+      path: '/api/gestopago/productos',
+      accessToken: accessToken,
+    );
+    final list = (datos as List<dynamic>?) ?? const [];
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(ProductoCatalogoDto.fromJson)
         .toList();
   }
 
