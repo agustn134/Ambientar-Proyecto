@@ -77,6 +77,34 @@ abstract final class GpagoTokens {
     color: ink,
   );
 
+  static String formatMxn(double monto) {
+    final negative = monto < 0;
+    final fixed = monto.abs().toStringAsFixed(2);
+    final parts = fixed.split('.');
+    final intPart = parts[0];
+    final buf = StringBuffer();
+    for (var i = 0; i < intPart.length; i++) {
+      final remaining = intPart.length - i;
+      if (i > 0 && remaining % 3 == 0) {
+        buf.write(',');
+      }
+      buf.write(intPart[i]);
+    }
+    final sign = negative ? '-' : '';
+    return '$sign\$${buf.toString()}.${parts[1]} MXN';
+  }
+
+  static String formatServerTimestamp(DateTime ts) {
+    final local = ts.toLocal();
+    final y = local.year.toString().padLeft(4, '0');
+    final m = local.month.toString().padLeft(2, '0');
+    final d = local.day.toString().padLeft(2, '0');
+    final hh = local.hour.toString().padLeft(2, '0');
+    final mm = local.minute.toString().padLeft(2, '0');
+    final ss = local.second.toString().padLeft(2, '0');
+    return '$d/$m/$y $hh:$mm:$ss';
+  }
+
   static ThemeData lightTheme() {
     const scheme = ColorScheme(
       brightness: Brightness.light,

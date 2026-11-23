@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:gpago_app/main.dart';
 import 'package:gpago_app/models/auth_models.dart';
 import 'package:gpago_app/services/gpago_api_client.dart';
 import 'package:gpago_app/services/session_storage.dart';
+import 'package:gpago_app/theme/gpago_theme.dart';
 
 typedef _Handler = Future<RawHttpResponse> Function(
   String method,
@@ -36,12 +38,12 @@ class _FakeTransport implements GpagoHttpTransport {
   }
 }
 
-RawHttpResponse _okJson(Object datos) {
+RawHttpResponse _okJson(Object datos, {int statusCode = 200}) {
   return RawHttpResponse(
-    statusCode: 200,
+    statusCode: statusCode,
     body: jsonEncode({
       'timestamp': '2026-11-21T16:30:00',
-      'status': 200,
+      'status': statusCode,
       'codigo': 'EXITO',
       'mensaje': 'Operación realizada correctamente',
       'path': '/auth',
@@ -69,6 +71,14 @@ RawHttpResponse _errJson(
       'errores': <Object>[],
     }),
   );
+}
+
+Future<void> _tapVisible(WidgetTester tester, Key key) async {
+  final finder = find.byKey(key);
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -672,6 +682,398 @@ void main() {
       await tester.tap(find.byKey(const Key('catalog_retry_button')));
       await tester.pumpAndSettle();
       expect(find.text('Agua Cancun'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'M3: Prevalidación, confirmación expresa, anti-doble-toque, RESERVED -> CAPTURED y comprobante real',
+    (WidgetTester tester) async {
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      final completer202 = Completer<RawHttpResponse>();
+      final idempotencyKeys = <String>[];
+      int postPagosCount = 0;
+      double saldoDisponible = 500.0;
+      double saldoContabilizado = 500.0;
+      double saldoReservado = 0.0;
+
+      final storage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-m3-ok',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '99999999-9999-9999-9999-999999999999',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([
+            {
+              'cuentaId': 45,
+              'numeroCuenta': '12345678901234567890',
+              'clienteId': 12,
+              'saldo': 500.00,
+              'estatus': 'ACTIVA',
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/productos') {
+          return _okJson([
+            {
+              'id': 1,
+              'idProducto': 219,
+              'idServicio': 78,
+              'servicio': 'Oui Movil',
+              'producto': 'Recarga 40',
+              'idCatTipoServicio': 13,
+              'tipoFront': '1',
+              'hasDigitoVerificador': false,
+              'precio': 40.00,
+              'showAyuda': true,
+              'tipoReferencia': 'a',
+              'legend': 'Recarga tiempo aire 10 dígitos',
+              'activo': true,
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/cuentas/45/saldo') {
+          return _okJson({
+            'cuentaId': 45,
+            'contabilizado': saldoContabilizado,
+            'reservado': saldoReservado,
+            'disponible': saldoDisponible,
+          });
+        }
+        if (method == 'POST' && path == '/api/gestopago/pagos/validar') {
+          expect(body?['idServicio'], 78);
+          expect(body?['idProducto'], 219);
+          expect(body?['montoPago'], 40);
+          expect(body?['telefono'], '5512345678');
+          expect(body?.containsKey('referencia'), isFalse);
+          return _okJson({
+            'contratoLocalValido': true,
+            'idServicio': 78,
+            'idProducto': 219,
+            'montoPago': 40.00,
+            'requiereVerificacionReferencia': false,
+            'pagoEnviado': false,
+          });
+        }
+        if (method == 'POST' && path == '/api/gestopago/pagos') {
+          postPagosCount++;
+          idempotencyKeys.add(headers['Idempotency-Key'] ?? '');
+          expect(body?['cuentaId'], 45);
+          expect(body?['pago']['telefono'], '5512345678');
+          return completer202.future;
+        }
+        if (method == 'GET' &&
+            path ==
+                '/api/gestopago/pagos/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee') {
+          saldoContabilizado = 460.00;
+          saldoReservado = 0.00;
+          saldoDisponible = 460.00;
+          return _okJson({
+            'id': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+            'cuentaId': 45,
+            'monto': 40.00,
+            'estado': 'CAPTURED',
+            'revisionManual': false,
+          });
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: storage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await _tapVisible(tester, const Key('nav_catalog_tab'));
+      await _tapVisible(tester, const Key('product_detail_button_219'));
+      await _tapVisible(tester, const Key('product_detail_action_button'));
+
+      expect(find.text('Preparar pago'), findsOneWidget);
+      expect(find.text('\$500.00 MXN'), findsWidgets);
+
+      await tester.ensureVisible(find.byKey(const Key('purchase_phone_field')));
+      await tester.enterText(
+        find.byKey(const Key('purchase_phone_field')),
+        '5512345678',
+      );
+      await _tapVisible(tester, const Key('purchase_validate_button'));
+
+      expect(find.text('Confirmar y pagar servicio'), findsOneWidget);
+      expect(find.text('\$40.00 MXN'), findsWidgets);
+
+      // Doble toque rápido en el botón de confirmación: solo debe dispararse 1 POST.
+      final submitFinder = find.byKey(
+        const Key('purchase_confirm_submit_button'),
+      );
+      await tester.ensureVisible(submitFinder);
+      await tester.tap(submitFinder);
+      await tester.pump();
+      await tester.tap(submitFinder, warnIfMissed: false);
+      await tester.pump();
+
+      expect(postPagosCount, 1);
+      expect(idempotencyKeys.single.length, greaterThanOrEqualTo(8));
+
+      completer202.complete(
+        _okJson({
+          'id': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+          'cuentaId': 45,
+          'monto': 40.00,
+          'estado': 'RESERVED',
+          'revisionManual': false,
+        }, statusCode: 202),
+      );
+      await tester.pumpAndSettle();
+
+      // 202 RESERVED NO muestra comprobante de éxito.
+      expect(find.byKey(const Key('purchase_pending_card')), findsOneWidget);
+      expect(find.byKey(const Key('purchase_receipt_card')), findsNothing);
+
+      await _tapVisible(tester, const Key('purchase_poll_status_button'));
+
+      // Solo CAPTURED presenta comprobante con UUID y fecha real del servidor.
+      expect(find.byKey(const Key('purchase_receipt_card')), findsOneWidget);
+      expect(
+        find.text('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          GpagoTokens.formatServerTimestamp(
+            DateTime.parse('2026-11-21T16:30:00'),
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('\$460.00 MXN'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'M3: Timeout e incertidumbre conservan Idempotency-Key y permiten recuperar; UNKNOWN -> FAILED y conflicto 409',
+    (WidgetTester tester) async {
+      final now = DateTime.utc(2026, 11, 21, 16, 0, 0);
+      final observedKeys = <String>[];
+      int scenario = 0;
+
+      final storage = InMemorySessionStorage(
+        LoginTokensDto(
+          accessToken: 'jwt-m3-uncertain',
+          tokenType: 'Bearer',
+          expiresIn: 300,
+          expiresAt: now.add(const Duration(seconds: 300)),
+          sesionId: '10101010-1010-1010-1010-101010101010',
+          plataforma: PlataformaCliente.android,
+        ),
+      );
+
+      final transport = _FakeTransport((method, path, headers, body) async {
+        if (method == 'GET' && path == '/auth/me') {
+          return _okJson({
+            'usuarioId': 7,
+            'clienteId': 12,
+            'correo': 'usuario@example.com',
+            'activo': true,
+            'rol': 'CLIENTE',
+          });
+        }
+        if (method == 'GET' && path == '/clientes/me') {
+          return _okJson({
+            'cliente': {
+              'clienteId': 12,
+              'nombre': 'Ana',
+              'apellidoPaterno': 'Pérez',
+              'apellidoMaterno': 'López',
+              'correo': 'usuario@example.com',
+              'estatus': 'ACTIVO',
+            },
+          });
+        }
+        if (method == 'GET' && path == '/cuentas/me') {
+          return _okJson([
+            {
+              'cuentaId': 45,
+              'numeroCuenta': '12345678901234567890',
+              'clienteId': 12,
+              'saldo': 500.00,
+              'estatus': 'ACTIVA',
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/productos') {
+          return _okJson([
+            {
+              'id': 1,
+              'idProducto': 219,
+              'idServicio': 78,
+              'servicio': 'Oui Movil',
+              'producto': 'Recarga 40',
+              'idCatTipoServicio': 13,
+              'tipoFront': '1',
+              'hasDigitoVerificador': false,
+              'precio': 40.00,
+              'showAyuda': false,
+              'tipoReferencia': null,
+              'legend': null,
+              'activo': true,
+            },
+          ]);
+        }
+        if (method == 'GET' && path == '/api/gestopago/cuentas/45/saldo') {
+          return _okJson({
+            'cuentaId': 45,
+            'contabilizado': 500.00,
+            'reservado': 0.00,
+            'disponible': 500.00,
+          });
+        }
+        if (method == 'POST' && path == '/api/gestopago/pagos/validar') {
+          return _okJson({
+            'contratoLocalValido': true,
+            'idServicio': 78,
+            'idProducto': 219,
+            'montoPago': 40.00,
+            'requiereVerificacionReferencia': false,
+            'pagoEnviado': false,
+          });
+        }
+        if (method == 'POST' && path == '/api/gestopago/pagos') {
+          observedKeys.add(headers['Idempotency-Key'] ?? '');
+          if (scenario == 0) {
+            scenario = 1;
+            throw const GpagoApiException(
+              statusCode: 0,
+              codigo: 'ERROR_COMUNICACION',
+              mensaje: 'Timeout de red esperando respuesta de pago',
+              isNetworkError: true,
+            );
+          }
+          if (scenario == 1) {
+            scenario = 2;
+            return _okJson({
+              'id': '11111111-2222-4333-8444-555555555555',
+              'cuentaId': 45,
+              'monto': 40.00,
+              'estado': 'UNKNOWN',
+              'revisionManual': false,
+            }, statusCode: 202);
+          }
+          return _errJson(
+            409,
+            'IDEMPOTENCIA_CONFLICTO',
+            'La clave ya corresponde a otros datos.',
+          );
+        }
+        if (method == 'POST' &&
+            path ==
+                '/api/gestopago/pagos/11111111-2222-4333-8444-555555555555/conciliar') {
+          return _okJson({
+            'id': '11111111-2222-4333-8444-555555555555',
+            'cuentaId': 45,
+            'monto': 40.00,
+            'estado': 'FAILED',
+            'revisionManual': false,
+          });
+        }
+        fail('Ruta inesperada: $method $path');
+      });
+
+      final controller = AuthController(
+        apiClient: GpagoApiClient(
+          baseUrl: 'https://api.gpago.local',
+          transport: transport,
+        ),
+        storage: storage,
+        clock: () => now,
+      );
+
+      await tester.pumpWidget(GPagoApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await _tapVisible(tester, const Key('nav_catalog_tab'));
+      await _tapVisible(tester, const Key('product_detail_button_219'));
+      await _tapVisible(tester, const Key('product_detail_action_button'));
+
+      await tester.ensureVisible(find.byKey(const Key('purchase_phone_field')));
+      await tester.enterText(
+        find.byKey(const Key('purchase_phone_field')),
+        '5512345678',
+      );
+      await _tapVisible(tester, const Key('purchase_validate_button'));
+      await _tapVisible(tester, const Key('purchase_confirm_submit_button'));
+
+      // Timeout => Comunicación incierta, sin tratar como FAILED y conservando Idempotency-Key.
+      expect(find.byKey(const Key('purchase_uncertain_card')), findsOneWidget);
+      expect(find.byKey(const Key('purchase_rejected_card')), findsNothing);
+      expect(find.byKey(const Key('purchase_receipt_card')), findsNothing);
+      expect(observedKeys.length, 1);
+
+      // Recuperar con la EXACTA misma clave de idempotencia -> UNKNOWN.
+      await _tapVisible(tester, const Key('purchase_recover_button'));
+
+      expect(observedKeys.length, 2);
+      expect(observedKeys[1], observedKeys[0]);
+      expect(find.byKey(const Key('purchase_pending_card')), findsOneWidget);
+
+      // Conciliar UNKNOWN -> FAILED definitivo sin comprobante de éxito.
+      await _tapVisible(tester, const Key('purchase_reconcile_button'));
+
+      expect(find.byKey(const Key('purchase_rejected_card')), findsOneWidget);
+      expect(find.byKey(const Key('purchase_receipt_card')), findsNothing);
+      expect(find.text('Operación rechazada'), findsOneWidget);
+
+      // Volver al catálogo y probar escenario de conflicto 409 en nueva compra.
+      await _tapVisible(tester, const Key('purchase_back_to_catalog_button'));
+
+      await _tapVisible(tester, const Key('product_detail_button_219'));
+      await _tapVisible(tester, const Key('product_detail_action_button'));
+      await tester.ensureVisible(find.byKey(const Key('purchase_phone_field')));
+      await tester.enterText(
+        find.byKey(const Key('purchase_phone_field')),
+        '5512345679',
+      );
+      await _tapVisible(tester, const Key('purchase_validate_button'));
+      await _tapVisible(tester, const Key('purchase_confirm_submit_button'));
+
+      expect(find.byKey(const Key('purchase_rejected_card')), findsOneWidget);
+      expect(
+        find.text('Código de servidor: IDEMPOTENCIA_CONFLICTO'),
+        findsOneWidget,
+      );
     },
   );
 }

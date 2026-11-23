@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/catalog_controller.dart';
+import '../models/catalog_models.dart';
 import '../theme/gpago_theme.dart';
 import 'catalog_screens.dart';
+import 'purchase_screens.dart';
 
 class _CenteredFormShell extends StatelessWidget {
   const _CenteredFormShell({
@@ -557,6 +559,28 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
     }
   }
 
+  Future<void> _abrirFlujoCompra(ProductoCatalogoDto producto) async {
+    final token = widget.controller.tokens?.accessToken;
+    if (token == null || token.isEmpty || !mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PurchaseFlowScreen(
+          apiClient: widget.controller.apiClient,
+          producto: producto,
+          cuentas: widget.controller.cuentas,
+          readAccessToken: () => widget.controller.tokens?.accessToken ?? '',
+          onUnauthorized: (ex) async {
+            if (mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+            await widget.controller.manejarSesionNoAutorizada(ex);
+          },
+          onBalanceUpdated: widget.controller.actualizarSaldoCuenta,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
@@ -698,7 +722,7 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _formatMxn(cuenta.saldo),
+                                GpagoTokens.formatMxn(cuenta.saldo),
                                 style: GpagoTokens.amountStyle.copyWith(
                                   fontSize: 24,
                                   height: 32 / 24,
@@ -739,6 +763,10 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
           : CatalogView(
               controller: _catalogController,
               onRefresh: _cargarCatalogo,
+              hasPurchaseAccount: controller.cuentas.any(
+                (c) => c.cuentaId > 0 && c.estatus.toUpperCase() == 'ACTIVA',
+              ),
+              onStartPurchase: _abrirFlujoCompra,
             ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
@@ -759,20 +787,5 @@ class _ProtectedHomeScreenState extends State<ProtectedHomeScreen> {
         ],
       ),
     );
-  }
-
-  static String _formatMxn(double monto) {
-    final fixed = monto.toStringAsFixed(2);
-    final parts = fixed.split('.');
-    final intPart = parts[0];
-    final buf = StringBuffer();
-    for (var i = 0; i < intPart.length; i++) {
-      final remaining = intPart.length - i;
-      if (i > 0 && remaining % 3 == 0) {
-        buf.write(',');
-      }
-      buf.write(intPart[i]);
-    }
-    return '\$${buf.toString()}.${parts[1]} MXN';
   }
 }

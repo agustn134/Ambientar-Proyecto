@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import '../models/auth_models.dart';
 import '../models/catalog_models.dart';
+import '../models/purchase_models.dart';
 
 class RawHttpResponse {
   const RawHttpResponse({
@@ -14,6 +15,22 @@ class RawHttpResponse {
   final int statusCode;
   final String body;
   final Map<String, String> headers;
+}
+
+class _ApiEnvelopeResult {
+  const _ApiEnvelopeResult({
+    required this.statusCode,
+    required this.datos,
+    required this.headers,
+    this.timestamp,
+    this.mensaje,
+  });
+
+  final int statusCode;
+  final dynamic datos;
+  final Map<String, String> headers;
+  final DateTime? timestamp;
+  final String? mensaje;
 }
 
 abstract interface class GpagoHttpTransport {
@@ -219,14 +236,113 @@ class GpagoApiClient {
         .toList();
   }
 
+  /// Prevalidación local de contrato en servidor sin cobro ni envío al proveedor.
+  Future<ValidacionLocalResponseDto> validarPagoLocal({
+    required String accessToken,
+    required CrearPagoRequestDto request,
+  }) async {
+    final datos = await _requestJson(
+      method: 'POST',
+      path: '/api/gestopago/pagos/validar',
+      accessToken: accessToken,
+      body: request.toJson(),
+    );
+    return ValidacionLocalResponseDto.fromJson(datos as Map<String, dynamic>);
+  }
+
+  /// Crea o recupera operación financiera real con `Idempotency-Key` estable.
+  Future<OperacionPagoDto> crearPagoIdempotente({
+    required String accessToken,
+    required String idempotencyKey,
+    required SolicitudPagoDto solicitud,
+  }) async {
+    final envelope = await _requestEnvelope(
+      method: 'POST',
+      path: '/api/gestopago/pagos',
+      accessToken: accessToken,
+      extraHeaders: {'Idempotency-Key': idempotencyKey},
+      body: solicitud.toJson(),
+    );
+    return OperacionPagoDto.fromJson(
+      envelope.datos as Map<String, dynamic>,
+      serverTimestamp: envelope.timestamp,
+      serverMessage: envelope.mensaje,
+    );
+  }
+
+  Future<OperacionPagoDto> consultarPago({
+    required String accessToken,
+    required String pagoId,
+  }) async {
+    final envelope = await _requestEnvelope(
+      method: 'GET',
+      path: '/api/gestopago/pagos/$pagoId',
+      accessToken: accessToken,
+    );
+    return OperacionPagoDto.fromJson(
+      envelope.datos as Map<String, dynamic>,
+      serverTimestamp: envelope.timestamp,
+      serverMessage: envelope.mensaje,
+    );
+  }
+
+  Future<OperacionPagoDto> conciliarPago({
+    required String accessToken,
+    required String pagoId,
+  }) async {
+    final envelope = await _requestEnvelope(
+      method: 'POST',
+      path: '/api/gestopago/pagos/$pagoId/conciliar',
+      accessToken: accessToken,
+    );
+    return OperacionPagoDto.fromJson(
+      envelope.datos as Map<String, dynamic>,
+      serverTimestamp: envelope.timestamp,
+      serverMessage: envelope.mensaje,
+    );
+  }
+
+  Future<SaldoCuentaFinancieraDto> consultarSaldoFinanciero({
+    required String accessToken,
+    required int cuentaId,
+  }) async {
+    final datos = await _requestJson(
+      method: 'GET',
+      path: '/api/gestopago/cuentas/$cuentaId/saldo',
+      accessToken: accessToken,
+    );
+    return SaldoCuentaFinancieraDto.fromJson(datos as Map<String, dynamic>);
+  }
+
   Future<dynamic> _requestJson({
     required String method,
     required String path,
     Map<String, dynamic>? body,
     String? accessToken,
+    Map<String, String> extraHeaders = const {},
+  }) async {
+    final result = await _requestEnvelope(
+      method: method,
+      path: path,
+      body: body,
+      accessToken: accessToken,
+      extraHeaders: extraHeaders,
+    );
+    return result.datos;
+  }
+
+  Future<_ApiEnvelopeResult> _requestEnvelope({
+    required String method,
+    required String path,
+    Map<String, dynamic>? body,
+    String? accessToken,
+    Map<String, String> extraHeaders = const {},
   }) async {
     final uri = Uri.parse('$baseUri$path');
-    final headers = <String, String>{'Accept': 'application/json'};
+    final headers = <String, String>{
+      'Accept': 'application/json',
+      ...extraHeaders,
+    };
     if (body != null) {
       headers['Content-Type'] = 'application/json';
     }
@@ -242,7 +358,11 @@ class GpagoApiClient {
     );
 
     if (response.statusCode == 204) {
-      return null;
+      return _ApiEnvelopeResult(
+        statusCode: 204,
+        datos: null,
+        headers: response.headers,
+      );
     }
 
     final Map<String, dynamic> parsed;
@@ -263,10 +383,17 @@ class GpagoApiClient {
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (parsed.containsKey('datos')) {
-        return parsed['datos'];
-      }
-      return parsed;
+      final rawTimestamp = parsed['timestamp']?.toString();
+      final parsedTimestamp = rawTimestamp != null
+          ? DateTime.tryParse(rawTimestamp)
+          : null;
+      return _ApiEnvelopeResult(
+        statusCode: response.statusCode,
+        datos: parsed.containsKey('datos') ? parsed['datos'] : parsed,
+        headers: response.headers,
+        timestamp: parsedTimestamp,
+        mensaje: parsed['mensaje']?.toString(),
+      );
     }
 
     final codigo = parsed['codigo']?.toString() ?? 'ERROR_HTTP';
