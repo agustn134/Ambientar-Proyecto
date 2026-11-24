@@ -24,7 +24,7 @@ public class OtpCorreoService {
     public OtpCorreoService(
             ObjectProvider<JavaMailSender> mailSenderProvider,
             @Value("${spring.mail.host:}") String mailHost,
-            @Value("${spring.mail.username:no-reply@gpago.local}") String remitente,
+            @Value("${gpago.mail.from:${spring.mail.username:no-reply@gpago.local}}") String remitente,
             @Value("${auth.otp.buzon-local-pruebas:false}") boolean buzonLocalPruebas) {
         this.mailSenderProvider = mailSenderProvider;
         this.mailHost = mailHost == null ? "" : mailHost.trim();
